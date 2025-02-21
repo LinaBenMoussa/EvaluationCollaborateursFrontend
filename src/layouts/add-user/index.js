@@ -1,13 +1,8 @@
 import { useState, useEffect } from "react";
 
-// react-router-dom components
-import { Link } from "react-router-dom";
-
 // @mui material components
 import Card from "@mui/material/Card";
-import Switch from "@mui/material/Switch";
 import Grid from "@mui/material/Grid";
-import MuiLink from "@mui/material/Link";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
@@ -16,14 +11,13 @@ import MDInput from "components/MDInput";
 import MDButton from "components/MDButton";
 
 import { Box, CircularProgress } from "@mui/material";
-import BasicSelect from "./SelectField";
-import Footer from "examples/Footer";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import { useAddUserMutation } from "../../store/api/userApi";
+import { useAddUserMutation, useGetByRoleQuery } from "../../store/api/userApi";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import AutocompleteFieldManager from "./autocompleteFieldManager";
+import SelectFieldRole from "./SelectFieldRole";
+import AutocompleteField from "layouts/shared/autocompleteField";
 
 function AddUser() {
   const [username, setUser] = useState("");
@@ -151,15 +145,17 @@ function AddUser() {
                             />
                           </MDBox>
                           <MDBox mb={2}>
-                            <BasicSelect role={role} setRole={setRole} />
+                            <SelectFieldRole role={role} setRole={setRole} />
                           </MDBox>
                           {role === "Collaborateur" && (
                             <MDBox mb={2}>
-                              <AutocompleteFieldManager
-                                setIdManager={setManagerId}
-                                setSelectedManager={setSelectedManager}
-                                selectedManager={selectedManager}
+                              <AutocompleteField
+                                useFetchHook={() => useGetByRoleQuery("manager")}
                                 fullWidth
+                                setSelectedItem={setSelectedManager}
+                                setIdItem={setManagerId}
+                                selectedItem={selectedManager}
+                                label="Choisir un manager"
                               />
                             </MDBox>
                           )}

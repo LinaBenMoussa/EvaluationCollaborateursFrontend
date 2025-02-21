@@ -19,14 +19,17 @@ import routes from "routes";
 
 // Material Dashboard 2 React contexts
 import { useMaterialUIController, setMiniSidenav } from "context";
-import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import SignIn from "layouts/authentication/sign-in";
 
 // Images
 import brandWhite from "assets/images/logo_clinisys.png";
 import { useSelector } from "react-redux";
 import { selectCurrentRole, selectIsAuthenticated } from "./store/slices/authSlice";
+import AuthRequired from "store/slices/RequireAuth";
+import AddFeedBack from "layouts/feedback/addfeedback";
+import LogoutButton from "layouts/authentication/logout/logout";
 
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
@@ -88,14 +91,26 @@ export default function App() {
             routes={routes.filter((route) => !route.roles || route.roles.includes(userRole?.[0] ?? ""))}
             onMouseEnter={handleOnMouseEnter}
             onMouseLeave={handleOnMouseLeave}
+            footerComponent={<LogoutButton />}
           />
         </>
       )}
       <Routes>
-        <Route >{getRoutes(routes)}</Route>
-        <Route path="*" element={<Navigate to="/dashboard" />} />
+      <Route
+        path="/*"
+        element={
+          <AuthRequired>
+            <Routes>
+              {getRoutes(routes)}
+              <Route path="*" element={<Navigate to="/dashboard" />} />
+              <Route path="/addfeedback" element={<AddFeedBack />} />
+            </Routes>
+          </AuthRequired>
+        }
+      />
+        <Route path="/authentication/sign-in" element={<SignIn />} />
       </Routes>
-      
     </ThemeProvider>
+    
   );
 }

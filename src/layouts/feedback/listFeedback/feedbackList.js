@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-import { Card, CardContent, Typography, Box, Grid } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 
 const FeedbackList = ({ feedbacks }) => {
   return (

@@ -7,7 +7,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 
-export default function BasicSelect({role,setRole}) {
+export default function SelectFieldRole({role,setRole}) {
   const handleChange = (event) => {
     setRole(event.target.value);
   };

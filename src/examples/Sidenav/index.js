@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useEffect } from "react";
 
 // react-router-dom components
@@ -24,9 +25,8 @@ import sidenavLogoLabel from "examples/Sidenav/styles/sidenav";
 
 // Material Dashboard 2 React context
 import { useMaterialUIController, setMiniSidenav } from "context";
-import LogoutButton from "./logout";
 
-function Sidenav({ color, brand, brandName, routes, ...rest }) {
+function Sidenav({ color, brand, brandName, routes, footerComponent, ...rest }) {
   const [controller, dispatch] = useMaterialUIController();
   const { miniSidenav, transparentSidenav, whiteSidenav, darkMode, sidenavColor } = controller;
   const location = useLocation();
@@ -154,7 +154,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
       <MDBox display="flex" flexDirection="column" height="100%">
         <List sx={{ flexGrow: 1 }}>{renderRoutes}</List>
         <MDBox display="flex" justifyContent="center" p={2} mt="auto">
-          <LogoutButton />
+          {footerComponent}
         </MDBox>
       </MDBox>
     </SidenavRoot>

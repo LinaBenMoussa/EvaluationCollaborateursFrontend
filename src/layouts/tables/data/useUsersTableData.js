@@ -1,0 +1,40 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable react/function-component-definition */
+
+import { useMemo } from "react";
+import MDTypography from "components/MDTypography";
+import { useGetByRoleQuery } from "store/api/userApi";
+
+export function useUsersTableData(role) {
+  const { data: users = [], isLoading } = useGetByRoleQuery(role);
+  console.log(users);
+
+  const columns = useMemo(
+    () => [
+      { Header: "id", accessor: "id", align: "left" },
+      { Header: "nom", accessor: "nom", align: "center" },
+      { Header: "prenom", accessor: "prenom", align: "center" },
+      { Header: "username", accessor: "username", align: "center" },
+      { Header: "action", accessor: "action", align: "center" },
+    ],
+    []
+  );
+
+  const rows = useMemo(
+    () =>
+      users.map((user) => ({
+        id: user.id,
+        nom: user.nom,
+        prenom: user.prenom,
+        username: user.username,
+        action: (
+          <MDTypography component="a" href="#" variant="caption" color="text" fontWeight="medium">
+            Edit
+          </MDTypography>
+        ),
+      })),
+    [users]
+  );
+
+  return { columns, rows, isLoading };
+}

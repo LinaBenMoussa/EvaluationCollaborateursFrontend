@@ -11,13 +11,13 @@ export const feedbackApi = api.injectEndpoints({
     }),
     getFeedback: builder.query({
       query: (id) => ({
-        url: `/feedback/getbycollaborateur/${id}`,
+        url: `/feedback/collaborateur/${id}`,
         method: "GET",
       }),
     }),
     getFeedbackByManager: builder.query({
       query: (id) => ({
-        url: `/feedback/getbymanager/${id}`,
+        url: `/feedback/manager/${id}`,
         method: "GET",
       }),
     }),

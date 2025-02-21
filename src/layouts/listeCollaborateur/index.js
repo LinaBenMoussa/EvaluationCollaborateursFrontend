@@ -6,13 +6,14 @@ import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import DataTable from "examples/Tables/DataTable";
-import SelectFieldRole from "layouts/add-user/SelectFieldRole";
-import { useUsersTableData } from "layouts/tables/data/useUsersTableData";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "store/slices/authSlice";
+import { useUsersTableData } from "./data/useUsersTableData";
 import { CircularProgress } from "@mui/material";
 
 function Tables() {
-  const [role, setRole] = useState("Admin");
-  const { columns, rows, isLoading } = useUsersTableData(role);
+  const managerId = useSelector(selectCurrentUser);
+  const { columns, rows, isLoading } = useUsersTableData(managerId);
   console.log(columns, rows, isLoading);
 
   return (
@@ -37,9 +38,6 @@ function Tables() {
                 </MDTypography>
               </MDBox>
               <MDBox pt={3}>
-                <MDBox mx={2}>
-                  <SelectFieldRole role={role} setRole={setRole} />
-                </MDBox>
                 {isLoading ? (
                   <CircularProgress />
                 ) : (

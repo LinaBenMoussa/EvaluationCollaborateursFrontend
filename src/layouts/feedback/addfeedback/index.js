@@ -5,22 +5,24 @@ import MDTypography from "components/MDTypography";
 import Footer from "examples/Footer";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import AutocompleteField from "./autocompleteField";
 import MDButton from "components/MDButton";
 import LikeDislikeButtons from "./likeButton";
-import { useAddFeedbackMutation } from "../../store/api/feedbackApi";
+import { useAddFeedbackMutation } from "../../../store/api/feedbackApi";
 import { useSelector } from "react-redux";
-import { selectCurrentUser } from "../../store/slices/authSlice";
+import { selectCurrentUser } from "../../../store/slices/authSlice";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
+import AutocompleteField from "layouts/shared/autocompleteField";
+import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
 
-function FeedBack() {
+function AddFeedBack() {
   const [collaborateurId, setCollaborateurId] = useState("");
   const [commentaire, setCommentaire] = useState("");
   const [type, setType] = useState("");
   const [selectedCollaborateur, setSelectedCollaborateur] = useState(null);
-  const [addFeedback, { isLoading }] = useAddFeedbackMutation();
-
+  const [addFeedback] = useAddFeedbackMutation();
+  const navigate = useNavigate();
   const managerId = useSelector(selectCurrentUser);
 
   const handleSubmit = async (e) => {
@@ -42,6 +44,7 @@ function FeedBack() {
       setCommentaire("");
       setType("");
       setSelectedCollaborateur(null);
+      navigate("/feedback");
     } catch (err) {
       if (err.message.includes("Veuillez remplir tous les champs.")) {
         toast.error(err.message);
@@ -90,10 +93,12 @@ function FeedBack() {
                       }}
                     >
                       <AutocompleteField
-                        setIdCollaborateur={setCollaborateurId}
-                        setSelectedCollaborateur={setSelectedCollaborateur}
-                        selectedCollaborateur={selectedCollaborateur}
+                        useFetchHook={() => useGetCollaborateursByManagerQuery(managerId)}
                         fullWidth
+                        setSelectedItem={setSelectedCollaborateur}
+                        setIdItem={setCollaborateurId}
+                        selectedItem={selectedCollaborateur}
+                        label="Choisir un collaborateur"
                       />
                       <TextField
                         label="Commantaire"
@@ -119,4 +124,4 @@ function FeedBack() {
   );
 }
 
-export default FeedBack;
+export default AddFeedBack;

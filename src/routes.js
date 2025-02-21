@@ -7,11 +7,12 @@ import SignIn from "layouts/authentication/sign-in";
 // @mui icons
 import Icon from "@mui/material/Icon";
 import { Feedback } from "@mui/icons-material";
-import FeedBack from "layouts/feedback";
 import AddUser from "layouts/add-user";
-import AuthRequired from "./store/slices/RequireAuth";
-import ListFeedback from "./layouts/listFeedback";
-import FeedbackListManager from "./layouts/listFeedbackManager";
+import ListFeedback from "./layouts/feedback/listFeedback";
+import FeedbackListManager from "./layouts/feedback/listFeedbackManager";
+import CollaborateursList from "./layouts/listeCollaborateur";
+import IssuesList from "./layouts/issues";
+import Pointage from "layouts/pointage";
 
 const routes = [
   {
@@ -20,12 +21,7 @@ const routes = [
     key: "dashboard",
     icon: <Icon fontSize="small">dashboard</Icon>,
     route: "/dashboard",
-    component: (
-      <AuthRequired>
-        <Dashboard />
-      </AuthRequired>
-    ),
-    prtected: true,
+    component: <Dashboard />,
   },
   {
     type: "collapse",
@@ -33,11 +29,7 @@ const routes = [
     key: "tables",
     icon: <Icon fontSize="small">table_view</Icon>,
     route: "/tables",
-    component: (
-      <AuthRequired>
-        <Tables />
-      </AuthRequired>
-    ),
+    component: <Tables />,
     roles: ["ROLE_ADMIN"],
   },
   {
@@ -57,24 +49,26 @@ const routes = [
     route: "/profile",
     component: <Profile />,
   },
+
   {
     type: "collapse",
     name: "Feedback",
-    key: "feedback",
+    key: "listFeedback",
     icon: <Feedback fontSize="small" />,
     route: "/feedback",
-    component: <FeedBack />,
+    component: <FeedbackListManager />,
     roles: ["ROLE_MANAGER"],
   },
   {
     type: "collapse",
-    name: "listFeedbackManager",
-    key: "listFeedback",
-    icon: <Feedback fontSize="small" />,
-    route: "/listFeedback",
-    component: <FeedbackListManager />,
+    name: "Issues",
+    key: "issues",
+    icon: <Icon fontSize="small">task</Icon>,
+    route: "/issues",
+    component: <IssuesList />,
     roles: ["ROLE_MANAGER"],
   },
+
   {
     type: "collapse",
     name: "Add User",
@@ -82,14 +76,7 @@ const routes = [
     icon: <Icon fontSize="small">add</Icon>,
     route: "/user",
     component: <AddUser />,
-  },
-  {
-    type: "collapse",
-    name: "Sign In",
-    key: "sign-in",
-    icon: <Icon fontSize="small">login</Icon>,
-    route: "/authentication/sign-in",
-    component: <SignIn />,
+    roles: ["ROLE_ADMIN"],
   },
   {
     type: "collapse",
@@ -99,6 +86,24 @@ const routes = [
     route: "/feedback",
     component: <ListFeedback />,
     roles: ["ROLE_COLLABORATEUR"],
+  },
+  {
+    type: "collapse",
+    name: "Collaborateurs",
+    key: "collaborateursList",
+    icon: <Icon fontSize="small">group</Icon>,
+    route: "/collaborateurs",
+    component: <CollaborateursList />,
+    roles: ["ROLE_MANAGER"],
+  },
+  {
+    type: "collapse",
+    name: "Pointages",
+    key: "pointage",
+    icon: <Icon fontSize="small">time</Icon>,
+    route: "/pointage",
+    component: <Pointage />,
+    roles: ["ROLE_MANAGER"],
   },
 ];
 

@@ -1,37 +1,28 @@
 /* eslint-disable react/jsx-key */
-import { useEffect, useRef, useState } from "react";
-import { Box, Button, Card, Grid, Stack, TextField } from "@mui/material";
+import { Box, Card, CircularProgress, Grid, Stack, TextField } from "@mui/material";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
-import Footer from "examples/Footer";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import MDButton from "components/MDButton";
-import SimpleBlogCard from "../../examples/Cards/BlogCards/SimpleBlogCard";
-
-import { useGetFeedbackByManagerQuery, useGetFeedbackQuery } from "../../store/api/feedbackApi";
+import FeedbackCard from "./feedbackCard";
+import FeedbackList from "./feedbackList";
+import { useGetFeedbackQuery } from "../../../store/api/feedbackApi";
 import { useSelector } from "react-redux";
-import { selectCurrentUser } from "../../store/slices/authSlice";
-import FeedbackCard from "../listFeedback/feedbackCard";
-import FeedbackList from "../listFeedback/feedbackList";
+import { selectCurrentUser } from "../../../store/slices/authSlice";
 
-function FeedbackListManager() {
-  const managerId = useSelector(selectCurrentUser);
-  const {
-    data: feedbacksdata = [],
-    isLoading,
-    isFetching,
-  } = useGetFeedbackByManagerQuery(managerId);
+function ListFeedback() {
+  const collaborateurId = useSelector(selectCurrentUser);
+  const { data: feedbacksdata = [], isLoading } = useGetFeedbackQuery(collaborateurId);
   const feedbacks = feedbacksdata.map((feedback) => {
     const date = new Date(feedback.dateFeedback);
-    const formattedDate = date.toLocaleDateString("fr-FR");
+    const formattedDate = date.toLocaleDateString("fr-FR"); // Format DD/MM/YYYY
     const formattedTime = date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }); // Format HH:MM
 
     return (
       <FeedbackCard
         key={feedback.id}
         dateTime={`${formattedDate} ${formattedTime} `}
-        manager={`to: ${feedback.manager.nom} ${feedback.manager.prenom}`}
+        manager={`${feedback.manager.nom} ${feedback.manager.prenom}`}
         comment={feedback.commentaire}
         isNegative={feedback.type === "negatif"}
       />
@@ -62,7 +53,7 @@ function FeedbackListManager() {
               <MDBox pt={3}>
                 <MDBox pt={4} pb={3} px={3}>
                   <Box display="flex" justifyContent="center" alignItems="center">
-                    <FeedbackList feedbacks={feedbacks} />
+                    {isLoading ? <CircularProgress /> : <FeedbackList feedbacks={feedbacks} />}
                   </Box>
                 </MDBox>
               </MDBox>
@@ -74,4 +65,4 @@ function FeedbackListManager() {
   );
 }
 
-export default FeedbackListManager;
+export default ListFeedback;

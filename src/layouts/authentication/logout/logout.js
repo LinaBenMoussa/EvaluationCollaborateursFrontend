@@ -1,8 +1,8 @@
 import { Button, Icon } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../../store/slices/authSlice";
-import MDButton from "../../components/MDButton";
+import { logout } from "../../../store/slices/authSlice";
+import MDButton from "../../../components/MDButton";
 
 const LogoutButton = () => {
   const dispatch = useDispatch();
