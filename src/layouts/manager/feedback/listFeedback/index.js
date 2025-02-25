@@ -6,9 +6,9 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import FeedbackCard from "./feedbackCard";
 import FeedbackList from "./feedbackList";
-import { useGetFeedbackQuery } from "../../../store/api/feedbackApi";
 import { useSelector } from "react-redux";
-import { selectCurrentUser } from "../../../store/slices/authSlice";
+import { useGetFeedbackQuery } from "store/api/feedbackApi";
+import { selectCurrentUser } from "store/slices/authSlice";
 
 function ListFeedback() {
   const collaborateurId = useSelector(selectCurrentUser);

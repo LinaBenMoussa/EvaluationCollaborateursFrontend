@@ -28,12 +28,14 @@ import brandWhite from "assets/images/logo_clinisys.png";
 import { useSelector } from "react-redux";
 import { selectCurrentRole, selectIsAuthenticated } from "./store/slices/authSlice";
 import AuthRequired from "store/slices/RequireAuth";
-import AddFeedBack from "layouts/feedback/addfeedback";
 import LogoutButton from "layouts/authentication/logout/logout";
-import SaisiesTable from "layouts/saisie temps";
-import AddUser from "layouts/add-user";
-import Pointage from "layouts/pointage/journalier";
-import Historique from "layouts/pointage/historique";
+import AddFeedBack from "layouts/manager/feedback/addfeedback";
+import SaisiesTable from "layouts/manager/saisie temps";
+import AddUser from "layouts/admin/add-user";
+import EditUser from "layouts/admin/edit-user";
+import Historique from "layouts/manager/pointage/historique";
+import Pointage from "layouts/manager/pointage/journalier";
+
 
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
@@ -110,6 +112,7 @@ export default function App() {
               <Route path="/addfeedback" element={<AddFeedBack />} />
               <Route path="/saisie/:id" element={<SaisiesTable />} />
               <Route path="/adduser" element={<AddUser />} />
+              <Route path="/edituser/:id" element={<EditUser />} />
               <Route path="/historique" element={<Historique />} />
               <Route path="/journalier" element={<Pointage />} />
             </Routes>

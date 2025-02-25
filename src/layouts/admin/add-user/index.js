@@ -13,11 +13,11 @@ import MDButton from "components/MDButton";
 import { Box, CircularProgress } from "@mui/material";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import { useAddUserMutation, useGetByRoleQuery } from "../../store/api/userApi";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SelectFieldRole from "./SelectFieldRole";
 import AutocompleteField from "layouts/shared/autocompleteField";
+import { useAddUserMutation } from "store/api/userApi";
 
 function AddUser() {
   const [username, setUser] = useState("");

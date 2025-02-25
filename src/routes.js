@@ -1,9 +1,3 @@
-import Dashboard from "layouts/dashboard";
-import Tables from "layouts/tables";
-import Notifications from "layouts/notifications";
-import Profile from "layouts/profile";
-import SignIn from "layouts/authentication/sign-in";
-
 // @mui icons
 import Icon from "@mui/material/Icon";
 import { Feedback } from "@mui/icons-material";
@@ -11,13 +5,16 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import TodayIcon from "@mui/icons-material/Today";
 import EventIcon from "@mui/icons-material/Event";
 import HistoryIcon from "@mui/icons-material/History";
-import ListFeedback from "./layouts/feedback/listFeedback";
-import FeedbackListManager from "./layouts/feedback/listFeedbackManager";
-import CollaborateursList from "./layouts/listeCollaborateur";
-import IssuesList from "./layouts/issues";
-import CongesList from "./layouts/conges";
-import Pointage from "layouts/pointage/journalier";
-import Historique from "layouts/pointage/historique";
+import Dashboard from "layouts/manager/dashboard";
+import Tables from "layouts/admin/tables";
+import Notifications from "layouts/collaborateur/notifications";
+import FeedbackListManager from "layouts/manager/feedback/listFeedbackManager";
+import ListFeedback from "layouts/manager/feedback/listFeedback";
+import Pointage from "layouts/manager/pointage/journalier";
+import Historique from "layouts/manager/pointage/historique";
+import IssuesList from "layouts/manager/issues";
+import CollaborateursList from "layouts/manager/listeCollaborateur";
+import CongesList from "layouts/manager/conges";
 
 const routes = [
   {
@@ -39,15 +36,6 @@ const routes = [
   },
   {
     type: "collapse",
-    name: "Notifications",
-    key: "notifications",
-    icon: <Icon fontSize="small">notifications</Icon>,
-    route: "/notifications",
-    component: <Notifications />,
-    roles: ["ROLE_COLLABORATEUR"],
-  },
-  {
-    type: "collapse",
     name: "Feedback",
     key: "listFeedback",
     icon: <Feedback fontSize="small" />,
@@ -63,15 +51,6 @@ const routes = [
     route: "/issues",
     component: <IssuesList />,
     roles: ["ROLE_MANAGER"],
-  },
-  {
-    type: "collapse",
-    name: "Feedback",
-    key: "listfeedback",
-    icon: <Feedback fontSize="small" />,
-    route: "/feedback",
-    component: <ListFeedback />,
-    roles: ["ROLE_COLLABORATEUR"],
   },
   {
     type: "collapse",

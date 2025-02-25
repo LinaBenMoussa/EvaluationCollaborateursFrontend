@@ -7,21 +7,17 @@ import Footer from "examples/Footer";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import MDButton from "components/MDButton";
-import SimpleBlogCard from "../../../examples/Cards/BlogCards/SimpleBlogCard";
 
-import { useGetFeedbackByManagerQuery } from "../../../store/api/feedbackApi";
 import { useSelector } from "react-redux";
-import { selectCurrentUser } from "../../../store/slices/authSlice";
 import FeedbackCard from "../listFeedback/feedbackCard";
 import FeedbackList from "../listFeedback/feedbackList";
 import { useNavigate } from "react-router-dom";
 import AutocompleteField from "layouts/shared/autocompleteField";
 import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
 import { formatDateWithTime } from "functions/dateTime";
-import { isSameDate } from "functions/dateTime";
 import { isDateInRange } from "functions/dateTime";
-import { convertDateFormat } from "functions/dateTime";
-import { SignalWifiStatusbarNullSharp } from "@mui/icons-material";
+import { selectCurrentUser } from "store/slices/authSlice";
+import { useGetFeedbackByManagerQuery } from "store/api/feedbackApi";
 
 function FeedbackListManager() {
   const [collaborateurId, setCollaborateurId] = useState(null);
@@ -113,8 +109,8 @@ function FeedbackListManager() {
                           sx={{ width: 200 }}
                         >
                           <option value="all">Tous</option>
-                          <option value="positive">Positifs</option>
-                          <option value="negative">Négatifs</option>
+                          <option value="positif">Positifs</option>
+                          <option value="negatif">Négatifs</option>
                         </TextField>
                       </MDBox>
 

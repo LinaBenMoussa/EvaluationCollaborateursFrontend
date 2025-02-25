@@ -9,6 +9,13 @@ export const userApi = api.injectEndpoints({
         body: { ...credentials },
       }),
     }),
+    editUser: builder.mutation({
+      query: (credentials) => ({
+        url: "/users",
+        method: "PUT",
+        body: { ...credentials },
+      }),
+    }),
     getCollaborateursByManager: builder.query({
       query: (id) => ({
         url: `/users/collaborateursByManager/${id}`,
@@ -21,7 +28,18 @@ export const userApi = api.injectEndpoints({
         method: "GET",
       }),
     }),
+    getUserById: builder.query({
+      query: (id) => ({
+        url: `/users/${id}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
-export const { useAddUserMutation, useGetCollaborateursByManagerQuery, useGetByRoleQuery } =
-  userApi;
+export const {
+  useAddUserMutation,
+  useGetCollaborateursByManagerQuery,
+  useGetByRoleQuery,
+  useEditUserMutation,
+  useGetUserByIdQuery,
+} = userApi;

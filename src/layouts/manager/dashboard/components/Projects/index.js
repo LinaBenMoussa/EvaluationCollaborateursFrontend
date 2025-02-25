@@ -27,9 +27,9 @@ import MDTypography from "components/MDTypography";
 
 // Material Dashboard 2 React examples
 import DataTable from "examples/Tables/DataTable";
+import data from "./data";
 
 // Data
-import data from "layouts/dashboard/components/Projects/data";
 
 function Projects() {
   const { columns, rows } = data();

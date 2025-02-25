@@ -4,8 +4,11 @@
 import { useMemo } from "react";
 import MDTypography from "components/MDTypography";
 import { useGetByRoleQuery } from "store/api/userApi";
+import MDButton from "components/MDButton";
+import { useNavigate } from "react-router-dom";
 
 export function useUsersTableData(role) {
+  const navigate = useNavigate();
   const { data: users = [], isLoading } = useGetByRoleQuery(role);
   console.log(users);
 
@@ -33,7 +36,7 @@ export function useUsersTableData(role) {
         id_bitrix24: user.id_bitrix24,
         action: (
           <MDTypography component="a" href="#" variant="caption" color="text" fontWeight="medium">
-            Edit
+            <MDButton onClick={() => navigate(`/edituser/${user.id}`)}> Edit</MDButton>
           </MDTypography>
         ),
       })),

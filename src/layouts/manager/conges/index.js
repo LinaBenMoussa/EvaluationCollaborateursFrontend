@@ -18,12 +18,12 @@ import AutocompleteField from "layouts/shared/autocompleteField";
 import { convertDateFormat } from "functions/dateTime";
 import { isDateInRange } from "functions/dateTime";
 
-function Tables() {
+function CongesList() {
   const managerId = useSelector(selectCurrentUser);
   const [collaborateurId, setCollaborateurId] = useState(null);
   const [selectedCollaborateur, setSelectedCollaborateur] = useState(null);
-  const [filterStatus, setFilterStatus] = useState("");
-  const [filterType, setFilterType] = useState("");
+  const [filterStatus, setFilterStatus] = useState("Tous");
+  const [filterType, setFilterType] = useState("Tous");
   const [selectedDateDebut1, setSelectedDateDebut1] = useState("");
   const [selectedDateDebut2, setSelectedDateDebut2] = useState("");
   const [selectedDateFin1, setSelectedDateFin1] = useState("");
@@ -44,8 +44,8 @@ function Tables() {
   }
 
   const filteredRows = rows.filter((row) => {
-    const statusMatch = filterStatus ? row.status.props.children[1] === filterStatus : true;
-    const typeMatch = filterType ? row.type === filterType : true;
+    const statusMatch = filterStatus !== "Tous" ? row.status === filterStatus : true;
+    const typeMatch = filterType !== "Tous" ? row.type === filterType : true;
     const collaborateurMatch =
       collaborateurId !== null
         ? row.collaborateur === `${selectedCollaborateur?.nom} ${selectedCollaborateur?.prenom}`
@@ -265,4 +265,4 @@ function Tables() {
   );
 }
 
-export default Tables;
+export default CongesList;

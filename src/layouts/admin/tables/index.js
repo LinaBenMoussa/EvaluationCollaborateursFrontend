@@ -6,11 +6,11 @@ import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import DataTable from "examples/Tables/DataTable";
-import SelectFieldRole from "layouts/add-user/SelectFieldRole";
-import { useUsersTableData } from "layouts/tables/data/useUsersTableData";
 import { CircularProgress } from "@mui/material";
 import MDButton from "components/MDButton";
 import { useNavigate } from "react-router-dom";
+import { useUsersTableData } from "./data/useUsersTableData";
+import SelectFieldRole from "../add-user/SelectFieldRole";
 
 function Tables() {
   const navigate = useNavigate();

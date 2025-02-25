@@ -18,7 +18,7 @@ import AutocompleteField from "layouts/shared/autocompleteField";
 import { convertDateFormat } from "functions/dateTime";
 import { isDateInRange } from "functions/dateTime";
 
-function Tables() {
+function IssuesList() {
   const managerId = useSelector(selectCurrentUser);
   const [collaborateurId, setCollaborateurId] = useState(null);
   const [selectedCollaborateur, setSelectedCollaborateur] = useState(null);
@@ -248,4 +248,4 @@ function Tables() {
   );
 }
 
-export default Tables;
+export default IssuesList;

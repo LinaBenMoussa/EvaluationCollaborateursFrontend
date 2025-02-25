@@ -11,7 +11,7 @@ import { selectCurrentUser } from "store/slices/authSlice";
 import { useUsersTableData } from "./data/useUsersTableData";
 import { CircularProgress } from "@mui/material";
 
-function Tables() {
+function CollaborateursList() {
   const managerId = useSelector(selectCurrentUser);
   const { columns, rows, isLoading } = useUsersTableData(managerId);
   console.log(columns, rows, isLoading);
@@ -66,4 +66,4 @@ function Tables() {
   );
 }
 
-export default Tables;
+export default CollaborateursList;
