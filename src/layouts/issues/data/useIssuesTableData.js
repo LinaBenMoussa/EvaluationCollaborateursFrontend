@@ -1,29 +1,20 @@
-import { useMemo } from "react";
+import MDButton from "components/MDButton";
+import { useCallback, useMemo } from "react";
 import { useGetIssuesQuery } from "store/api/issueApi";
+import { useNavigate } from "react-router-dom";
+import { formatDateWithTime } from "functions/dateTime";
 
 // Fonction pour formater la date
-function formatDate(date) {
-  if (date == null) {
-    return "";
-  }
-  const d = new Date(date);
-  return d.toLocaleString("fr-FR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-}
 
 export function useIssuesTableData(idManager) {
   const { data: issues = [], isLoading } = useGetIssuesQuery(idManager);
+  const navigate = useNavigate();
+  const navigateToSaisie = useCallback((id) => navigate(`/saisie/${id}`), [navigate]);
 
   const statusColors = {
     Terminé: "green",
     "En cours": "orange",
-    Bloqué: "red",
+    "En retard": "red",
     "À faire": "gray",
   };
 
@@ -37,6 +28,7 @@ export function useIssuesTableData(idManager) {
       { Header: "date_écheance", accessor: "date_echeance", align: "center" },
       { Header: "date_fin", accessor: "date_fin", align: "center" },
       { Header: "collaborateur", accessor: "collaborateur", align: "center" },
+      { Header: "action", accessor: "action", align: "center" },
     ],
     []
   );
@@ -62,11 +54,12 @@ export function useIssuesTableData(idManager) {
             {issue.status}
           </>
         ),
-        date_debut: formatDate(issue.date_debut),
+        date_debut: formatDateWithTime(issue.date_debut),
 
-        date_echeance: formatDate(issue.date_echeance),
-        date_fin: formatDate(issue.date_fin),
+        date_echeance: formatDateWithTime(issue.date_echeance),
+        date_fin: formatDateWithTime(issue.date_fin),
         collaborateur: `${issue.collaborateur.nom} ${issue.collaborateur.prenom}`,
+        action: <MDButton onClick={() => navigateToSaisie(issue.id)}>Saisies</MDButton>,
       })),
     [issues]
   );

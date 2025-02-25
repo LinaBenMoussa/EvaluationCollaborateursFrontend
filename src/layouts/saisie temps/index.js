@@ -6,14 +6,13 @@ import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import DataTable from "examples/Tables/DataTable";
-import { useSelector } from "react-redux";
-import { selectCurrentUser } from "store/slices/authSlice";
-import { useUsersTableData } from "./data/useUsersTableData";
 import { CircularProgress } from "@mui/material";
+import { useSaisiesTableData } from "./data/useSaisiesTableData";
+import { useParams } from "react-router-dom";
 
-function Tables() {
-  const managerId = useSelector(selectCurrentUser);
-  const { columns, rows, isLoading } = useUsersTableData(managerId);
+function SaisiesTable() {
+  const { id } = useParams();
+  const { columns, rows, isLoading } = useSaisiesTableData(id);
   console.log(columns, rows, isLoading);
 
   return (
@@ -34,19 +33,12 @@ function Tables() {
                 coloredShadow="info"
               >
                 <MDTypography variant="h6" color="white">
-                  Authors Table
+                  Saisies Table
                 </MDTypography>
               </MDBox>
               <MDBox pt={3}>
                 {isLoading ? (
-                  <MDBox
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                    sx={{ minHeight: "300px" }}
-                  >
-                    <CircularProgress />
-                  </MDBox>
+                  <CircularProgress />
                 ) : (
                   <DataTable
                     table={{ columns, rows }}
@@ -66,4 +58,4 @@ function Tables() {
   );
 }
 
-export default Tables;
+export default SaisiesTable;

@@ -30,6 +30,10 @@ import { selectCurrentRole, selectIsAuthenticated } from "./store/slices/authSli
 import AuthRequired from "store/slices/RequireAuth";
 import AddFeedBack from "layouts/feedback/addfeedback";
 import LogoutButton from "layouts/authentication/logout/logout";
+import SaisiesTable from "layouts/saisie temps";
+import AddUser from "layouts/add-user";
+import Pointage from "layouts/pointage/journalier";
+import Historique from "layouts/pointage/historique";
 
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
@@ -104,6 +108,10 @@ export default function App() {
               {getRoutes(routes)}
               <Route path="*" element={<Navigate to="/dashboard" />} />
               <Route path="/addfeedback" element={<AddFeedBack />} />
+              <Route path="/saisie/:id" element={<SaisiesTable />} />
+              <Route path="/adduser" element={<AddUser />} />
+              <Route path="/historique" element={<Historique />} />
+              <Route path="/journalier" element={<Pointage />} />
             </Routes>
           </AuthRequired>
         }

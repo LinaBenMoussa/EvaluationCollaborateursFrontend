@@ -15,6 +15,8 @@ export function useUsersTableData(role) {
       { Header: "nom", accessor: "nom", align: "center" },
       { Header: "prenom", accessor: "prenom", align: "center" },
       { Header: "username", accessor: "username", align: "center" },
+      { Header: "id_redmine", accessor: "id_redmine", align: "center" },
+      { Header: "id_bitrix24", accessor: "id_bitrix24", align: "center" },
       { Header: "action", accessor: "action", align: "center" },
     ],
     []
@@ -27,6 +29,8 @@ export function useUsersTableData(role) {
         nom: user.nom,
         prenom: user.prenom,
         username: user.username,
+        id_redmine: user.id_redmine,
+        id_bitrix24: user.id_bitrix24,
         action: (
           <MDTypography component="a" href="#" variant="caption" color="text" fontWeight="medium">
             Edit

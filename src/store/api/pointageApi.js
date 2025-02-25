@@ -1,6 +1,6 @@
 import { api } from "./api";
 
-export const IssueApi = api.injectEndpoints({
+export const PointageApi = api.injectEndpoints({
   endpoints: (builder) => ({
     addPointage: builder.mutation({
       query: (credentials) => ({
@@ -17,4 +17,4 @@ export const IssueApi = api.injectEndpoints({
     }),
   }),
 });
-export const { useAddPointageMutation, useGetPointagesQuery } = IssueApi;
+export const { useAddPointageMutation, useGetPointagesQuery } = PointageApi;

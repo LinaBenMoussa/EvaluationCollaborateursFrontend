@@ -25,6 +25,8 @@ function AddUser() {
   const [nom, setNom] = useState("");
   const [prenom, setPrenom] = useState("");
   const [role, setRole] = useState("");
+  const [id_redmine, setIdRedmine] = useState("");
+  const [id_bitrix24, setIdBitrix24] = useState("");
   console.log("role=" + role);
   const [managerId, setManagerId] = useState("");
   const [selectedManager, setSelectedManager] = useState(null);
@@ -34,7 +36,16 @@ function AddUser() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await addUser({ username, password, nom, prenom, role, managerId });
+      const response = await addUser({
+        username,
+        password,
+        nom,
+        prenom,
+        role,
+        managerId,
+        id_redmine,
+        id_bitrix24,
+      });
       if (response.error) {
         throw new Error(response.error.data.message || "Une erreur inconnue");
       }
@@ -46,6 +57,8 @@ function AddUser() {
       setPrenom("");
       setRole("");
       setManagerId("");
+      setIdBitrix24("");
+      setIdRedmine("");
     } catch (err) {
       if (err.message.includes("Le nom d'utilisateur")) {
         toast.error(err.message);
@@ -148,16 +161,36 @@ function AddUser() {
                             <SelectFieldRole role={role} setRole={setRole} />
                           </MDBox>
                           {role === "Collaborateur" && (
-                            <MDBox mb={2}>
-                              <AutocompleteField
-                                useFetchHook={() => useGetByRoleQuery("manager")}
-                                fullWidth
-                                setSelectedItem={setSelectedManager}
-                                setIdItem={setManagerId}
-                                selectedItem={selectedManager}
-                                label="Choisir un manager"
-                              />
-                            </MDBox>
+                            <>
+                              <MDBox mb={2}>
+                                <AutocompleteField
+                                  useFetchHook={() => useGetByRoleQuery("manager")}
+                                  fullWidth
+                                  setSelectedItem={setSelectedManager}
+                                  setIdItem={setManagerId}
+                                  selectedItem={selectedManager}
+                                  label="Choisir un manager"
+                                />
+                              </MDBox>
+                              <MDBox mb={2}>
+                                <MDInput
+                                  type="id_Redmine"
+                                  label="id Redmine"
+                                  value={id_redmine}
+                                  onChange={(e) => setIdRedmine(e.target.value)}
+                                  fullWidth
+                                />
+                              </MDBox>
+                              <MDBox mb={2}>
+                                <MDInput
+                                  type="id bitrix24"
+                                  label="id_bitrix24"
+                                  value={id_bitrix24}
+                                  onChange={(e) => setIdBitrix24(e.target.value)}
+                                  fullWidth
+                                />
+                              </MDBox>
+                            </>
                           )}
 
                           <MDButton variant="gradient" color="info" type="submit" fullWidth>

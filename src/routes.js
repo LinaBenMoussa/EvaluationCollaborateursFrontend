@@ -7,12 +7,17 @@ import SignIn from "layouts/authentication/sign-in";
 // @mui icons
 import Icon from "@mui/material/Icon";
 import { Feedback } from "@mui/icons-material";
-import AddUser from "layouts/add-user";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import TodayIcon from "@mui/icons-material/Today";
+import EventIcon from "@mui/icons-material/Event";
+import HistoryIcon from "@mui/icons-material/History";
 import ListFeedback from "./layouts/feedback/listFeedback";
 import FeedbackListManager from "./layouts/feedback/listFeedbackManager";
 import CollaborateursList from "./layouts/listeCollaborateur";
 import IssuesList from "./layouts/issues";
-import Pointage from "layouts/pointage";
+import CongesList from "./layouts/conges";
+import Pointage from "layouts/pointage/journalier";
+import Historique from "layouts/pointage/historique";
 
 const routes = [
   {
@@ -25,10 +30,10 @@ const routes = [
   },
   {
     type: "collapse",
-    name: "Tables",
-    key: "tables",
-    icon: <Icon fontSize="small">table_view</Icon>,
-    route: "/tables",
+    name: "Utilisateurs",
+    key: "Utilisateurs",
+    icon: <Icon fontSize="small">group</Icon>,
+    route: "/utilisateurs",
     component: <Tables />,
     roles: ["ROLE_ADMIN"],
   },
@@ -41,15 +46,6 @@ const routes = [
     component: <Notifications />,
     roles: ["ROLE_COLLABORATEUR"],
   },
-  {
-    type: "collapse",
-    name: "Profile",
-    key: "profile",
-    icon: <Icon fontSize="small">person</Icon>,
-    route: "/profile",
-    component: <Profile />,
-  },
-
   {
     type: "collapse",
     name: "Feedback",
@@ -67,16 +63,6 @@ const routes = [
     route: "/issues",
     component: <IssuesList />,
     roles: ["ROLE_MANAGER"],
-  },
-
-  {
-    type: "collapse",
-    name: "Add User",
-    key: "addUser",
-    icon: <Icon fontSize="small">add</Icon>,
-    route: "/user",
-    component: <AddUser />,
-    roles: ["ROLE_ADMIN"],
   },
   {
     type: "collapse",
@@ -100,9 +86,34 @@ const routes = [
     type: "collapse",
     name: "Pointages",
     key: "pointage",
-    icon: <Icon fontSize="small">time</Icon>,
+    icon: <AccessTimeIcon fontSize="small" />,
     route: "/pointage",
-    component: <Pointage />,
+    roles: ["ROLE_MANAGER"],
+    subRoutes: [
+      {
+        type: "collapse",
+        key: "Journalier",
+        icon: <EventIcon fontSize="small" />,
+        roles: ["ROLE_MANAGER"],
+        name: "Journalier",
+        route: "/journalier",
+        component: <Pointage />,
+      },
+      {
+        icon: <HistoryIcon fontSize="small" />,
+        name: "Historique",
+        route: "/historique",
+        component: <Historique />,
+      },
+    ],
+  },
+  {
+    type: "collapse",
+    name: "Congés",
+    key: "conge",
+    icon: <TodayIcon fontSize="small" />,
+    route: "/congé",
+    component: <CongesList />,
     roles: ["ROLE_MANAGER"],
   },
 ];

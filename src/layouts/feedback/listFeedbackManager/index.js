@@ -9,10 +9,7 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import MDButton from "components/MDButton";
 import SimpleBlogCard from "../../../examples/Cards/BlogCards/SimpleBlogCard";
 
-import {
-  useGetFeedbackByManagerAndCollaborateurQuery,
-  useGetFeedbackByManagerQuery,
-} from "../../../store/api/feedbackApi";
+import { useGetFeedbackByManagerQuery } from "../../../store/api/feedbackApi";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../../../store/slices/authSlice";
 import FeedbackCard from "../listFeedback/feedbackCard";
@@ -20,12 +17,18 @@ import FeedbackList from "../listFeedback/feedbackList";
 import { useNavigate } from "react-router-dom";
 import AutocompleteField from "layouts/shared/autocompleteField";
 import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
+import { formatDateWithTime } from "functions/dateTime";
+import { isSameDate } from "functions/dateTime";
+import { isDateInRange } from "functions/dateTime";
+import { convertDateFormat } from "functions/dateTime";
+import { SignalWifiStatusbarNullSharp } from "@mui/icons-material";
 
 function FeedbackListManager() {
-  const [collaborateurId, setCollaborateurId] = useState(-1);
+  const [collaborateurId, setCollaborateurId] = useState(null);
   const [selectedCollaborateur, setSelectedCollaborateur] = useState(null);
   const [filterType, setFilterType] = useState("all"); // all, positive, negative
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate1, setSelectedDate1] = useState("");
+  const [selectedDate2, setSelectedDate2] = useState("");
 
   const navigate = useNavigate();
   const managerId = useSelector(selectCurrentUser);
@@ -41,25 +44,23 @@ function FeedbackListManager() {
       return filterType === "positif" ? feedback.type === "positif" : feedback.type === "negatif";
     })
     .filter((feedback) => {
-      if (!selectedDate) return true;
-      return (
-        new Date(feedback.date_feedback).toLocaleDateString("fr-FR") ===
-        new Date(selectedDate).toLocaleDateString("fr-FR")
-      );
+      if (!selectedDate1 && !selectedDate2) return true;
+      return isDateInRange(feedback.date_feedback.split("T")[0], selectedDate1, selectedDate2);
     })
     .filter((feedback) => {
-      if (collaborateurId === -1) return true;
+      if (collaborateurId === null) return true;
       return feedback.collaborateur.id === collaborateurId;
     });
 
+  if (selectedDate2 && selectedDate2 < selectedDate1) {
+    setSelectedDate1(selectedDate2);
+  }
+
   const feedbacks = filteredFeedbacks.map((feedback) => {
-    const date = new Date(feedback.date_feedback);
-    const formattedDate = date.toLocaleDateString("fr-FR");
-    const formattedTime = date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }); // Format HH:MM
     return (
       <FeedbackCard
         key={feedback.id}
-        dateTime={`${formattedDate} ${formattedTime} `}
+        dateTime={formatDateWithTime(feedback.date_feedback)}
         manager={`to: ${feedback.manager.nom} ${feedback.manager.prenom}`}
         comment={feedback.commentaire}
         isNegative={feedback.type === "negatif"}
@@ -118,14 +119,28 @@ function FeedbackListManager() {
                       </MDBox>
 
                       <MDBox>
-                        <TextField
-                          type="date"
-                          label="Date"
-                          InputLabelProps={{ shrink: true }}
-                          value={selectedDate}
-                          onChange={(e) => setSelectedDate(e.target.value)}
-                          fullWidth
-                        />
+                        <Grid container spacing={2}>
+                          <Grid item xs={6}>
+                            <TextField
+                              type="date"
+                              label="De"
+                              InputLabelProps={{ shrink: true }}
+                              value={selectedDate1}
+                              onChange={(e) => setSelectedDate1(e.target.value)}
+                              fullWidth
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <TextField
+                              type="date"
+                              label="À"
+                              InputLabelProps={{ shrink: true }}
+                              value={selectedDate2}
+                              onChange={(e) => setSelectedDate2(e.target.value)}
+                              fullWidth
+                            />
+                          </Grid>
+                        </Grid>
                       </MDBox>
                     </MDBox>
                     <MDBox m={5}>

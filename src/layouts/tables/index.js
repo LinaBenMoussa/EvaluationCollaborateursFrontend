@@ -9,8 +9,12 @@ import DataTable from "examples/Tables/DataTable";
 import SelectFieldRole from "layouts/add-user/SelectFieldRole";
 import { useUsersTableData } from "layouts/tables/data/useUsersTableData";
 import { CircularProgress } from "@mui/material";
+import MDButton from "components/MDButton";
+import { useNavigate } from "react-router-dom";
 
 function Tables() {
+  const navigate = useNavigate();
+
   const [role, setRole] = useState("Admin");
   const { columns, rows, isLoading } = useUsersTableData(role);
   console.log(columns, rows, isLoading);
@@ -36,9 +40,24 @@ function Tables() {
                   Authors Table
                 </MDTypography>
               </MDBox>
-              <MDBox pt={3}>
-                <MDBox mx={2}>
-                  <SelectFieldRole role={role} setRole={setRole} />
+              <MDBox pt={0}>
+                <MDBox justifyContent="space-between">
+                  <MDBox display="flex" justifyContent="space-between" alignItems="center">
+                    <MDBox display="flex" alignItems="center">
+                      <MDBox m={2} sx={{ width: 280 }}>
+                        <SelectFieldRole role={role} setRole={setRole} />
+                      </MDBox>
+                    </MDBox>
+                    <MDBox m={5}>
+                      <MDButton
+                        variant="contained"
+                        color="info"
+                        onClick={() => navigate("/adduser")}
+                      >
+                        Ajouter utilisateur
+                      </MDButton>
+                    </MDBox>
+                  </MDBox>
                 </MDBox>
                 {isLoading ? (
                   <CircularProgress />

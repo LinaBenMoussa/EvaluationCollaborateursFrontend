@@ -19,7 +19,7 @@ export default function AutocompleteField({
       fullWidth={fullwidth}
       autoHighlight
       loading={isFetching}
-      value={selectedItem || null}
+      value={selectedItem}
       getOptionLabel={(option) => option.nom + " " + option.prenom}
       renderOption={(props, option) => (
         <Box component="li" {...props} key={option.id}>
