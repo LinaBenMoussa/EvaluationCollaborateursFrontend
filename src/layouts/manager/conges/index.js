@@ -81,7 +81,7 @@ function CongesList() {
                 alignItems="center"
               >
                 <MDTypography variant="h6" color="white">
-                  Congés Table
+                  Liste des Congés
                 </MDTypography>
                 <IconButton color="white" onClick={() => setOpenFilter(true)}>
                   <FilterListIcon sx={{ color: "white" }} />

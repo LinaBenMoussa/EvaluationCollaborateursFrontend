@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
 import MDBox from "components/MDBox";
@@ -31,6 +31,7 @@ function EditUser() {
   const [id_bitrix24, setIdBitrix24] = useState("");
   const [managerId, setManagerId] = useState("");
   const [selectedManager, setSelectedManager] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
@@ -66,6 +67,7 @@ function EditUser() {
         id_redmine,
         id_bitrix24,
       });
+      navigate("/utilisateurs");
       if (response.error) {
         throw new Error(response.error.data.message || "Une erreur inconnue");
       }
@@ -93,7 +95,7 @@ function EditUser() {
                 coloredShadow="info"
               >
                 <MDTypography variant="h6" color="white">
-                  Modifier l utilisateur
+                  {`Modifier l'utilisateur`}
                 </MDTypography>
               </MDBox>
               <MDBox pt={3}>
@@ -129,7 +131,7 @@ function EditUser() {
                               type="text"
                               value={username}
                               onChange={(e) => setUser(e.target.value)}
-                              label="Username"
+                              label="Nom d'utilisateur"
                               fullWidth
                               disabled
                             />

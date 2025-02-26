@@ -13,15 +13,11 @@ import { useSelector } from "react-redux";
 import { selectCurrentUser } from "store/slices/authSlice";
 import { useIssuesTableData } from "./data/useIssuesTableData";
 import { TextField, MenuItem, CircularProgress } from "@mui/material";
-import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
-import AutocompleteField from "layouts/shared/autocompleteField";
 import { convertDateFormat } from "functions/dateTime";
 import { isDateInRange } from "functions/dateTime";
 
-function IssuesList() {
-  const managerId = useSelector(selectCurrentUser);
-  const [collaborateurId, setCollaborateurId] = useState(null);
-  const [selectedCollaborateur, setSelectedCollaborateur] = useState(null);
+function IssuesListCollaborateur() {
+  const collaborateurId = useSelector(selectCurrentUser);
   const [filterStatus, setFilterStatus] = useState("Tous");
   const [selectedDateDebut1, setSelectedDateDebut1] = useState("");
   const [selectedDateDebut2, setSelectedDateDebut2] = useState("");
@@ -30,7 +26,7 @@ function IssuesList() {
   const [selectedDateEcheance1, setSelectedDateEcheance1] = useState("");
   const [selectedDateEcheance2, setSelectedDateEcheance2] = useState("");
   const [openFilter, setOpenFilter] = useState(false);
-  const { columns, rows, isLoading } = useIssuesTableData(managerId);
+  const { columns, rows, isLoading } = useIssuesTableData(collaborateurId);
 
   if (selectedDateDebut2 && selectedDateDebut2 < selectedDateDebut1) {
     setSelectedDateDebut1(selectedDateDebut2);
@@ -45,13 +41,8 @@ function IssuesList() {
   const filteredRows = rows.filter((row) => {
     const statusMatch =
       filterStatus === "Tous" ? true : row.status.props.children[1] === filterStatus;
-    const collaborateurMatch =
-      collaborateurId !== null
-        ? row.collaborateur === `${selectedCollaborateur?.nom} ${selectedCollaborateur?.prenom}`
-        : true;
     return (
       statusMatch &&
-      collaborateurMatch &&
       isDateInRange(convertDateFormat(row.date_debut), selectedDateDebut1, selectedDateDebut2) &&
       isDateInRange(convertDateFormat(row.date_fin), selectedDateFin1, selectedDateFin2) &&
       isDateInRange(
@@ -134,14 +125,6 @@ function IssuesList() {
           </MDTypography>
 
           <MDBox display="flex" flexDirection="column" gap={2}>
-            <AutocompleteField
-              useFetchHook={() => useGetCollaborateursByManagerQuery(managerId)}
-              fullWidth
-              setSelectedItem={setSelectedCollaborateur}
-              setIdItem={setCollaborateurId}
-              selectedItem={selectedCollaborateur}
-              label="Choisir un collaborateur"
-            />
             <TextField
               select
               label="Statut"
@@ -248,4 +231,4 @@ function IssuesList() {
   );
 }
 
-export default IssuesList;
+export default IssuesListCollaborateur;

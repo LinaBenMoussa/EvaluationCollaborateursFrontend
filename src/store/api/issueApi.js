@@ -15,6 +15,13 @@ export const IssueApi = api.injectEndpoints({
         method: "GET",
       }),
     }),
+    getIssuesByCollaborateur: builder.query({
+      query: (id) => ({
+        url: `/issues/collaborateur/${id}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
-export const { useAddIssueMutation, useGetIssuesQuery } = IssueApi;
+export const { useAddIssueMutation, useGetIssuesQuery, useGetIssuesByCollaborateurQuery } =
+  IssueApi;

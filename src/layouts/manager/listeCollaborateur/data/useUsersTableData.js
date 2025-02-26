@@ -14,7 +14,7 @@ export function useUsersTableData(managerId) {
       { Header: "id", accessor: "id", align: "left" },
       { Header: "nom", accessor: "nom", align: "center" },
       { Header: "prenom", accessor: "prenom", align: "center" },
-      { Header: "username", accessor: "username", align: "center" },
+      { Header: "Nom d'utilisateur", accessor: "username", align: "center" },
     ],
     []
   );

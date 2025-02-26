@@ -18,6 +18,8 @@ import "react-toastify/dist/ReactToastify.css";
 import SelectFieldRole from "./SelectFieldRole";
 import AutocompleteField from "layouts/shared/autocompleteField";
 import { useAddUserMutation } from "store/api/userApi";
+import { useNavigate } from "react-router-dom";
+import { useGetByRoleQuery } from "store/api/userApi";
 
 function AddUser() {
   const [username, setUser] = useState("");
@@ -30,7 +32,7 @@ function AddUser() {
   console.log("role=" + role);
   const [managerId, setManagerId] = useState("");
   const [selectedManager, setSelectedManager] = useState(null);
-
+  const navigate = useNavigate();
   const [addUser, { isLoading }] = useAddUserMutation();
 
   const handleSubmit = async (e) => {
@@ -59,6 +61,7 @@ function AddUser() {
       setManagerId("");
       setIdBitrix24("");
       setIdRedmine("");
+      navigate("/utilisateurs");
     } catch (err) {
       if (err.message.includes("Le nom d'utilisateur")) {
         toast.error(err.message);
@@ -90,7 +93,7 @@ function AddUser() {
                 coloredShadow="info"
               >
                 <MDTypography variant="h6" color="white">
-                  Add User
+                  Ajouter un utilisateur
                 </MDTypography>
               </MDBox>
               <MDBox pt={3}>
@@ -126,7 +129,7 @@ function AddUser() {
                               type="text"
                               value={username}
                               onChange={(e) => setUser(e.target.value)}
-                              label="Username"
+                              label="Nom d'utilisateur"
                               fullWidth
                             />
                           </MDBox>
@@ -151,7 +154,7 @@ function AddUser() {
                           <MDBox mb={2}>
                             <MDInput
                               type="password"
-                              label="Password"
+                              label="Mot de passe"
                               value={password}
                               onChange={(e) => setPwd(e.target.value)}
                               fullWidth
@@ -184,7 +187,7 @@ function AddUser() {
                               <MDBox mb={2}>
                                 <MDInput
                                   type="id bitrix24"
-                                  label="id_bitrix24"
+                                  label="id bitrix24"
                                   value={id_bitrix24}
                                   onChange={(e) => setIdBitrix24(e.target.value)}
                                   fullWidth

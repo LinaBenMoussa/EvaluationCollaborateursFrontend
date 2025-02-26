@@ -57,7 +57,7 @@ function FeedbackListManager() {
       <FeedbackCard
         key={feedback.id}
         dateTime={formatDateWithTime(feedback.date_feedback)}
-        manager={`to: ${feedback.manager.nom} ${feedback.manager.prenom}`}
+        manager={`à: ${feedback.manager.nom} ${feedback.manager.prenom}`}
         comment={feedback.commentaire}
         isNegative={feedback.type === "negatif"}
       />
@@ -82,7 +82,7 @@ function FeedbackListManager() {
                 coloredShadow="info"
               >
                 <MDTypography variant="h6" color="white">
-                  Feedback
+                  {`Liste d'évaluations`}
                 </MDTypography>
               </MDBox>
               <MDBox pt={1}>
@@ -102,7 +102,7 @@ function FeedbackListManager() {
                       <MDBox mr={2}>
                         <TextField
                           select
-                          label="Type de feedback"
+                          label="Type"
                           value={filterType}
                           onChange={(e) => setFilterType(e.target.value)}
                           SelectProps={{ native: true }}
@@ -145,7 +145,7 @@ function FeedbackListManager() {
                         color="info"
                         onClick={() => navigate("/addfeedback")}
                       >
-                        Add Feedback
+                        Ajouter
                       </MDButton>
                     </MDBox>
                   </MDBox>

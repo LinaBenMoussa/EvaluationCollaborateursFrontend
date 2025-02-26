@@ -1,6 +1,6 @@
 // @mui icons
 import Icon from "@mui/material/Icon";
-import { Feedback } from "@mui/icons-material";
+import { Feedback, NotificationsNone } from "@mui/icons-material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import TodayIcon from "@mui/icons-material/Today";
 import EventIcon from "@mui/icons-material/Event";
@@ -15,11 +15,14 @@ import Historique from "layouts/manager/pointage/historique";
 import IssuesList from "layouts/manager/issues";
 import CollaborateursList from "layouts/manager/listeCollaborateur";
 import CongesList from "layouts/manager/conges";
+import ListPointage from "layouts/collaborateur/pointage";
+import IssuesListCollaborateur from "layouts/collaborateur/issues";
+import CongesListCollaborateur from "layouts/collaborateur/conges";
 
 const routes = [
   {
     type: "collapse",
-    name: "Dashboard",
+    name: "Tableau de bord",
     key: "dashboard",
     icon: <Icon fontSize="small">dashboard</Icon>,
     route: "/dashboard",
@@ -36,7 +39,25 @@ const routes = [
   },
   {
     type: "collapse",
-    name: "Feedback",
+    name: "Notifications",
+    key: "Notifications",
+    icon: <NotificationsNone fontSize="small" />,
+    route: "/notification",
+    component: <Notifications />,
+    roles: ["ROLE_COLLABORATEUR"],
+  },
+  {
+    type: "collapse",
+    name: "Pointage",
+    key: "Pointage",
+    icon: <EventIcon fontSize="small" />,
+    route: "/pointage",
+    component: <ListPointage />,
+    roles: ["ROLE_COLLABORATEUR"],
+  },
+  {
+    type: "collapse",
+    name: "Évaluation",
     key: "listFeedback",
     icon: <Feedback fontSize="small" />,
     route: "/feedback",
@@ -45,12 +66,21 @@ const routes = [
   },
   {
     type: "collapse",
-    name: "Issues",
+    name: "Tâches",
     key: "issues",
     icon: <Icon fontSize="small">task</Icon>,
     route: "/issues",
     component: <IssuesList />,
     roles: ["ROLE_MANAGER"],
+  },
+  {
+    type: "collapse",
+    name: "Tâches",
+    key: "issues",
+    icon: <Icon fontSize="small">task</Icon>,
+    route: "/issues",
+    component: <IssuesListCollaborateur />,
+    roles: ["ROLE_COLLABORATEUR"],
   },
   {
     type: "collapse",
@@ -94,6 +124,15 @@ const routes = [
     route: "/congé",
     component: <CongesList />,
     roles: ["ROLE_MANAGER"],
+  },
+  {
+    type: "collapse",
+    name: "Congés",
+    key: "conge",
+    icon: <TodayIcon fontSize="small" />,
+    route: "/congé",
+    component: <CongesListCollaborateur />,
+    roles: ["ROLE_COLLABORATEUR"],
   },
 ];
 

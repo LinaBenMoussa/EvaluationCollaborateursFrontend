@@ -34,7 +34,7 @@ function CollaborateursList() {
                 coloredShadow="info"
               >
                 <MDTypography variant="h6" color="white">
-                  Authors Table
+                  Liste des Collaborateurs
                 </MDTypography>
               </MDBox>
               <MDBox pt={3}>

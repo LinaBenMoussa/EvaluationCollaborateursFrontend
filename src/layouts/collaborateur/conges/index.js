@@ -11,26 +11,23 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import DataTable from "examples/Tables/DataTable";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "store/slices/authSlice";
-import { useIssuesTableData } from "./data/useIssuesTableData";
+import { useCongesTableData } from "./data/useCongesTableData";
 import { TextField, MenuItem, CircularProgress } from "@mui/material";
-import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
-import AutocompleteField from "layouts/shared/autocompleteField";
 import { convertDateFormat } from "functions/dateTime";
 import { isDateInRange } from "functions/dateTime";
 
-function IssuesList() {
-  const managerId = useSelector(selectCurrentUser);
-  const [collaborateurId, setCollaborateurId] = useState(null);
-  const [selectedCollaborateur, setSelectedCollaborateur] = useState(null);
+function CongesListCollaborateur() {
+  const collaborateurId = useSelector(selectCurrentUser);
   const [filterStatus, setFilterStatus] = useState("Tous");
+  const [filterType, setFilterType] = useState("Tous");
   const [selectedDateDebut1, setSelectedDateDebut1] = useState("");
   const [selectedDateDebut2, setSelectedDateDebut2] = useState("");
   const [selectedDateFin1, setSelectedDateFin1] = useState("");
   const [selectedDateFin2, setSelectedDateFin2] = useState("");
-  const [selectedDateEcheance1, setSelectedDateEcheance1] = useState("");
-  const [selectedDateEcheance2, setSelectedDateEcheance2] = useState("");
+  const [selectedDateDemande1, setSelectedDateDemande1] = useState("");
+  const [selectedDateDemande2, setSelectedDateDemande2] = useState("");
   const [openFilter, setOpenFilter] = useState(false);
-  const { columns, rows, isLoading } = useIssuesTableData(managerId);
+  const { columns, rows, isLoading } = useCongesTableData(collaborateurId);
 
   if (selectedDateDebut2 && selectedDateDebut2 < selectedDateDebut1) {
     setSelectedDateDebut1(selectedDateDebut2);
@@ -38,27 +35,19 @@ function IssuesList() {
   if (selectedDateFin2 && selectedDateFin2 < selectedDateFin1) {
     setSelectedDateFin1(selectedDateFin2);
   }
-  if (selectedDateEcheance2 && selectedDateEcheance2 < selectedDateEcheance1) {
-    setSelectedDateEcheance1(selectedDateEcheance2);
+  if (selectedDateDemande2 && selectedDateDemande2 < selectedDateDemande1) {
+    setSelectedDateDemande1(selectedDateDemande2);
   }
 
   const filteredRows = rows.filter((row) => {
-    const statusMatch =
-      filterStatus === "Tous" ? true : row.status.props.children[1] === filterStatus;
-    const collaborateurMatch =
-      collaborateurId !== null
-        ? row.collaborateur === `${selectedCollaborateur?.nom} ${selectedCollaborateur?.prenom}`
-        : true;
+    const statusMatch = filterStatus !== "Tous" ? row.status === filterStatus : true;
+    const typeMatch = filterType !== "Tous" ? row.type === filterType : true;
     return (
+      typeMatch &&
       statusMatch &&
-      collaborateurMatch &&
       isDateInRange(convertDateFormat(row.date_debut), selectedDateDebut1, selectedDateDebut2) &&
       isDateInRange(convertDateFormat(row.date_fin), selectedDateFin1, selectedDateFin2) &&
-      isDateInRange(
-        convertDateFormat(row.date_echeance),
-        selectedDateEcheance1,
-        selectedDateEcheance2
-      )
+      isDateInRange(convertDateFormat(row.date_demande), selectedDateDemande1, selectedDateDemande2)
     );
   });
 
@@ -83,7 +72,7 @@ function IssuesList() {
                 alignItems="center"
               >
                 <MDTypography variant="h6" color="white">
-                  Liste des Tâches
+                  Liste des congés
                 </MDTypography>
                 <IconButton color="white" onClick={() => setOpenFilter(true)}>
                   <FilterListIcon sx={{ color: "white" }} />
@@ -134,14 +123,6 @@ function IssuesList() {
           </MDTypography>
 
           <MDBox display="flex" flexDirection="column" gap={2}>
-            <AutocompleteField
-              useFetchHook={() => useGetCollaborateursByManagerQuery(managerId)}
-              fullWidth
-              setSelectedItem={setSelectedCollaborateur}
-              setIdItem={setCollaborateurId}
-              selectedItem={selectedCollaborateur}
-              label="Choisir un collaborateur"
-            />
             <TextField
               select
               label="Statut"
@@ -152,10 +133,29 @@ function IssuesList() {
               }}
             >
               <MenuItem value="Tous">Tous</MenuItem>
-              <MenuItem value="Terminé">Terminé</MenuItem>
+              <MenuItem value="En attente">En attente</MenuItem>
+              <MenuItem value="Approuvé">Approuvé</MenuItem>
+              <MenuItem value="Refusé">Refusé</MenuItem>
+              <MenuItem value="Annulé">Annulé</MenuItem>
               <MenuItem value="En cours">En cours</MenuItem>
-              <MenuItem value="En retard">En retard</MenuItem>
-              <MenuItem value="À faire">À faire</MenuItem>
+              <MenuItem value="Terminé">Terminé</MenuItem>
+            </TextField>
+            <TextField
+              select
+              label="Type"
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              SelectProps={{
+                sx: { height: 43, display: "flex", alignItems: "center" },
+              }}
+            >
+              <MenuItem value="Tous">Tous</MenuItem>
+              <MenuItem value="Congé annuel">Congé annuel</MenuItem>
+              <MenuItem value="Congé maladie">Congé maladie</MenuItem>
+              <MenuItem value="Congé sans solde">Congé sans solde</MenuItem>
+              <MenuItem value="Congé maternité">Congé maternité</MenuItem>
+              <MenuItem value="Congé de décès">Congé de décès</MenuItem>
+              <MenuItem value="Congé exceptionnel">Congé exceptionnel</MenuItem>
             </TextField>
             <MDBox>
               <MDTypography variant="caption" sx={{ fontSize: "1rem" }} fontWeight="light" mb={1}>
@@ -215,7 +215,7 @@ function IssuesList() {
             </MDBox>
             <MDBox>
               <MDTypography variant="caption" sx={{ fontSize: "1rem" }} fontWeight="light" mb={1}>
-                Date Echeance
+                Date de Demande
               </MDTypography>
 
               <Grid container spacing={2}>
@@ -224,8 +224,8 @@ function IssuesList() {
                     type="date"
                     label="De"
                     InputLabelProps={{ shrink: true }}
-                    value={selectedDateEcheance1}
-                    onChange={(e) => setSelectedDateEcheance1(e.target.value)}
+                    value={selectedDateDemande1}
+                    onChange={(e) => setSelectedDateDemande1(e.target.value)}
                     fullWidth
                   />
                 </Grid>
@@ -234,8 +234,8 @@ function IssuesList() {
                     type="date"
                     label="À"
                     InputLabelProps={{ shrink: true }}
-                    value={selectedDateEcheance2}
-                    onChange={(e) => setSelectedDateEcheance2(e.target.value)}
+                    value={selectedDateDemande2}
+                    onChange={(e) => setSelectedDateDemande2(e.target.value)}
                     fullWidth
                   />
                 </Grid>
@@ -248,4 +248,4 @@ function IssuesList() {
   );
 }
 
-export default IssuesList;
+export default CongesListCollaborateur;

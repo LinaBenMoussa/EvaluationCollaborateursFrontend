@@ -15,11 +15,9 @@ import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
 import { isDateInRange } from "functions/dateTime";
 import { convertDateFormat } from "functions/dateTime";
 
-function Historique() {
-  const managerId = useSelector(selectCurrentUser);
-  const [collaborateurId, setCollaborateurId] = useState(null);
-  const [selectedCollaborateur, setSelectedCollaborateur] = useState(null);
-  const { columns, rows, isLoading } = usePointageTableData(managerId);
+function ListPointage() {
+  const collaborateurId = useSelector(selectCurrentUser);
+  const { columns, rows, isLoading } = usePointageTableData(collaborateurId);
 
   const [filterStatus, setFilterStatus] = useState("Tous");
   const [selectedDate1, setSelectedDate1] = useState("");
@@ -34,10 +32,6 @@ function Historique() {
     .filter((row) => {
       if (!selectedDate1 && !selectedDate2) return true;
       return isDateInRange(convertDateFormat(row.date), selectedDate1, selectedDate2);
-    })
-    .filter((row) => {
-      if (collaborateurId === null) return true;
-      return row.collaborateur === `${selectedCollaborateur?.nom} ${selectedCollaborateur?.prenom}`;
     });
   if (selectedDate2 && selectedDate2 < selectedDate1) {
     setSelectedDate1(selectedDate2);
@@ -60,23 +54,13 @@ function Historique() {
                 coloredShadow="info"
               >
                 <MDTypography variant="h6" color="white">
-                  Historique
+                  Liste des pointages
                 </MDTypography>
               </MDBox>
               <MDBox pt={3}>
                 <MDBox display="flex" justifyContent="space-between" alignItems="center">
                   <MDBox display="flex" alignItems="center">
-                    <MDBox m={2} sx={{ width: 280 }}>
-                      <AutocompleteField
-                        useFetchHook={() => useGetCollaborateursByManagerQuery(managerId)}
-                        fullWidth
-                        setSelectedItem={setSelectedCollaborateur}
-                        setIdItem={setCollaborateurId}
-                        selectedItem={selectedCollaborateur}
-                        label="Choisir un collaborateur"
-                      />
-                    </MDBox>
-                    <MDBox mr={2}>
+                    <MDBox m={2}>
                       <TextField
                         select
                         label="Status"
@@ -145,4 +129,4 @@ function Historique() {
   );
 }
 
-export default Historique;
+export default ListPointage;
