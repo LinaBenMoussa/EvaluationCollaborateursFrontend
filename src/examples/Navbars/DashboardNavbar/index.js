@@ -18,7 +18,7 @@ import MDBox from "components/MDBox";
 import MDInput from "components/MDInput";
 
 // Material Dashboard 2 React example components
-import Breadcrumbs from "examples/Breadcrumbs";
+import SettingsIcon from "@mui/icons-material/Settings";
 import NotificationItem from "examples/Items/NotificationItem";
 
 // Custom styles for DashboardNavbar
@@ -130,6 +130,11 @@ function DashboardNavbar({ absolute, light, isMini }) {
                 <Icon sx={iconsStyle}>notifications</Icon>
               </IconButton>
               {renderMenu()}
+              <Link to="/parametre">
+                <IconButton sx={navbarIconButton} size="small" disableRipple>
+                  <SettingsIcon sx={iconsStyle} />
+                </IconButton>
+              </Link>
             </MDBox>
           </MDBox>
         )}

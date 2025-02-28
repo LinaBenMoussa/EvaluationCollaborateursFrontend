@@ -17,6 +17,8 @@ import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
 import AutocompleteField from "layouts/shared/autocompleteField";
 import { convertDateFormat } from "functions/dateTime";
 import { isDateInRange } from "functions/dateTime";
+import { exportToExcel } from "functions/exportToExcel";
+import exceller from "assets/images/icons/flags/exceller.png";
 
 function CongesList() {
   const managerId = useSelector(selectCurrentUser);
@@ -83,9 +85,17 @@ function CongesList() {
                 <MDTypography variant="h6" color="white">
                   Liste des Congés
                 </MDTypography>
-                <IconButton color="white" onClick={() => setOpenFilter(true)}>
-                  <FilterListIcon sx={{ color: "white" }} />
-                </IconButton>
+                <MDBox>
+                  <IconButton
+                    color="white"
+                    onClick={() => exportToExcel(filteredRows, "Liste_des_Congés")}
+                  >
+                    <img src={exceller} alt="Exporter en Excel" style={{ width: 30, height: 30 }} />
+                  </IconButton>
+                  <IconButton color="white" onClick={() => setOpenFilter(true)}>
+                    <FilterListIcon sx={{ color: "white" }} />
+                  </IconButton>
+                </MDBox>
               </MDBox>
 
               <MDBox pt={1}>

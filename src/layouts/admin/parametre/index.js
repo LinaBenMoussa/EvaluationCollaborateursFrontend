@@ -1,22 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import DataTable from "examples/Tables/DataTable";
-import { useSelector } from "react-redux";
-import { selectCurrentUser } from "store/slices/authSlice";
-import { useUsersTableData } from "./data/useUsersTableData";
-import { CircularProgress, IconButton } from "@mui/material";
-import { exportToExcel } from "functions/exportToExcel";
-import exceller from "assets/images/icons/flags/exceller.png";
+import { CircularProgress } from "@mui/material";
+import MDInput from "components/MDInput";
+import { useGetParametreQuery } from "store/api/parametreApi";
+import MDButton from "components/MDButton";
+import { useSetParametreMutation } from "store/api/parametreApi";
+import { toast } from "react-toastify";
 
-function CollaborateursList() {
-  const managerId = useSelector(selectCurrentUser);
-  const { columns, rows, isLoading } = useUsersTableData(managerId);
-  console.log(columns, rows, isLoading);
+function Parametre() {
+  const { data, isLoading } = useGetParametreQuery();
+  const [updateParameters] = useSetParametreMutation();
+  const [jwt_expiration, setExpiration] = useState("");
+
+  useEffect(() => {
+    if (data && data.jwt_expiration) {
+      setExpiration(data.jwt_expiration);
+    }
+  }, [data]);
+  const handleSubmit = () => {
+    updateParameters({ jwt_expiration });
+    toast.success("Les changement sont modifi avec succès !");
+  };
 
   return (
     <DashboardLayout>
@@ -39,16 +48,8 @@ function CollaborateursList() {
                 alignItems="center"
               >
                 <MDTypography variant="h6" color="white">
-                  Liste des Collaborateurs
+                  Parametre
                 </MDTypography>
-                <MDBox>
-                  <IconButton
-                    color="white"
-                    onClick={() => exportToExcel(rows, "Liste_des_Collaborateurs")}
-                  >
-                    <img src={exceller} alt="Exporter en Excel" style={{ width: 30, height: 30 }} />
-                  </IconButton>
-                </MDBox>
               </MDBox>
               <MDBox pt={3}>
                 {isLoading ? (
@@ -61,14 +62,19 @@ function CollaborateursList() {
                     <CircularProgress />
                   </MDBox>
                 ) : (
-                  <DataTable
-                    table={{ columns, rows }}
-                    isSorted={true}
-                    entriesPerPage={true}
-                    showTotalEntries={false}
-                    canSearch={true}
-                    noEndBorder={false}
-                  />
+                  <>
+                    <MDBox mb={2}>
+                      <MDInput
+                        type="text"
+                        label="expiration"
+                        value={jwt_expiration}
+                        onChange={(e) => setExpiration(e.target.value)}
+                      />
+                    </MDBox>
+                    <MDButton onClick={handleSubmit} variant="gradient" color="info" type="submit">
+                      Enregistrer
+                    </MDButton>
+                  </>
                 )}
               </MDBox>
             </Card>
@@ -79,4 +85,4 @@ function CollaborateursList() {
   );
 }
 
-export default CollaborateursList;
+export default Parametre;

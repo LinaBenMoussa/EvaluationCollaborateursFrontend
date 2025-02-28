@@ -35,6 +35,7 @@ import AddUser from "layouts/admin/add-user";
 import EditUser from "layouts/admin/edit-user";
 import Historique from "layouts/manager/pointage/historique";
 import Pointage from "layouts/manager/pointage/journalier";
+import Parametre from "layouts/admin/parametre";
 
 
 export default function App() {
@@ -115,6 +116,7 @@ export default function App() {
               <Route path="/edituser/:id" element={<EditUser />} />
               <Route path="/historique" element={<Historique />} />
               <Route path="/journalier" element={<Pointage />} />
+              <Route path="/parametre" element={<Parametre />} />
             </Routes>
           </AuthRequired>
         }

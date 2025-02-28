@@ -8,12 +8,14 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import DataTable from "examples/Tables/DataTable";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "store/slices/authSlice";
-import { CircularProgress, TextField } from "@mui/material";
+import { CircularProgress, IconButton, TextField } from "@mui/material";
 import { usePointageTableData } from "./data/usePointageTableData";
 import AutocompleteField from "layouts/shared/autocompleteField";
 import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
 import { isDateInRange } from "functions/dateTime";
 import { convertDateFormat } from "functions/dateTime";
+import { exportToExcel } from "functions/exportToExcel";
+import exceller from "assets/images/icons/flags/exceller.png";
 
 function Historique() {
   const managerId = useSelector(selectCurrentUser);
@@ -58,10 +60,21 @@ function Historique() {
                 bgColor="info"
                 borderRadius="lg"
                 coloredShadow="info"
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
               >
                 <MDTypography variant="h6" color="white">
                   Historique
                 </MDTypography>
+                <MDBox>
+                  <IconButton
+                    color="white"
+                    onClick={() => exportToExcel(filteredPointages, "Liste_des_Collaborateurs")}
+                  >
+                    <img src={exceller} alt="Exporter en Excel" style={{ width: 30, height: 30 }} />
+                  </IconButton>
+                </MDBox>
               </MDBox>
               <MDBox pt={3}>
                 <MDBox display="flex" justifyContent="space-between" alignItems="center">

@@ -17,6 +17,8 @@ import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
 import AutocompleteField from "layouts/shared/autocompleteField";
 import { convertDateFormat } from "functions/dateTime";
 import { isDateInRange } from "functions/dateTime";
+import exceller from "assets/images/icons/flags/exceller.png";
+import { exportToExcel } from "functions/exportToExcel";
 
 function IssuesList() {
   const managerId = useSelector(selectCurrentUser);
@@ -85,9 +87,17 @@ function IssuesList() {
                 <MDTypography variant="h6" color="white">
                   Liste des Tâches
                 </MDTypography>
-                <IconButton color="white" onClick={() => setOpenFilter(true)}>
-                  <FilterListIcon sx={{ color: "white" }} />
-                </IconButton>
+                <MDBox>
+                  <IconButton
+                    color="white"
+                    onClick={() => exportToExcel(filteredRows, "Liste_des_Taches")}
+                  >
+                    <img src={exceller} alt="Exporter en Excel" style={{ width: 30, height: 30 }} />
+                  </IconButton>
+                  <IconButton color="white" onClick={() => setOpenFilter(true)}>
+                    <FilterListIcon sx={{ color: "white" }} />
+                  </IconButton>
+                </MDBox>
               </MDBox>
 
               <MDBox pt={1}>

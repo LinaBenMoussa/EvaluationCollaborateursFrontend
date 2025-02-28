@@ -8,6 +8,12 @@ export const SasieTempsApi = api.injectEndpoints({
         method: "GET",
       }),
     }),
+    getSaisieTempsByManager: builder.query({
+      query: (id) => ({
+        url: `/saisietemps/manager/${id}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
-export const { useGetSaisieTempsQuery } = SasieTempsApi;
+export const { useGetSaisieTempsQuery, useGetSaisieTempsByManagerQuery } = SasieTempsApi;

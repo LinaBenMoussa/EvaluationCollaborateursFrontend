@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-key */
 import { useEffect, useRef, useState } from "react";
-import { Box, Button, Card, CircularProgress, Grid, Stack, TextField } from "@mui/material";
+import { Box, Card, CircularProgress, Grid, IconButton, TextField } from "@mui/material";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import Footer from "examples/Footer";
@@ -18,6 +18,8 @@ import { formatDateWithTime } from "functions/dateTime";
 import { isDateInRange } from "functions/dateTime";
 import { selectCurrentUser } from "store/slices/authSlice";
 import { useGetFeedbackByManagerQuery } from "store/api/feedbackApi";
+import { exportToExcel } from "functions/exportToExcel";
+import exceller from "assets/images/icons/flags/exceller.png";
 
 function FeedbackListManager() {
   const [collaborateurId, setCollaborateurId] = useState(null);
@@ -25,6 +27,8 @@ function FeedbackListManager() {
   const [filterType, setFilterType] = useState("all"); // all, positive, negative
   const [selectedDate1, setSelectedDate1] = useState("");
   const [selectedDate2, setSelectedDate2] = useState("");
+  const [selectedButtonToday, setSelectedButtonToday] = useState(null);
+  const [selectedButtonYesterday, setSelectedButtonYesterday] = useState(null);
 
   const navigate = useNavigate();
   const managerId = useSelector(selectCurrentUser);
@@ -51,6 +55,15 @@ function FeedbackListManager() {
   if (selectedDate2 && selectedDate2 < selectedDate1) {
     setSelectedDate1(selectedDate2);
   }
+
+  const exportData = filteredFeedbacks.map((feedback) => ({
+    id: feedback.id,
+    date_feedback: formatDateWithTime(feedback.date_feedback),
+    manager: `${feedback.manager.nom} ${feedback.manager.prenom}`,
+    collaborateur: `${feedback.collaborateur.nom} ${feedback.collaborateur.prenom}`,
+    commentaire: feedback.commentaire,
+    type: feedback.type,
+  }));
 
   const feedbacks = filteredFeedbacks.map((feedback) => {
     return (
@@ -80,16 +93,63 @@ function FeedbackListManager() {
                 bgColor="info"
                 borderRadius="lg"
                 coloredShadow="info"
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
               >
                 <MDTypography variant="h6" color="white">
                   {`Liste d'évaluations`}
                 </MDTypography>
+                <MDBox>
+                  <IconButton
+                    color="white"
+                    onClick={() => exportToExcel(exportData, "Liste_des_Evaluations")}
+                  >
+                    <img src={exceller} alt="Exporter en Excel" style={{ width: 30, height: 30 }} />
+                  </IconButton>
+                </MDBox>
               </MDBox>
               <MDBox pt={1}>
                 <MDBox justifyContent="space-between">
+                  <MDBox m={1} display="flex" justifyContent="space-between" alignItems="center">
+                    <MDBox>
+                      <MDButton
+                        style={{ color: selectedButtonToday === "today" ? "blue" : "grey" }}
+                        onClick={() => {
+                          setSelectedButtonToday("today");
+                          setSelectedButtonYesterday(null);
+                          setSelectedDate1(new Date().toISOString().split("T")[0]);
+                          setSelectedDate2(new Date().toISOString().split("T")[0]);
+                        }}
+                      >{`Aujourd'hui`}</MDButton>
+                      <MDButton
+                        style={{
+                          color: selectedButtonYesterday === "Yesterday" ? "blue" : "grey",
+                        }}
+                        onClick={() => {
+                          setSelectedButtonYesterday("Yesterday");
+                          setSelectedButtonToday(null);
+                          const yesterday = new Date();
+                          yesterday.setDate(yesterday.getDate() - 1); // Recule d'un jour
+                          const formattedDate = yesterday.toISOString().split("T")[0]; // Format YYYY-MM-DD
+                          setSelectedDate1(formattedDate);
+                          setSelectedDate2(formattedDate);
+                        }}
+                      >{`Hier`}</MDButton>
+                    </MDBox>
+                    <MDBox mr={5} mh={2}>
+                      <MDButton
+                        variant="contained"
+                        color="info"
+                        onClick={() => navigate("/addfeedback")}
+                      >
+                        Ajouter
+                      </MDButton>
+                    </MDBox>
+                  </MDBox>
                   <MDBox display="flex" justifyContent="space-between" alignItems="center">
                     <MDBox display="flex" alignItems="center">
-                      <MDBox m={2} sx={{ width: 280 }}>
+                      <MDBox mr={2} ml={2} sx={{ width: 280 }}>
                         <AutocompleteField
                           useFetchHook={() => useGetCollaborateursByManagerQuery(managerId)}
                           fullWidth
@@ -122,7 +182,11 @@ function FeedbackListManager() {
                               label="De"
                               InputLabelProps={{ shrink: true }}
                               value={selectedDate1}
-                              onChange={(e) => setSelectedDate1(e.target.value)}
+                              onChange={(e) => {
+                                setSelectedButtonToday(null);
+                                setSelectedButtonYesterday(null);
+                                setSelectedDate1(e.target.value);
+                              }}
                               fullWidth
                             />
                           </Grid>
@@ -132,14 +196,18 @@ function FeedbackListManager() {
                               label="À"
                               InputLabelProps={{ shrink: true }}
                               value={selectedDate2}
-                              onChange={(e) => setSelectedDate2(e.target.value)}
+                              onChange={(e) => {
+                                setSelectedButtonToday(null);
+                                setSelectedButtonYesterday(null);
+                                setSelectedDate2(e.target.value);
+                              }}
                               fullWidth
                             />
                           </Grid>
                         </Grid>
                       </MDBox>
                     </MDBox>
-                    <MDBox m={5}>
+                    {/* <MDBox m={5}>
                       <MDButton
                         variant="contained"
                         color="info"
@@ -147,7 +215,7 @@ function FeedbackListManager() {
                       >
                         Ajouter
                       </MDButton>
-                    </MDBox>
+                    </MDBox> */}
                   </MDBox>
 
                   <Box display="flex" justifyContent="center" alignItems="center">

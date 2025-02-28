@@ -164,17 +164,19 @@ function AddUser() {
                             <SelectFieldRole role={role} setRole={setRole} />
                           </MDBox>
                           {role === "Collaborateur" && (
+                            <MDBox mb={2}>
+                              <AutocompleteField
+                                useFetchHook={() => useGetByRoleQuery("manager")}
+                                fullWidth
+                                setSelectedItem={setSelectedManager}
+                                setIdItem={setManagerId}
+                                selectedItem={selectedManager}
+                                label="Choisir un manager"
+                              />
+                            </MDBox>
+                          )}
+                          {(role === "Manager" || role === "Collaborateur") && (
                             <>
-                              <MDBox mb={2}>
-                                <AutocompleteField
-                                  useFetchHook={() => useGetByRoleQuery("manager")}
-                                  fullWidth
-                                  setSelectedItem={setSelectedManager}
-                                  setIdItem={setManagerId}
-                                  selectedItem={selectedManager}
-                                  label="Choisir un manager"
-                                />
-                              </MDBox>
                               <MDBox mb={2}>
                                 <MDInput
                                   type="id_Redmine"
@@ -195,7 +197,6 @@ function AddUser() {
                               </MDBox>
                             </>
                           )}
-
                           <MDButton variant="gradient" color="info" type="submit" fullWidth>
                             Add User
                           </MDButton>
