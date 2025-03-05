@@ -24,7 +24,7 @@ import exceller from "assets/images/icons/flags/exceller.png";
 function FeedbackListManager() {
   const [collaborateurId, setCollaborateurId] = useState(null);
   const [selectedCollaborateur, setSelectedCollaborateur] = useState(null);
-  const [filterType, setFilterType] = useState("all"); // all, positive, negative
+  const [filterType, setFilterType] = useState("all");
   const [selectedDate1, setSelectedDate1] = useState("");
   const [selectedDate2, setSelectedDate2] = useState("");
   const [selectedButtonToday, setSelectedButtonToday] = useState(null);
@@ -207,15 +207,6 @@ function FeedbackListManager() {
                         </Grid>
                       </MDBox>
                     </MDBox>
-                    {/* <MDBox m={5}>
-                      <MDButton
-                        variant="contained"
-                        color="info"
-                        onClick={() => navigate("/addfeedback")}
-                      >
-                        Ajouter
-                      </MDButton>
-                    </MDBox> */}
                   </MDBox>
 
                   <Box display="flex" justifyContent="center" alignItems="center">

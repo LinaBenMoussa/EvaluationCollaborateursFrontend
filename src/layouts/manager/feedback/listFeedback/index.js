@@ -53,7 +53,18 @@ function ListFeedback() {
               <MDBox pt={3}>
                 <MDBox pt={4} pb={3} px={3}>
                   <Box display="flex" justifyContent="center" alignItems="center">
-                    {isLoading ? <CircularProgress /> : <FeedbackList feedbacks={feedbacks} />}
+                    {isLoading ? (
+                      <MDBox
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        sx={{ minHeight: "300px" }}
+                      >
+                        <CircularProgress />
+                      </MDBox>
+                    ) : (
+                      <FeedbackList feedbacks={feedbacks} />
+                    )}
                   </Box>
                 </MDBox>
               </MDBox>

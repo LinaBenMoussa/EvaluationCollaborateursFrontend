@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import Drawer from "@mui/material/Drawer";
@@ -12,7 +12,14 @@ import DataTable from "examples/Tables/DataTable";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "store/slices/authSlice";
 import { useIssuesTableData } from "./data/useIssuesTableData";
-import { TextField, MenuItem, CircularProgress } from "@mui/material";
+import {
+  TextField,
+  MenuItem,
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+} from "@mui/material";
 import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
 import AutocompleteField from "layouts/shared/autocompleteField";
 import { convertDateFormat } from "functions/dateTime";
@@ -25,6 +32,7 @@ function IssuesList() {
   const [collaborateurId, setCollaborateurId] = useState(null);
   const [selectedCollaborateur, setSelectedCollaborateur] = useState(null);
   const [filterStatus, setFilterStatus] = useState("Tous");
+  const [filterType, setFilterType] = useState("today");
   const [selectedDateDebut1, setSelectedDateDebut1] = useState("");
   const [selectedDateDebut2, setSelectedDateDebut2] = useState("");
   const [selectedDateFin1, setSelectedDateFin1] = useState("");
@@ -34,6 +42,59 @@ function IssuesList() {
   const [openFilter, setOpenFilter] = useState(false);
   const { columns, rows, isLoading } = useIssuesTableData(managerId);
 
+  // Function to calculate date ranges based on selected period
+  const calculateDateRange = (period) => {
+    const today = new Date();
+    let startDate, endDate;
+
+    switch (period) {
+      case "today":
+        startDate = endDate = new Date(today);
+        break;
+      case "yesterday":
+        startDate = endDate = new Date(today);
+        startDate.setDate(today.getDate() - 1);
+        endDate.setDate(today.getDate() - 1);
+        break;
+      case "thisWeek":
+        startDate = new Date(today);
+        startDate.setDate(today.getDate() - today.getDay());
+        endDate = new Date(today);
+        endDate.setDate(today.getDate() + (6 - today.getDay()));
+        break;
+      case "thisMonth":
+        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+        endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        break;
+      case "thisYear":
+        startDate = new Date(today.getFullYear(), 0, 1);
+        endDate = new Date(today.getFullYear(), 11, 31);
+        break;
+      case "custom":
+        setOpenFilter(true);
+        return;
+      default:
+        return;
+    }
+
+    // Format dates to YYYY-MM-DD
+    const formatDate = (date) => date.toISOString().split("T")[0];
+
+    // Set all date ranges to the calculated dates
+    setSelectedDateDebut1(formatDate(startDate));
+    setSelectedDateDebut2(formatDate(endDate));
+  };
+
+  // Effect to handle period change
+  useEffect(() => {
+    if (filterType !== "custom") {
+      calculateDateRange(filterType);
+    } else {
+      setOpenFilter(true);
+    }
+  }, [filterType]);
+
+  // Validation for date ranges
   if (selectedDateDebut2 && selectedDateDebut2 < selectedDateDebut1) {
     setSelectedDateDebut1(selectedDateDebut2);
   }
@@ -101,6 +162,25 @@ function IssuesList() {
               </MDBox>
 
               <MDBox pt={1}>
+                <MDBox ml={2}>
+                  <FormControl fullWidth>
+                    <InputLabel id="filter-type-label">Période</InputLabel>
+                    <Select
+                      labelId="filter-type-label"
+                      label="Période"
+                      value={filterType}
+                      onChange={(e) => setFilterType(e.target.value)}
+                      sx={{ height: "45px", width: "220px", mx: 0.5 }}
+                    >
+                      <MenuItem value="today">{"Aujourd'hui"}</MenuItem>
+                      <MenuItem value="yesterday">Hier</MenuItem>
+                      <MenuItem value="thisWeek">Cette semaine</MenuItem>
+                      <MenuItem value="thisMonth">Ce mois</MenuItem>
+                      <MenuItem value="thisYear">Cette année</MenuItem>
+                      <MenuItem value="custom">Personnalisée</MenuItem>
+                    </Select>
+                  </FormControl>
+                </MDBox>
                 {isLoading ? (
                   <MDBox
                     display="flex"
@@ -179,7 +259,10 @@ function IssuesList() {
                     label="De"
                     InputLabelProps={{ shrink: true }}
                     value={selectedDateDebut1}
-                    onChange={(e) => setSelectedDateDebut1(e.target.value)}
+                    onChange={(e) => {
+                      setSelectedDateDebut1(e.target.value);
+                      setFilterType("custom");
+                    }}
                     fullWidth
                   />
                 </Grid>
@@ -189,7 +272,10 @@ function IssuesList() {
                     label="À"
                     InputLabelProps={{ shrink: true }}
                     value={selectedDateDebut2}
-                    onChange={(e) => setSelectedDateDebut2(e.target.value)}
+                    onChange={(e) => {
+                      setSelectedDateDebut2(e.target.value);
+                      setFilterType("custom");
+                    }}
                     fullWidth
                   />
                 </Grid>

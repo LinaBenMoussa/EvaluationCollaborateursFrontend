@@ -38,7 +38,14 @@ function SaisiesTable() {
               </MDBox>
               <MDBox pt={3}>
                 {isLoading ? (
-                  <CircularProgress />
+                  <MDBox
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    sx={{ minHeight: "300px" }}
+                  >
+                    <CircularProgress />
+                  </MDBox>
                 ) : (
                   <DataTable
                     table={{ columns, rows }}

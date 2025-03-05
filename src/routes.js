@@ -28,6 +28,7 @@ const routes = [
     icon: <Icon fontSize="small">dashboard</Icon>,
     route: "/dashboard",
     component: <Dashboard />,
+    roles: ["ROLE_MANAGER"],
   },
   {
     type: "collapse",

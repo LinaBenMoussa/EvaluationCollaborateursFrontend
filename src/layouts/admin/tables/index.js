@@ -51,7 +51,14 @@ function Tables() {
                   </MDBox>
                 </MDBox>
                 {isLoading ? (
-                  <CircularProgress />
+                  <MDBox
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    sx={{ minHeight: "300px" }}
+                  >
+                    <CircularProgress />
+                  </MDBox>
                 ) : (
                   <DataTable
                     table={{ columns, rows }}

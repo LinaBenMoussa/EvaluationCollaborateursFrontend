@@ -40,6 +40,13 @@ export const userApi = api.injectEndpoints({
         method: "GET",
       }),
     }),
+    getCollaborateursStats: builder.query({
+      query: ({ id, startDate, endDate }) => ({
+        url: `/users/collaborateur/stats/${id}`,
+        method: "GET",
+        params: { startDate, endDate },
+      }),
+    }),
   }),
 });
 export const {
@@ -49,4 +56,5 @@ export const {
   useEditUserMutation,
   useGetUserByIdQuery,
   useDeleteUserMutation,
+  useGetCollaborateursStatsQuery,
 } = userApi;

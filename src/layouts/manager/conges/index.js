@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import Drawer from "@mui/material/Drawer";
@@ -12,7 +12,14 @@ import DataTable from "examples/Tables/DataTable";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "store/slices/authSlice";
 import { useCongesTableData } from "./data/useCongesTableData";
-import { TextField, MenuItem, CircularProgress } from "@mui/material";
+import {
+  TextField,
+  MenuItem,
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+} from "@mui/material";
 import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
 import AutocompleteField from "layouts/shared/autocompleteField";
 import { convertDateFormat } from "functions/dateTime";
@@ -32,8 +39,61 @@ function CongesList() {
   const [selectedDateFin2, setSelectedDateFin2] = useState("");
   const [selectedDateDemande1, setSelectedDateDemande1] = useState("");
   const [selectedDateDemande2, setSelectedDateDemande2] = useState("");
+  const [filterPeriode, setFilterPeriode] = useState("thisMonth");
+
   const [openFilter, setOpenFilter] = useState(false);
   const { columns, rows, isLoading } = useCongesTableData(managerId);
+
+  const calculateDateRange = (period) => {
+    const today = new Date();
+    let startDate, endDate;
+
+    switch (period) {
+      case "today":
+        startDate = endDate = new Date(today);
+        break;
+      case "yesterday":
+        startDate = endDate = new Date(today);
+        startDate.setDate(today.getDate() - 1);
+        endDate.setDate(today.getDate() - 1);
+        break;
+      case "thisWeek":
+        startDate = new Date(today);
+        startDate.setDate(today.getDate() - today.getDay());
+        endDate = new Date(today);
+        endDate.setDate(today.getDate() + (6 - today.getDay()));
+        break;
+      case "thisMonth":
+        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+        endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        break;
+      case "thisYear":
+        startDate = new Date(today.getFullYear(), 0, 1);
+        endDate = new Date(today.getFullYear(), 11, 31);
+        break;
+      case "custom":
+        setOpenFilter(true);
+        return;
+      default:
+        return;
+    }
+
+    // Format dates to YYYY-MM-DD
+    const formatDate = (date) => date.toISOString().split("T")[0];
+
+    // Set all date ranges to the calculated dates
+    setSelectedDateDebut1(formatDate(startDate));
+    setSelectedDateDebut2(formatDate(endDate));
+  };
+
+  // Effect to handle period change
+  useEffect(() => {
+    if (filterPeriode !== "custom") {
+      calculateDateRange(filterPeriode);
+    } else {
+      setOpenFilter(true);
+    }
+  }, [filterPeriode]);
 
   if (selectedDateDebut2 && selectedDateDebut2 < selectedDateDebut1) {
     setSelectedDateDebut1(selectedDateDebut2);
@@ -99,6 +159,25 @@ function CongesList() {
               </MDBox>
 
               <MDBox pt={1}>
+                <MDBox m={1}>
+                  <FormControl fullWidth>
+                    <InputLabel id="filter-type-label">Période</InputLabel>
+                    <Select
+                      labelId="filter-type-label"
+                      label="Période"
+                      value={filterPeriode}
+                      onChange={(e) => setFilterPeriode(e.target.value)}
+                      sx={{ height: "45px", width: "220px", mx: 0.5 }}
+                    >
+                      <MenuItem value="today">{"Aujourd'hui"}</MenuItem>
+                      <MenuItem value="yesterday">Hier</MenuItem>
+                      <MenuItem value="thisWeek">Cette semaine</MenuItem>
+                      <MenuItem value="thisMonth">Ce mois</MenuItem>
+                      <MenuItem value="thisYear">Cette année</MenuItem>
+                      <MenuItem value="custom">Personnalisée</MenuItem>
+                    </Select>
+                  </FormControl>
+                </MDBox>
                 {isLoading ? (
                   <MDBox
                     display="flex"
@@ -178,11 +257,7 @@ function CongesList() {
             >
               <MenuItem value="Tous">Tous</MenuItem>
               <MenuItem value="Congé annuel">Congé annuel</MenuItem>
-              <MenuItem value="Congé maladie">Congé maladie</MenuItem>
-              <MenuItem value="Congé sans solde">Congé sans solde</MenuItem>
-              <MenuItem value="Congé maternité">Congé maternité</MenuItem>
-              <MenuItem value="Congé de décès">Congé de décès</MenuItem>
-              <MenuItem value="Congé exceptionnel">Congé exceptionnel</MenuItem>
+              <MenuItem value="Congé maladie">Autorisation</MenuItem>
             </TextField>
             <MDBox>
               <MDTypography variant="caption" sx={{ fontSize: "1rem" }} fontWeight="light" mb={1}>

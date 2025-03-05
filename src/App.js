@@ -36,6 +36,7 @@ import EditUser from "layouts/admin/edit-user";
 import Historique from "layouts/manager/pointage/historique";
 import Pointage from "layouts/manager/pointage/journalier";
 import Parametre from "layouts/admin/parametre";
+import { PrivateRoute } from "privateRoute";
 
 
 export default function App() {
@@ -109,7 +110,7 @@ export default function App() {
           <AuthRequired>
             <Routes>
               {getRoutes(routes)}
-              <Route path="*" element={<Navigate to="/dashboard" />} />
+              <Route path="*" element={<PrivateRoute role={userRole} />} />
               <Route path="/addfeedback" element={<AddFeedBack />} />
               <Route path="/saisie/:id" element={<SaisiesTable />} />
               <Route path="/adduser" element={<AddUser />} />

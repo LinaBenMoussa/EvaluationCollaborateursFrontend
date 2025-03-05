@@ -1,5 +1,15 @@
 /* eslint-disable react/jsx-key */
-import { Box, Card, CircularProgress, Grid, TextField } from "@mui/material";
+import {
+  Box,
+  Card,
+  CircularProgress,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+} from "@mui/material";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
@@ -18,9 +28,13 @@ function Pointage() {
   const [collaborateurId, setCollaborateurId] = useState(null);
   const [selectedCollaborateur, setSelectedCollaborateur] = useState(null);
   const [filterStatus, setFilterStatus] = useState("all");
+  // Par défaut, on initialise à la date d'aujourd'hui
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+  // Nouveau state pour le type de filtre de période
+  const [filterType, setFilterType] = useState("today");
 
   const managerId = useSelector(selectCurrentUser);
+
   const {
     data: pointages = [],
     isLoading,
@@ -28,9 +42,21 @@ function Pointage() {
   } = useGetPointagesQuery(managerId);
   const { data: collaborateurs = [], refetch: refetchCollaborateurs } =
     useGetCollaborateursByManagerQuery(managerId);
-
   const { data: conges = [], refetch: refetchConges } = useGetCongesQuery(managerId);
 
+  // Mise à jour de selectedDate selon le filtre choisi ("today", "yesterday" ou "custom")
+  useEffect(() => {
+    if (filterType === "today") {
+      setSelectedDate(new Date().toISOString().split("T")[0]);
+    } else if (filterType === "yesterday") {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      setSelectedDate(yesterday.toISOString().split("T")[0]);
+    }
+    // Pour "custom", on laisse l'utilisateur choisir la date manuellement.
+  }, [filterType]);
+
+  // Refetch lors du changement de la date sélectionnée
   useEffect(() => {
     refetchCollaborateurs();
     refetchPointages();
@@ -38,7 +64,6 @@ function Pointage() {
   }, [selectedDate]);
 
   const today = new Date().toISOString().split("T")[0];
-
   const currentHour = new Date().getHours();
 
   const todayPointages = useMemo(
@@ -79,12 +104,10 @@ function Pointage() {
     () =>
       nonPointesToday.filter((collab) => {
         const matchesCollaborateur = collaborateurId === null || collab.id === collaborateurId;
-        const isLeave = isOnLeave(collab);
-        console.log("collab", collab);
-        console.log("collab isleave", isLeave);
+        const isLeaveFlag = isOnLeave(collab);
         // Détermine le statut calculé :
         let computedStatus = currentHour > 17 ? "Absent" : "Pas encore arrivé";
-        if (isLeave) {
+        if (isLeaveFlag) {
           computedStatus = "En congé";
         }
         const matchesStatus = filterStatus === "all" || filterStatus === computedStatus;
@@ -97,11 +120,9 @@ function Pointage() {
     () =>
       nonPointesSelectedDate.filter((collab) => {
         const matchesCollaborateur = collaborateurId === null || collab.id === collaborateurId;
-        const isLeave = isOnLeave(collab);
-        console.log("collab", collab);
-        console.log("collab isleave", isLeave);
+        const isLeaveFlag = isOnLeave(collab);
         // Pour une date passée, par défaut, on considère "Absent" sauf s'il était en congé
-        const computedStatus = isLeave ? "En congé" : "Absent";
+        const computedStatus = isLeaveFlag ? "En congé" : "Absent";
         const matchesStatus = filterStatus === "all" || filterStatus === computedStatus;
         return matchesCollaborateur && matchesStatus;
       }),
@@ -158,6 +179,22 @@ function Pointage() {
                         />
                       </MDBox>
                       <MDBox mr={2}>
+                        <FormControl fullWidth>
+                          <InputLabel id="filter-type-label">Période</InputLabel>
+                          <Select
+                            labelId="filter-type-label"
+                            label="Période"
+                            value={filterType}
+                            onChange={(e) => setFilterType(e.target.value)}
+                            sx={{ height: "45px", width: "220px", mx: 0.5 }}
+                          >
+                            <MenuItem value="today">{"Aujourd'hui"}</MenuItem>
+                            <MenuItem value="yesterday">Hier</MenuItem>
+                            <MenuItem value="custom">Personnalisée</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </MDBox>
+                      <MDBox mr={2}>
                         <TextField
                           select
                           label="Status"
@@ -174,21 +211,31 @@ function Pointage() {
                           <option value="En congé">En congé</option>
                         </TextField>
                       </MDBox>
-                      <MDBox>
-                        <TextField
-                          type="date"
-                          label="Date"
-                          InputLabelProps={{ shrink: true }}
-                          value={selectedDate}
-                          onChange={(e) => setSelectedDate(e.target.value)}
-                          fullWidth
-                        />
-                      </MDBox>
+                      {/* Affichage conditionnel du champ de date uniquement si "custom" est sélectionné */}
+                      {filterType === "custom" && (
+                        <MDBox>
+                          <TextField
+                            type="date"
+                            label="Date"
+                            InputLabelProps={{ shrink: true }}
+                            value={selectedDate}
+                            onChange={(e) => setSelectedDate(e.target.value)}
+                            fullWidth
+                          />
+                        </MDBox>
+                      )}
                     </MDBox>
                   </MDBox>
                   <Box display="flex" justifyContent="center" alignItems="center">
                     {isLoading ? (
-                      <CircularProgress />
+                      <MDBox
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        sx={{ minHeight: "300px" }}
+                      >
+                        <CircularProgress />
+                      </MDBox>
                     ) : (
                       <Box sx={{ display: "flex", flexWrap: "wrap" }}>
                         {filteredPointages.map((pointage, index) => (
