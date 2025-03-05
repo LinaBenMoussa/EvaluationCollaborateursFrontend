@@ -130,58 +130,12 @@ function Dashboard() {
     return typeof value === "number" ? value.toFixed(decimals) : "N/A";
   };
 
-  // Données pour les graphiques
   const taskStatusPieChart = {
     labels: ["Complété à temps", "En retard"],
     datasets: {
       label: "Distribution",
       backgroundColors: ["#4CAF50", "#2196F3", "#F44336"],
       data: stats ? [stats.respectEcheanceRate || 0, 100 - stats.respectEcheanceRate || 0] : [0, 0],
-    },
-  };
-
-  const retardEvolutionData = {
-    labels: ["Semaine 1", "Semaine 2", "Semaine 3", "Semaine 4"],
-    datasets: {
-      label: "Taux de retard (%)",
-      data: stats
-        ? [
-            (stats.retardRate || 0) * 1.2,
-            (stats.retardRate || 0) * 0.9,
-            (stats.retardRate || 0) * 1.1,
-            stats.retardRate || 0,
-          ]
-        : [40, 38, 35, 33],
-    },
-  };
-
-  const performanceRadarData = {
-    labels: ["Productivité", "Satisfaction", "Respect délais", "Ponctualité", "Complexité tâches"],
-    datasets: {
-      label: "Performance",
-      data: stats
-        ? [
-            ((stats.productivityScore || 0) / 100) * 10,
-            (stats.positiveRate || 0) / 10,
-            (stats.respectEcheanceRate || 0) / 10,
-            (100 - (stats.retardRate || 0)) / 10,
-            (stats.taskComplexityScore || 0) * 2,
-          ]
-        : [5, 5, 5, 5, 5],
-    },
-  };
-
-  const taskCompletionData = {
-    labels: ["Retard", "À temps", "En avance"],
-    datasets: {
-      label: "Tâches",
-      data: stats
-        ? [
-            stats.retardRate || 0,
-            stats.respectEcheanceRate || 0,
-            Math.max(0, 100 - ((stats.retardRate || 0) + (stats.respectEcheanceRate || 0))),
-          ]
-        : [33.33, 33.33, 33.33],
     },
   };
 
@@ -430,64 +384,11 @@ function Dashboard() {
                   />
                 </MDBox>
               </Grid>
-              <Grid item xs={12} md={6} lg={4}>
-                <MDBox mb={3}>
-                  <ReportsLineChart
-                    color={(stats?.retardRate || 0) > 25 ? "error" : "success"}
-                    title="Évolution des retards"
-                    description={
-                      <>
-                        {(stats?.retardRate || 0) > (stats?.respectEcheanceRate || 0) ? (
-                          <>
-                            <strong>Attention:</strong> Taux de retard élevé
-                          </>
-                        ) : (
-                          <>
-                            <strong>Bien:</strong> Taux de retard contrôlé
-                          </>
-                        )}
-                      </>
-                    }
-                    date="Tendance sur le dernier mois"
-                    chart={retardEvolutionData}
-                  />
-                </MDBox>
-              </Grid>
-              <Grid item xs={12} md={6} lg={4}>
-                <MDBox mb={3}>
-                  <ReportsBarChart
-                    color="dark"
-                    title="Tâches complétées"
-                    description="Performance par rapport aux échéances"
-                    date="Données mises à jour aujourd'hui"
-                    chart={taskCompletionData}
-                  />
-                </MDBox>
-              </Grid>
             </Grid>
           </MDBox>
 
           <MDBox mt={3}>
             <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
-                <Card>
-                  <MDBox px={3} pt={3}>
-                    <MDTypography variant="h6" fontWeight="medium">
-                      Performance globale
-                      <Tooltip title="Évaluation sur plusieurs métriques clés combinées">
-                        <InfoIcon fontSize="small" sx={{ ml: 1, verticalAlign: "middle" }} />
-                      </Tooltip>
-                    </MDTypography>
-                  </MDBox>
-                  <MDBox p={3} height="400px">
-                    <RadarChart
-                      data={performanceRadarData}
-                      title="Profil de performance"
-                      color="info"
-                    />
-                  </MDBox>
-                </Card>
-              </Grid>
               <Grid item xs={12} md={6}>
                 <Card>
                   <MDBox px={3} pt={3}>
