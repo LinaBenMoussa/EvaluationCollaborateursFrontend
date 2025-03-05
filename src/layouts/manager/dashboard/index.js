@@ -286,7 +286,7 @@ function Dashboard() {
                       Complexité moyenne des tâches:{" "}
                       <strong>
                         {stats?.taskComplexityScore !== null
-                          ? safeNumberFormat(stats.taskComplexityScore) + "/5"
+                          ? safeNumberFormat(stats?.taskComplexityScore) + "/5"
                           : "N/A"}
                       </strong>
                     </MDTypography>
@@ -444,7 +444,7 @@ function Dashboard() {
                           </MDTypography>
                           <MDTypography variant="h5">
                             {stats?.congeUtilizationRate !== null
-                              ? `${safeNumberFormat(stats.congeUtilizationRate)}%`
+                              ? `${safeNumberFormat(stats?.congeUtilizationRate)}%`
                               : "N/A"}
                           </MDTypography>
                           <MDTypography variant="body2" color="text">
