@@ -242,10 +242,20 @@ function IssuesList() {
               }}
             >
               <MenuItem value="Tous">Tous</MenuItem>
-              <MenuItem value="Terminé">Terminé</MenuItem>
+              <MenuItem value="Nouveau">Nouveau</MenuItem>
+              <MenuItem value="Résolu">Résolu</MenuItem>
+              <MenuItem value="Fermé">Fermé</MenuItem>
+              <MenuItem value="Réouvert">Réouvert</MenuItem>
+              <MenuItem value="Assigné">Assigné</MenuItem>
+              <MenuItem value="Rejeté">Rejeté</MenuItem>
+              <MenuItem value="Reporté">Reporté</MenuItem>
+              <MenuItem value="Dupliqué">Dupliqué</MenuItem>
+              <MenuItem value="Ambigu">Ambigu</MenuItem>
               <MenuItem value="En cours">En cours</MenuItem>
-              <MenuItem value="En retard">En retard</MenuItem>
-              <MenuItem value="À faire">À faire</MenuItem>
+              <MenuItem value="Ouvert">Ouvert</MenuItem>
+              <MenuItem value="Négociation de l'offre">{"Négociation de l'offre"}</MenuItem>
+              <MenuItem value="Validation de l'offre">{"Validation de l'offre"}</MenuItem>
+              <MenuItem value="Clôture provisoire">Clôture provisoire</MenuItem>
             </TextField>
             <MDBox>
               <MDTypography variant="caption" sx={{ fontSize: "1rem" }} fontWeight="light" mb={1}>

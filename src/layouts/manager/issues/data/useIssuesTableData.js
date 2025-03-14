@@ -18,10 +18,29 @@ export function useIssuesTableData(idManager) {
     "À faire": "gray",
   };
 
+  // Dictionnaire de traduction des statuts en français
+  const statusTranslations = {
+    New: "Nouveau",
+    Resolved: "Résolu",
+    Closed: "Fermé",
+    Reopened: "Réouvert",
+    Assigned: "Assigné",
+    Rejected: "Rejeté",
+    Deffered: "Reporté",
+    Duplicate: "Dupliqué",
+    Ambiguous: "Ambigu",
+    "in progress": "En cours",
+    open: "Ouvert",
+    "Négociation Offre": "Négociation de l'offre",
+    "Validation Offre.": "Validation de l'offre",
+    "clôture provisoire": "Clôture provisoire",
+  };
+
   const columns = useMemo(
     () => [
       { Header: "id", accessor: "id", align: "left" },
-      { Header: "titre", accessor: "titre", align: "center" },
+      { Header: "sujet", accessor: "sujet", align: "center" },
+      { Header: "description", accessor: "description", align: "center" },
       { Header: "type", accessor: "type", align: "center" },
       { Header: "status", accessor: "status", align: "center" },
       { Header: "date_début", accessor: "date_debut", align: "center" },
@@ -35,33 +54,37 @@ export function useIssuesTableData(idManager) {
 
   const rows = useMemo(
     () =>
-      issues.map((issue) => ({
-        id: issue.id,
-        titre: issue.titre,
-        type: issue.type,
-        status: (
-          <>
-            <span
-              style={{
-                display: "inline-block",
-                width: 10,
-                height: 10,
-                borderRadius: "50%",
-                backgroundColor: statusColors[issue.status] || "black",
-                marginRight: 5,
-              }}
-            />
-            {issue.status}
-          </>
-        ),
-        date_debut: formatDateWithTime(issue.date_debut),
+      issues.map((issue) => {
+        const translatedStatus = statusTranslations[issue.status?.name] || issue.status?.name;
 
-        date_echeance: formatDateWithTime(issue.date_echeance),
-        date_fin: formatDateWithTime(issue.date_fin),
-        collaborateur: `${issue.collaborateur.nom} ${issue.collaborateur.prenom}`,
-        action: <MDButton onClick={() => navigateToSaisie(issue.id)}>Saisies</MDButton>,
-      })),
-    [issues]
+        return {
+          id: issue.id,
+          sujet: issue.sujet,
+          description: issue.description,
+          type: issue.type,
+          status: (
+            <>
+              <span
+                style={{
+                  display: "inline-block",
+                  width: 10,
+                  height: 10,
+                  borderRadius: "50%",
+                  backgroundColor: statusColors[translatedStatus] || "black",
+                  marginRight: 5,
+                }}
+              />
+              {translatedStatus}
+            </>
+          ),
+          date_debut: formatDateWithTime(issue.date_debut),
+          date_echeance: formatDateWithTime(issue.date_echeance),
+          date_fin: formatDateWithTime(issue.date_fin),
+          collaborateur: `${issue.collaborateur.nom} ${issue.collaborateur.prenom}`,
+          action: <MDButton onClick={() => navigateToSaisie(issue.id)}>Saisies</MDButton>,
+        };
+      }),
+    [issues, navigateToSaisie]
   );
 
   return { columns, rows, isLoading };

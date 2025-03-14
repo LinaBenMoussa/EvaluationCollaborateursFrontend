@@ -27,8 +27,8 @@ function EditUser() {
   const [nom, setNom] = useState("");
   const [prenom, setPrenom] = useState("");
   const [role, setRole] = useState("");
-  const [id_redmine, setIdRedmine] = useState("");
-  const [id_bitrix24, setIdBitrix24] = useState("");
+  const [id_redmine, setIdRedmine] = useState(null);
+  const [id_bitrix24, setIdBitrix24] = useState(null);
   const [managerId, setManagerId] = useState("");
   const [selectedManager, setSelectedManager] = useState(null);
   const navigate = useNavigate();

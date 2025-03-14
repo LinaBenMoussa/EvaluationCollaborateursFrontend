@@ -1,100 +1,99 @@
-import { useState } from "react";
-
 // @mui material components
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
+import Icon from "@mui/material/Icon";
+import Pagination from "@mui/material/Pagination";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
-import MDAlert from "components/MDAlert";
-import MDButton from "components/MDButton";
-import MDSnackbar from "components/MDSnackbar";
 
 // Material Dashboard 2 React example components
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import Footer from "examples/Footer";
+
+// API et Redux
+import { useGetNotificationByCollaborateurQuery } from "store/api/notificationApi";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "store/slices/authSlice";
+
+// React hooks
+import { useState } from "react";
 
 function Notifications() {
-  const [successSB, setSuccessSB] = useState(false);
-  const [infoSB, setInfoSB] = useState(false);
-  const [warningSB, setWarningSB] = useState(false);
-  const [errorSB, setErrorSB] = useState(false);
+  // Récupérer l'ID du collaborateur connecté
+  const collaborateurId = useSelector(selectCurrentUser);
 
-  const openSuccessSB = () => setSuccessSB(true);
-  const closeSuccessSB = () => setSuccessSB(false);
-  const openInfoSB = () => setInfoSB(true);
-  const closeInfoSB = () => setInfoSB(false);
-  const openWarningSB = () => setWarningSB(true);
-  const closeWarningSB = () => setWarningSB(false);
-  const openErrorSB = () => setErrorSB(true);
-  const closeErrorSB = () => setErrorSB(false);
+  // Utiliser le hook RTK Query pour récupérer les notifications
+  const {
+    data: notifications = [],
+    isLoading,
+    isError,
+  } = useGetNotificationByCollaborateurQuery(collaborateurId);
 
-  const alertContent = (name) => (
-    <MDTypography variant="body2" color="white">
-      A simple {name} alert with{" "}
-      <MDTypography component="a" href="#" variant="body2" fontWeight="medium" color="white">
-        an example link
-      </MDTypography>
-      . Give it a click if you like.
-    </MDTypography>
-  );
+  // États pour la pagination
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 5; // Nombre de notifications par page
 
-  const renderSuccessSB = (
-    <MDSnackbar
-      color="success"
-      icon="check"
-      title="Material Dashboard"
-      content="Hello, world! This is a notification message"
-      dateTime="11 mins ago"
-      open={successSB}
-      onClose={closeSuccessSB}
-      close={closeSuccessSB}
-      bgWhite
-    />
-  );
+  // Fonction pour gérer le changement de page
+  const handlePageChange = (event, value) => {
+    setPage(value);
+  };
 
-  const renderInfoSB = (
-    <MDSnackbar
-      icon="notifications"
-      title="Material Dashboard"
-      content="Hello, world! This is a notification message"
-      dateTime="11 mins ago"
-      open={infoSB}
-      onClose={closeInfoSB}
-      close={closeInfoSB}
-    />
-  );
+  // Fonction pour supprimer une notification (à implémenter côté backend)
+  const handleDeleteNotification = (notificationId) => {
+    console.log("Supprimer la notification avec l'ID :", notificationId);
+    // Ajoutez ici la logique pour supprimer la notification
+  };
 
-  const renderWarningSB = (
-    <MDSnackbar
-      color="warning"
-      icon="star"
-      title="Material Dashboard"
-      content="Hello, world! This is a notification message"
-      dateTime="11 mins ago"
-      open={warningSB}
-      onClose={closeWarningSB}
-      close={closeWarningSB}
-      bgWhite
-    />
-  );
+  // Calcul des notifications à afficher pour la page actuelle
+  const startIndex = (page - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedNotifications = notifications.slice(startIndex, endIndex);
 
-  const renderErrorSB = (
-    <MDSnackbar
-      color="error"
-      icon="warning"
-      title="Material Dashboard"
-      content="Hello, world! This is a notification message"
-      dateTime="11 mins ago"
-      open={errorSB}
-      onClose={closeErrorSB}
-      close={closeErrorSB}
-      bgWhite
-    />
-  );
+  // Afficher un message de chargement si les données sont en cours de chargement
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <DashboardNavbar />
+        <MDBox mt={6} mb={3}>
+          <Grid container spacing={3} justifyContent="center">
+            <Grid item xs={12} lg={8}>
+              <Card>
+                <MDBox p={2}>
+                  <MDTypography variant="h5">Chargement en cours...</MDTypography>
+                </MDBox>
+              </Card>
+            </Grid>
+          </Grid>
+        </MDBox>
+      </DashboardLayout>
+    );
+  }
 
+  // Afficher un message d'erreur si la requête a échoué
+  if (isError) {
+    return (
+      <DashboardLayout>
+        <DashboardNavbar />
+        <MDBox mt={6} mb={3}>
+          <Grid container spacing={3} justifyContent="center">
+            <Grid item xs={12} lg={8}>
+              <Card>
+                <MDBox p={2}>
+                  <MDTypography variant="h5" color="error">
+                    {"Une erreur s'est produite lors du chargement des notifications."}
+                  </MDTypography>
+                </MDBox>
+              </Card>
+            </Grid>
+          </Grid>
+        </MDBox>
+      </DashboardLayout>
+    );
+  }
+
+  // Afficher les notifications
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -103,72 +102,40 @@ function Notifications() {
           <Grid item xs={12} lg={8}>
             <Card>
               <MDBox p={2}>
-                <MDTypography variant="h5">Alerts</MDTypography>
+                <MDTypography variant="h5">Notifications</MDTypography>
               </MDBox>
               <MDBox pt={2} px={2}>
-                <MDAlert color="primary" dismissible>
-                  {alertContent("primary")}
-                </MDAlert>
-                <MDAlert color="secondary" dismissible>
-                  {alertContent("secondary")}
-                </MDAlert>
-                <MDAlert color="success" dismissible>
-                  {alertContent("success")}
-                </MDAlert>
-                <MDAlert color="error" dismissible>
-                  {alertContent("error")}
-                </MDAlert>
-                <MDAlert color="warning" dismissible>
-                  {alertContent("warning")}
-                </MDAlert>
-                <MDAlert color="info" dismissible>
-                  {alertContent("info")}
-                </MDAlert>
-                <MDAlert color="light" dismissible>
-                  {alertContent("light")}
-                </MDAlert>
-                <MDAlert color="dark" dismissible>
-                  {alertContent("dark")}
-                </MDAlert>
+                {paginatedNotifications.map((notification) => (
+                  <MDBox
+                    key={notification.id}
+                    bgColor="info"
+                    borderRadius="md"
+                    p={2}
+                    mb={2}
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
+                    <MDTypography variant="body2" color="white">
+                      {notification.contenu}
+                    </MDTypography>
+                    <Icon
+                      style={{ cursor: "pointer", color: "white" }}
+                      onClick={() => handleDeleteNotification(notification.id)}
+                    >
+                      close
+                    </Icon>
+                  </MDBox>
+                ))}
               </MDBox>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} lg={8}>
-            <Card>
-              <MDBox p={2} lineHeight={0}>
-                <MDTypography variant="h5">Notifications</MDTypography>
-                <MDTypography variant="button" color="text" fontWeight="regular">
-                  Notifications on this page use Toasts from Bootstrap. Read more details here.
-                </MDTypography>
-              </MDBox>
-              <MDBox p={2}>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} sm={6} lg={3}>
-                    <MDButton variant="gradient" color="success" onClick={openSuccessSB} fullWidth>
-                      success notification
-                    </MDButton>
-                    {renderSuccessSB}
-                  </Grid>
-                  <Grid item xs={12} sm={6} lg={3}>
-                    <MDButton variant="gradient" color="info" onClick={openInfoSB} fullWidth>
-                      info notification
-                    </MDButton>
-                    {renderInfoSB}
-                  </Grid>
-                  <Grid item xs={12} sm={6} lg={3}>
-                    <MDButton variant="gradient" color="warning" onClick={openWarningSB} fullWidth>
-                      warning notification
-                    </MDButton>
-                    {renderWarningSB}
-                  </Grid>
-                  <Grid item xs={12} sm={6} lg={3}>
-                    <MDButton variant="gradient" color="error" onClick={openErrorSB} fullWidth>
-                      error notification
-                    </MDButton>
-                    {renderErrorSB}
-                  </Grid>
-                </Grid>
+              {/* Pagination */}
+              <MDBox display="flex" justifyContent="center" p={2}>
+                <Pagination
+                  count={Math.ceil(notifications.length / itemsPerPage)}
+                  page={page}
+                  onChange={handlePageChange}
+                  color="primary"
+                />
               </MDBox>
             </Card>
           </Grid>

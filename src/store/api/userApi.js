@@ -41,10 +41,10 @@ export const userApi = api.injectEndpoints({
       }),
     }),
     getCollaborateursStats: builder.query({
-      query: ({ id, startDate, endDate }) => ({
+      query: ({ id, startDate, endDate, type }) => ({
         url: `/users/collaborateur/stats/${id}`,
         method: "GET",
-        params: { startDate, endDate },
+        params: { startDate, endDate, type },
       }),
     }),
   }),

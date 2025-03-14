@@ -14,7 +14,7 @@ export function useSaisiesTableData(id) {
       { Header: "id", accessor: "id", align: "left" },
       { Header: "date", accessor: "date", align: "center" },
       { Header: "heures", accessor: "heures", align: "center" },
-      { Header: "activite", accessor: "activite", align: "center" },
+      { Header: "commentaire", accessor: "commentaire", align: "center" },
       { Header: "collaborateur", accessor: "collaborateur", align: "center" },
     ],
     []
@@ -25,8 +25,8 @@ export function useSaisiesTableData(id) {
       saisies.map((saisie) => ({
         id: saisie.id,
         date: formatDate(saisie.date),
-        heures: formatTime(saisie.heures),
-        activite: saisie.activite,
+        heures: saisie.heures,
+        commentaire: saisie.commentaire,
         collaborateur: `${saisie.collaborateur.nom} ${saisie.collaborateur.prenom}`,
       })),
     [saisies]

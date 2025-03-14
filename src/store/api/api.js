@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { loginSuccess, logout } from "../slices/authSlice";
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "https://eval-coollab-back.onrender.com",
+  baseUrl: "http://localhost:8090", //https://eval-coollab-back.onrender.com
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const token = getState().auth.token;
