@@ -43,7 +43,7 @@ function configs(labels, datasets) {
           tension: 0.9,
           pointRadius: 2,
           borderWidth: 2,
-          backgroundColor: backgroundColors,
+          backgroundColor: ["#4CAF50", "#F44336"],
           fill: false,
           data: datasets.data,
         },

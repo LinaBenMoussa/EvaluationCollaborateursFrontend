@@ -1,14 +1,34 @@
-/* eslint-disable react/prop-types */
-/* eslint-disable react/function-component-definition */
-
-import { formatTime } from "functions/dateTime";
 import { formatDate } from "functions/dateTime";
 import { useMemo } from "react";
-import { useGetSaisieTempsByManagerQuery } from "store/api/saisieTemps";
-import { useGetSaisieTempsQuery } from "store/api/saisieTemps";
+import { useFiltreSaisiesTempsQuery } from "store/api/saisieTemps";
 
-export function useSaisiesTableData(id) {
-  const { data: saisies = [], isLoading } = useGetSaisieTempsByManagerQuery(id);
+export function useSaisiesTableData(managerId, filters = {}) {
+  const { startDate, endDate, collaborateurId, page = 0, pageSize = 25 } = filters;
+
+  // Calculer l'offset pour la pagination
+  const offset = page * pageSize;
+
+  // Appel à l'API avec pagination
+  const {
+    data = { saisies: [], total: 0 },
+    isLoading,
+    isFetching,
+  } = useFiltreSaisiesTempsQuery(
+    {
+      managerId,
+      startDate,
+      endDate,
+      collaborateurId,
+      offset: offset,
+      limit: pageSize,
+    },
+    {
+      skip: !managerId,
+    }
+  );
+
+  // Récupérer les saisies et le total depuis la réponse
+  const { saisies = [], total = 0 } = data;
 
   const columns = useMemo(
     () => [
@@ -33,5 +53,24 @@ export function useSaisiesTableData(id) {
     [saisies]
   );
 
-  return { columns, rows, isLoading };
+  // Fonction pour changer de page
+  const handlePageChange = (newPage) => {
+    // Cette fonction est appelée par le composant parent
+    // Les changements d'état sont gérés dans le composant parent
+  };
+
+  // Fonction pour changer le nombre d'éléments par page
+  const handlePageSizeChange = (newPageSize) => {
+    // Cette fonction est appelée par le composant parent
+    // Les changements d'état sont gérés dans le composant parent
+  };
+
+  return {
+    columns,
+    rows,
+    isLoading: isLoading || isFetching,
+    total,
+    handlePageChange,
+    handlePageSizeChange,
+  };
 }

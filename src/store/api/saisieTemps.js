@@ -14,6 +14,17 @@ export const SasieTempsApi = api.injectEndpoints({
         method: "GET",
       }),
     }),
+    filtreSaisiesTemps: builder.query({
+      query: ({ managerId, startDate, endDate, offset, limit }) => ({
+        url: `/saisietemps/filtre`,
+        method: "GET",
+        params: { managerId, startDate, endDate, offset, limit },
+      }),
+    }),
   }),
 });
-export const { useGetSaisieTempsQuery, useGetSaisieTempsByManagerQuery } = SasieTempsApi;
+export const {
+  useGetSaisieTempsQuery,
+  useGetSaisieTempsByManagerQuery,
+  useFiltreSaisiesTempsQuery,
+} = SasieTempsApi;

@@ -19,7 +19,7 @@ export const MetricsAvancees = ({ stats }) => (
               <Grid item xs={12} md={6}>
                 <MDBox mb={2}>
                   <MDTypography variant="subtitle2" color="text" fontWeight="medium">
-                    Temps moyen de complétion
+                    Temps moyen de complétion des tâches
                   </MDTypography>
                   <MDTypography variant="h5">
                     {formatTime(stats?.averageTaskCompletionTime)}
@@ -32,7 +32,7 @@ export const MetricsAvancees = ({ stats }) => (
               <Grid item xs={12} md={6}>
                 <MDBox mb={2}>
                   <MDTypography variant="subtitle2" color="text" fontWeight="medium">
-                    Heures manquantes
+                    Heures de travail non effectuées
                   </MDTypography>
                   <MDTypography
                     variant="h5"
@@ -58,15 +58,12 @@ export const MetricsAvancees = ({ stats }) => (
               <Grid item xs={12} md={6}>
                 <MDBox mb={2}>
                   <MDTypography variant="subtitle2" color="text" fontWeight="medium">
-                    {"Taux d'utilisation congés"}
+                    {"Nombre total de jours de congé utilisés"}
                   </MDTypography>
                   <MDTypography variant="h5">
                     {stats?.congeUtilizationRate !== null
-                      ? `${safeNumberFormat(stats?.congeUtilizationRate)}%`
+                      ? `${safeNumberFormat(stats?.congeUtilizationRate)} jour`
                       : "N/A"}
-                  </MDTypography>
-                  <MDTypography variant="body2" color="text">
-                    des jours disponibles
                   </MDTypography>
                 </MDBox>
               </Grid>

@@ -21,7 +21,17 @@ export const CongeApi = api.injectEndpoints({
         method: "GET",
       }),
     }),
+    getCongesByCollaborateurAndDate: builder.query({
+      query: ({ id, date }) => ({
+        url: `/conges/manager/${id}/${date}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
-export const { useAddCongeMutation, useGetCongesQuery, useGetCongesByCollaborateurQuery } =
-  CongeApi;
+export const {
+  useAddCongeMutation,
+  useGetCongesQuery,
+  useGetCongesByCollaborateurQuery,
+  useGetCongesByCollaborateurAndDateQuery,
+} = CongeApi;

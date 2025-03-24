@@ -1,3 +1,5 @@
+import { formatDate } from "functions/dateTime";
+import { formatTime } from "functions/dateTime";
 import { formatDateWithTime } from "functions/dateTime";
 import { useMemo } from "react";
 import { useGetCongesByCollaborateurQuery } from "store/api/congeApi";
@@ -19,11 +21,11 @@ export function useCongesTableData(idCollaborateur) {
     () => [
       { Header: "id", accessor: "id", align: "left" },
       { Header: "type", accessor: "type", align: "center" },
-      { Header: "status", accessor: "status", align: "center" },
-      { Header: "commentaire", accessor: "commentaire", align: "center" },
-      { Header: "date_demande", accessor: "date_demande", align: "center" },
       { Header: "date_debut", accessor: "date_debut", align: "center" },
       { Header: "date_fin", accessor: "date_fin", align: "center" },
+      { Header: "nombre des jours", accessor: "nbrjour", align: "center" },
+      { Header: "heureDeb", accessor: "heureDeb", align: "center" },
+      { Header: "heureFin", accessor: "heureFin", align: "center" },
     ],
     []
   );
@@ -32,12 +34,12 @@ export function useCongesTableData(idCollaborateur) {
     () =>
       conges.map((conge) => ({
         id: conge.id,
-        type: conge.type,
-        status: conge.status,
-        date_demande: formatDateWithTime(conge.date_demande),
-        date_debut: formatDateWithTime(conge.date_debut),
-        date_fin: formatDateWithTime(conge.date_fin),
-        commentaire: conge.commentaire,
+        type: conge.type === "A" ? "Autorisation" : "Congé annuel",
+        date_debut: formatDate(conge.date_debut),
+        date_fin: formatDate(conge.date_fin),
+        nbrjour: conge.nbrjour,
+        heureFin: formatTime(conge.heureFin),
+        heureDeb: formatTime(conge.heureDeb),
       })),
     [conges]
   );

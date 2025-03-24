@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent, Typography, Box, Grid } from "@mui/material";
 
-const FeedbackCard = ({ manager, comment, dateTime, isNegative }) => {
+const FeedbackCard = ({ collaborateur, comment, dateTime, isNegative }) => {
   const bgColor = isNegative ? "#ffdddd" : "#ddffdd";
   const borderColor = isNegative ? "#ff4d4d" : "#4caf50";
 
@@ -18,7 +18,7 @@ const FeedbackCard = ({ manager, comment, dateTime, isNegative }) => {
       <CardContent>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-            {manager}
+            {collaborateur}
           </Typography>
           <Typography variant="h6" color="text.secondary">
             {dateTime}

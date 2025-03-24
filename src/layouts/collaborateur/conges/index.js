@@ -18,14 +18,11 @@ import { isDateInRange } from "functions/dateTime";
 
 function CongesListCollaborateur() {
   const collaborateurId = useSelector(selectCurrentUser);
-  const [filterStatus, setFilterStatus] = useState("Tous");
   const [filterType, setFilterType] = useState("Tous");
   const [selectedDateDebut1, setSelectedDateDebut1] = useState("");
   const [selectedDateDebut2, setSelectedDateDebut2] = useState("");
   const [selectedDateFin1, setSelectedDateFin1] = useState("");
   const [selectedDateFin2, setSelectedDateFin2] = useState("");
-  const [selectedDateDemande1, setSelectedDateDemande1] = useState("");
-  const [selectedDateDemande2, setSelectedDateDemande2] = useState("");
   const [openFilter, setOpenFilter] = useState(false);
   const { columns, rows, isLoading } = useCongesTableData(collaborateurId);
 
@@ -35,19 +32,13 @@ function CongesListCollaborateur() {
   if (selectedDateFin2 && selectedDateFin2 < selectedDateFin1) {
     setSelectedDateFin1(selectedDateFin2);
   }
-  if (selectedDateDemande2 && selectedDateDemande2 < selectedDateDemande1) {
-    setSelectedDateDemande1(selectedDateDemande2);
-  }
 
   const filteredRows = rows.filter((row) => {
-    const statusMatch = filterStatus !== "Tous" ? row.status === filterStatus : true;
     const typeMatch = filterType !== "Tous" ? row.type === filterType : true;
     return (
       typeMatch &&
-      statusMatch &&
       isDateInRange(convertDateFormat(row.date_debut), selectedDateDebut1, selectedDateDebut2) &&
-      isDateInRange(convertDateFormat(row.date_fin), selectedDateFin1, selectedDateFin2) &&
-      isDateInRange(convertDateFormat(row.date_demande), selectedDateDemande1, selectedDateDemande2)
+      isDateInRange(convertDateFormat(row.date_fin), selectedDateFin1, selectedDateFin2)
     );
   });
 
@@ -125,23 +116,6 @@ function CongesListCollaborateur() {
           <MDBox display="flex" flexDirection="column" gap={2}>
             <TextField
               select
-              label="Statut"
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              SelectProps={{
-                sx: { height: 43, display: "flex", alignItems: "center" },
-              }}
-            >
-              <MenuItem value="Tous">Tous</MenuItem>
-              <MenuItem value="En attente">En attente</MenuItem>
-              <MenuItem value="Approuvé">Approuvé</MenuItem>
-              <MenuItem value="Refusé">Refusé</MenuItem>
-              <MenuItem value="Annulé">Annulé</MenuItem>
-              <MenuItem value="En cours">En cours</MenuItem>
-              <MenuItem value="Terminé">Terminé</MenuItem>
-            </TextField>
-            <TextField
-              select
               label="Type"
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
@@ -151,11 +125,7 @@ function CongesListCollaborateur() {
             >
               <MenuItem value="Tous">Tous</MenuItem>
               <MenuItem value="Congé annuel">Congé annuel</MenuItem>
-              <MenuItem value="Congé maladie">Congé maladie</MenuItem>
-              <MenuItem value="Congé sans solde">Congé sans solde</MenuItem>
-              <MenuItem value="Congé maternité">Congé maternité</MenuItem>
-              <MenuItem value="Congé de décès">Congé de décès</MenuItem>
-              <MenuItem value="Congé exceptionnel">Congé exceptionnel</MenuItem>
+              <MenuItem value="Autorisation">Autorisation</MenuItem>
             </TextField>
             <MDBox>
               <MDTypography variant="caption" sx={{ fontSize: "1rem" }} fontWeight="light" mb={1}>
@@ -208,34 +178,6 @@ function CongesListCollaborateur() {
                     InputLabelProps={{ shrink: true }}
                     value={selectedDateFin2}
                     onChange={(e) => setSelectedDateFin2(e.target.value)}
-                    fullWidth
-                  />
-                </Grid>
-              </Grid>
-            </MDBox>
-            <MDBox>
-              <MDTypography variant="caption" sx={{ fontSize: "1rem" }} fontWeight="light" mb={1}>
-                Date de Demande
-              </MDTypography>
-
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <TextField
-                    type="date"
-                    label="De"
-                    InputLabelProps={{ shrink: true }}
-                    value={selectedDateDemande1}
-                    onChange={(e) => setSelectedDateDemande1(e.target.value)}
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    type="date"
-                    label="À"
-                    InputLabelProps={{ shrink: true }}
-                    value={selectedDateDemande2}
-                    onChange={(e) => setSelectedDateDemande2(e.target.value)}
                     fullWidth
                   />
                 </Grid>

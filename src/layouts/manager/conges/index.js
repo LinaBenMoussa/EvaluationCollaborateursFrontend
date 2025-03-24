@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import FilterListIcon from "@mui/icons-material/FilterList";
+import DownloadIcon from "@mui/icons-material/Download";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
+import MDButton from "components/MDButton";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import DataTable from "examples/Tables/DataTable";
@@ -19,31 +21,37 @@ import {
   FormControl,
   InputLabel,
   Select,
+  Chip,
+  Tooltip,
+  Badge,
 } from "@mui/material";
 import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
 import AutocompleteField from "layouts/shared/autocompleteField";
-import { convertDateFormat } from "functions/dateTime";
-import { isDateInRange } from "functions/dateTime";
+import { convertDateFormat, isDateInRange } from "functions/dateTime";
 import { exportToExcel } from "functions/exportToExcel";
-import exceller from "assets/images/icons/flags/exceller.png";
+
+// Colors for types
+const TYPE_COLORS = {
+  "Congé annuel": "#4CAF50", // Green
+  Autorisation: "#2196F3", // Blue
+};
 
 function CongesList() {
   const managerId = useSelector(selectCurrentUser);
   const [collaborateurId, setCollaborateurId] = useState(null);
   const [selectedCollaborateur, setSelectedCollaborateur] = useState(null);
-  const [filterStatus, setFilterStatus] = useState("Tous");
   const [filterType, setFilterType] = useState("Tous");
   const [selectedDateDebut1, setSelectedDateDebut1] = useState("");
   const [selectedDateDebut2, setSelectedDateDebut2] = useState("");
   const [selectedDateFin1, setSelectedDateFin1] = useState("");
   const [selectedDateFin2, setSelectedDateFin2] = useState("");
-  const [selectedDateDemande1, setSelectedDateDemande1] = useState("");
-  const [selectedDateDemande2, setSelectedDateDemande2] = useState("");
   const [filterPeriode, setFilterPeriode] = useState("thisMonth");
-
   const [openFilter, setOpenFilter] = useState(false);
-  const { columns, rows, isLoading } = useCongesTableData(managerId);
+  const [activeFilters, setActiveFilters] = useState(0);
 
+  const { columns: columnsData, rows: rowsData, isLoading } = useCongesTableData(managerId);
+
+  // Calculate date range based on selected period
   const calculateDateRange = (period) => {
     const today = new Date();
     let startDate, endDate;
@@ -90,23 +98,42 @@ function CongesList() {
   useEffect(() => {
     if (filterPeriode !== "custom") {
       calculateDateRange(filterPeriode);
-    } else {
-      setOpenFilter(true);
     }
   }, [filterPeriode]);
 
-  if (selectedDateDebut2 && selectedDateDebut2 < selectedDateDebut1) {
-    setSelectedDateDebut1(selectedDateDebut2);
-  }
-  if (selectedDateFin2 && selectedDateFin2 < selectedDateFin1) {
-    setSelectedDateFin1(selectedDateFin2);
-  }
-  if (selectedDateDemande2 && selectedDateDemande2 < selectedDateDemande1) {
-    setSelectedDateDemande1(selectedDateDemande2);
-  }
+  // Count active filters
+  useEffect(() => {
+    let count = 0;
+    if (filterType !== "Tous") count++;
+    if (collaborateurId !== null) count++;
+    if (selectedDateDebut1 || selectedDateDebut2) count++;
+    if (selectedDateFin1 || selectedDateFin2) count++;
 
-  const filteredRows = rows.filter((row) => {
-    const statusMatch = filterStatus !== "Tous" ? row.status === filterStatus : true;
+    setActiveFilters(count);
+  }, [
+    filterType,
+    collaborateurId,
+    selectedDateDebut1,
+    selectedDateDebut2,
+    selectedDateFin1,
+    selectedDateFin2,
+  ]);
+
+  // Reset all filters
+  const handleResetFilters = () => {
+    setFilterType("Tous");
+    setCollaborateurId(null);
+    setSelectedCollaborateur(null);
+    setSelectedDateDebut1("");
+    setSelectedDateDebut2("");
+    setSelectedDateFin1("");
+    setSelectedDateFin2("");
+    setFilterPeriode("thisMonth");
+    calculateDateRange("thisMonth");
+  };
+
+  // Filter rows based on selected filters
+  const filteredRows = rowsData.filter((row) => {
     const typeMatch = filterType !== "Tous" ? row.type === filterType : true;
     const collaborateurMatch =
       collaborateurId !== null
@@ -114,13 +141,43 @@ function CongesList() {
         : true;
     return (
       typeMatch &&
-      statusMatch &&
       collaborateurMatch &&
-      isDateInRange(convertDateFormat(row.date_debut), selectedDateDebut1, selectedDateDebut2) &&
-      isDateInRange(convertDateFormat(row.date_fin), selectedDateFin1, selectedDateFin2) &&
-      isDateInRange(convertDateFormat(row.date_demande), selectedDateDemande1, selectedDateDemande2)
+      isDateInRange(convertDateFormat(row.dateDebut), selectedDateDebut1, selectedDateDebut2) &&
+      isDateInRange(convertDateFormat(row.dateFin), selectedDateFin1, selectedDateFin2)
     );
   });
+
+  // Generate table rows with colors
+  const rows = useMemo(() => {
+    return filteredRows.map((row) => ({
+      ...row,
+      type: (
+        <Chip
+          label={row.type}
+          size="small"
+          sx={{
+            backgroundColor: TYPE_COLORS[row.type] || theme.palette.grey[500],
+            color: "#FFF",
+            fontWeight: "bold",
+            "& .MuiChip-label": { px: 1 },
+          }}
+        />
+      ),
+    }));
+  }, [filteredRows]);
+
+  // Table columns definition
+  const columns = useMemo(
+    () => [
+      { Header: "ID", accessor: "id", align: "left", width: "50px" },
+      { Header: "Collaborateur", accessor: "collaborateur", align: "left", width: "200px" },
+      { Header: "Type", accessor: "type", align: "center", width: "150px" },
+      { Header: "Date début", accessor: "dateDebut", align: "center" },
+      { Header: "Date fin", accessor: "dateFin", align: "center" },
+      { Header: "Statut", accessor: "statut", align: "center" },
+    ],
+    []
+  );
 
   return (
     <DashboardLayout>
@@ -128,7 +185,7 @@ function CongesList() {
       <MDBox pt={6} pb={3}>
         <Grid container spacing={6}>
           <Grid item xs={12}>
-            <Card>
+            <Card sx={{ boxShadow: "0 4px 20px 0 rgba(0,0,0,0.1)" }}>
               <MDBox
                 mx={2}
                 mt={-3}
@@ -146,28 +203,45 @@ function CongesList() {
                   Liste des Congés
                 </MDTypography>
                 <MDBox>
-                  <IconButton
-                    color="white"
-                    onClick={() => exportToExcel(filteredRows, "Liste_des_Congés")}
-                  >
-                    <img src={exceller} alt="Exporter en Excel" style={{ width: 30, height: 30 }} />
-                  </IconButton>
-                  <IconButton color="white" onClick={() => setOpenFilter(true)}>
-                    <FilterListIcon sx={{ color: "white" }} />
-                  </IconButton>
+                  <Tooltip title="Exporter en Excel">
+                    <IconButton
+                      color="white"
+                      onClick={() => exportToExcel(filteredRows, "Liste_des_Congés")}
+                      sx={{ mr: 1 }}
+                    >
+                      <DownloadIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Filtres avancés">
+                    <Badge
+                      badgeContent={activeFilters}
+                      color="secondary"
+                      sx={{ "& .MuiBadge-badge": { fontSize: 10 } }}
+                    >
+                      <IconButton color="white" onClick={() => setOpenFilter(true)}>
+                        <FilterListIcon />
+                      </IconButton>
+                    </Badge>
+                  </Tooltip>
                 </MDBox>
               </MDBox>
 
-              <MDBox pt={1}>
-                <MDBox m={1}>
-                  <FormControl fullWidth>
+              <MDBox pt={3} pb={2} px={3}>
+                {/* Quick filters section */}
+                <MDBox display="flex" alignItems="center" mb={2}>
+                  <FormControl sx={{ minWidth: 220, mr: 2 }}>
                     <InputLabel id="filter-type-label">Période</InputLabel>
                     <Select
                       labelId="filter-type-label"
                       label="Période"
                       value={filterPeriode}
-                      onChange={(e) => setFilterPeriode(e.target.value)}
-                      sx={{ height: "45px", width: "220px", mx: 0.5 }}
+                      sx={{ width: 110, height: 40 }}
+                      onChange={(e) => {
+                        setFilterPeriode(e.target.value);
+                        if (e.target.value === "custom") {
+                          setOpenFilter(true);
+                        }
+                      }}
                     >
                       <MenuItem value="today">{"Aujourd'hui"}</MenuItem>
                       <MenuItem value="yesterday">Hier</MenuItem>
@@ -177,7 +251,75 @@ function CongesList() {
                       <MenuItem value="custom">Personnalisée</MenuItem>
                     </Select>
                   </FormControl>
+
+                  {activeFilters > 0 && (
+                    <MDButton
+                      variant="text"
+                      color="error"
+                      size="small"
+                      onClick={handleResetFilters}
+                    >
+                      Réinitialiser les filtres
+                    </MDButton>
+                  )}
                 </MDBox>
+
+                {/* Active filters display */}
+                {activeFilters > 0 && (
+                  <MDBox display="flex" flexWrap="wrap" gap={1} mb={3}>
+                    {filterType !== "Tous" && (
+                      <Chip
+                        label={`Type: ${filterType}`}
+                        onDelete={() => setFilterType("Tous")}
+                        size="small"
+                        color="primary"
+                      />
+                    )}
+                    {collaborateurId !== null && (
+                      <Chip
+                        label={`Collaborateur: ${selectedCollaborateur?.nom} ${selectedCollaborateur?.prenom}`}
+                        onDelete={() => {
+                          setCollaborateurId(null);
+                          setSelectedCollaborateur(null);
+                        }}
+                        size="small"
+                        color="primary"
+                      />
+                    )}
+                    {(selectedDateDebut1 || selectedDateDebut2) && (
+                      <Chip
+                        label={`Début: ${selectedDateDebut1 || ""} - ${selectedDateDebut2 || ""}`}
+                        onDelete={() => {
+                          setSelectedDateDebut1("");
+                          setSelectedDateDebut2("");
+                        }}
+                        size="small"
+                        color="primary"
+                      />
+                    )}
+                    {(selectedDateFin1 || selectedDateFin2) && (
+                      <Chip
+                        label={`Fin: ${selectedDateFin1 || ""} - ${selectedDateFin2 || ""}`}
+                        onDelete={() => {
+                          setSelectedDateFin1("");
+                          setSelectedDateFin2("");
+                        }}
+                        size="small"
+                        color="primary"
+                      />
+                    )}
+                  </MDBox>
+                )}
+
+                {/* Task count summary */}
+                <MDBox mb={2}>
+                  <MDTypography variant="button" fontWeight="regular" color="text">
+                    {filteredRows.length}{" "}
+                    {filteredRows.length > 1 ? "congés trouvés" : "congé trouvé"}
+                  </MDTypography>
+                </MDBox>
+
+                {/* Data table */}
                 {isLoading ? (
                   <MDBox
                     display="flex"
@@ -189,10 +331,13 @@ function CongesList() {
                   </MDBox>
                 ) : (
                   <DataTable
-                    table={{ columns, rows: filteredRows }}
+                    table={{ columns, rows }}
                     isSorted={true}
-                    entriesPerPage={true}
-                    showTotalEntries={false}
+                    entriesPerPage={{
+                      defaultValue: 10,
+                      entries: [5, 10, 15, 20, 25],
+                    }}
+                    showTotalEntries={true}
                     canSearch={true}
                     noEndBorder={true}
                   />
@@ -203,67 +348,79 @@ function CongesList() {
         </Grid>
       </MDBox>
 
+      {/* Filter drawer */}
       <Drawer
         anchor="right"
         open={openFilter}
         onClose={() => setOpenFilter(false)}
         sx={{
           "& .MuiDrawer-paper": {
-            width: 400,
+            width: { xs: "100%", sm: 450 },
             padding: 2,
-            height: "auto",
           },
         }}
       >
-        <MDBox p={2}>
-          <MDTypography variant="h6" mb={2}>
-            Filtres
-          </MDTypography>
+        <MDBox p={3} height="100%" display="flex" flexDirection="column">
+          <MDBox display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+            <MDTypography variant="h5">Filtres avancés</MDTypography>
+            <IconButton onClick={() => setOpenFilter(false)}>&times;</IconButton>
+          </MDBox>
 
-          <MDBox display="flex" flexDirection="column" gap={2}>
-            <AutocompleteField
-              useFetchHook={() => useGetCollaborateursByManagerQuery(managerId)}
-              fullWidth
-              setSelectedItem={setSelectedCollaborateur}
-              setIdItem={setCollaborateurId}
-              selectedItem={selectedCollaborateur}
-              label="Choisir un collaborateur"
-            />
-            <TextField
-              select
-              label="Statut"
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              SelectProps={{
-                sx: { height: 43, display: "flex", alignItems: "center" },
-              }}
-            >
-              <MenuItem value="Tous">Tous</MenuItem>
-              <MenuItem value="En attente">En attente</MenuItem>
-              <MenuItem value="Approuvé">Approuvé</MenuItem>
-              <MenuItem value="Refusé">Refusé</MenuItem>
-              <MenuItem value="Annulé">Annulé</MenuItem>
-              <MenuItem value="En cours">En cours</MenuItem>
-              <MenuItem value="Terminé">Terminé</MenuItem>
-            </TextField>
-            <TextField
-              select
-              label="Type"
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              SelectProps={{
-                sx: { height: 43, display: "flex", alignItems: "center" },
-              }}
-            >
-              <MenuItem value="Tous">Tous</MenuItem>
-              <MenuItem value="Congé annuel">Congé annuel</MenuItem>
-              <MenuItem value="Congé maladie">Autorisation</MenuItem>
-            </TextField>
+          <MDBox display="flex" flexDirection="column" gap={3} flex="1" overflow="auto">
+            {/* Collaborator filter */}
             <MDBox>
-              <MDTypography variant="caption" sx={{ fontSize: "1rem" }} fontWeight="light" mb={1}>
+              <MDTypography variant="subtitle2" fontWeight="medium" mb={1}>
+                Collaborateur
+              </MDTypography>
+              <AutocompleteField
+                useFetchHook={() => useGetCollaborateursByManagerQuery(managerId)}
+                fullWidth
+                setSelectedItem={setSelectedCollaborateur}
+                setIdItem={setCollaborateurId}
+                selectedItem={selectedCollaborateur}
+                label="Choisir un collaborateur"
+              />
+            </MDBox>
+
+            {/* Type filter */}
+            <MDBox>
+              <MDTypography variant="subtitle2" fontWeight="medium" mb={1}>
+                Type
+              </MDTypography>
+              <FormControl fullWidth>
+                <InputLabel id="type-select-label">Type</InputLabel>
+                <Select
+                  labelId="type-select-label"
+                  sx={{ height: 40 }}
+                  label="Type"
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
+                >
+                  <MenuItem value="Tous">Tous les types</MenuItem>
+                  {Object.entries(TYPE_COLORS).map(([type, color]) => (
+                    <MenuItem key={type} value={type}>
+                      <MDBox display="flex" alignItems="center">
+                        <MDBox
+                          width={12}
+                          height={12}
+                          borderRadius="50%"
+                          mr={1}
+                          backgroundColor={color}
+                        />
+                        {type}
+                      </MDBox>
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </MDBox>
+
+            {/* Date ranges */}
+            {/* Start date range */}
+            <MDBox>
+              <MDTypography variant="subtitle2" fontWeight="medium" mb={1}>
                 Date de début
               </MDTypography>
-
               <Grid container spacing={2}>
                 <Grid item xs={6}>
                   <TextField
@@ -273,6 +430,7 @@ function CongesList() {
                     value={selectedDateDebut1}
                     onChange={(e) => setSelectedDateDebut1(e.target.value)}
                     fullWidth
+                    size="small"
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -283,15 +441,17 @@ function CongesList() {
                     value={selectedDateDebut2}
                     onChange={(e) => setSelectedDateDebut2(e.target.value)}
                     fullWidth
+                    size="small"
                   />
                 </Grid>
               </Grid>
             </MDBox>
+
+            {/* End date range */}
             <MDBox>
-              <MDTypography variant="caption" sx={{ fontSize: "1rem" }} fontWeight="light" mb={1}>
+              <MDTypography variant="subtitle2" fontWeight="medium" mb={1}>
                 Date de fin
               </MDTypography>
-
               <Grid container spacing={2}>
                 <Grid item xs={6}>
                   <TextField
@@ -301,6 +461,7 @@ function CongesList() {
                     value={selectedDateFin1}
                     onChange={(e) => setSelectedDateFin1(e.target.value)}
                     fullWidth
+                    size="small"
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -311,38 +472,21 @@ function CongesList() {
                     value={selectedDateFin2}
                     onChange={(e) => setSelectedDateFin2(e.target.value)}
                     fullWidth
+                    size="small"
                   />
                 </Grid>
               </Grid>
             </MDBox>
-            <MDBox>
-              <MDTypography variant="caption" sx={{ fontSize: "1rem" }} fontWeight="light" mb={1}>
-                Date de Demande
-              </MDTypography>
+          </MDBox>
 
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <TextField
-                    type="date"
-                    label="De"
-                    InputLabelProps={{ shrink: true }}
-                    value={selectedDateDemande1}
-                    onChange={(e) => setSelectedDateDemande1(e.target.value)}
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    type="date"
-                    label="À"
-                    InputLabelProps={{ shrink: true }}
-                    value={selectedDateDemande2}
-                    onChange={(e) => setSelectedDateDemande2(e.target.value)}
-                    fullWidth
-                  />
-                </Grid>
-              </Grid>
-            </MDBox>
+          {/* Action buttons */}
+          <MDBox mt={3} display="flex" justifyContent="space-between">
+            <MDButton color="error" onClick={handleResetFilters} variant="outlined">
+              Réinitialiser
+            </MDButton>
+            <MDButton color="info" onClick={() => setOpenFilter(false)}>
+              Appliquer
+            </MDButton>
           </MDBox>
         </MDBox>
       </Drawer>

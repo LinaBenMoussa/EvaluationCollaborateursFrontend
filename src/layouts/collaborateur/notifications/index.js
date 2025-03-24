@@ -13,12 +13,16 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 
 // API et Redux
-import { useGetNotificationByCollaborateurQuery } from "store/api/notificationApi";
+import {
+  useGetNotificationByCollaborateurQuery,
+  useDeleteNotificationByCollaborateurMutation,
+} from "store/api/notificationApi";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "store/slices/authSlice";
 
 // React hooks
 import { useState } from "react";
+import { CircularProgress } from "@mui/material";
 
 function Notifications() {
   // Récupérer l'ID du collaborateur connecté
@@ -29,7 +33,12 @@ function Notifications() {
     data: notifications = [],
     isLoading,
     isError,
+    refetch,
   } = useGetNotificationByCollaborateurQuery(collaborateurId);
+
+  // Utiliser le hook RTK Query pour supprimer une notification
+  const [deleteNotification, { isLoading: isDeleting }] =
+    useDeleteNotificationByCollaborateurMutation();
 
   // États pour la pagination
   const [page, setPage] = useState(1);
@@ -40,18 +49,21 @@ function Notifications() {
     setPage(value);
   };
 
-  // Fonction pour supprimer une notification (à implémenter côté backend)
-  const handleDeleteNotification = (notificationId) => {
-    console.log("Supprimer la notification avec l'ID :", notificationId);
-    // Ajoutez ici la logique pour supprimer la notification
+  // Fonction pour supprimer une notification
+  const handleDeleteNotification = async (notificationId) => {
+    try {
+      await deleteNotification(notificationId);
+      refetch();
+      console.log("Notification supprimée avec succès !");
+    } catch (err) {
+      console.error("Erreur lors de la suppression de la notification :", err);
+    }
   };
 
-  // Calcul des notifications à afficher pour la page actuelle
   const startIndex = (page - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedNotifications = notifications.slice(startIndex, endIndex);
 
-  // Afficher un message de chargement si les données sont en cours de chargement
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -60,8 +72,13 @@ function Notifications() {
           <Grid container spacing={3} justifyContent="center">
             <Grid item xs={12} lg={8}>
               <Card>
-                <MDBox p={2}>
-                  <MDTypography variant="h5">Chargement en cours...</MDTypography>
+                <MDBox
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  sx={{ minHeight: "300px" }}
+                >
+                  <CircularProgress />
                 </MDBox>
               </Card>
             </Grid>
@@ -71,7 +88,6 @@ function Notifications() {
     );
   }
 
-  // Afficher un message d'erreur si la requête a échoué
   if (isError) {
     return (
       <DashboardLayout>
@@ -93,7 +109,6 @@ function Notifications() {
     );
   }
 
-  // Afficher les notifications
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -122,13 +137,13 @@ function Notifications() {
                     <Icon
                       style={{ cursor: "pointer", color: "white" }}
                       onClick={() => handleDeleteNotification(notification.id)}
+                      disabled={isDeleting} // Désactiver l'icône pendant la suppression
                     >
                       close
                     </Icon>
                   </MDBox>
                 ))}
               </MDBox>
-              {/* Pagination */}
               <MDBox display="flex" justifyContent="center" p={2}>
                 <Pagination
                   count={Math.ceil(notifications.length / itemsPerPage)}

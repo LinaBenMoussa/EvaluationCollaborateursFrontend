@@ -5,7 +5,15 @@ import {
   useGetCollaborateursStatsQuery,
 } from "store/api/userApi";
 import { selectCurrentUser } from "store/slices/authSlice";
-import { Grid, Card, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import {
+  Grid,
+  Card,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  CircularProgress,
+} from "@mui/material";
 import ReportsPieChart from "examples/Charts/PieChart";
 import { formatDate } from "./utils/formatUtils";
 import PerformanceSummaryCard from "./components/performanceSummaryCard";
@@ -62,9 +70,7 @@ const Dashboard = () => {
       datasets: {
         label: "Distribution",
         backgroundColors: ["#4CAF50", "#F44336"],
-        data: stats
-          ? [stats.respectEcheanceRate || 0, 100 - stats.respectEcheanceRate || 0]
-          : [0, 0],
+        data: [stats?.respectEcheanceRate || 0, 100 - stats?.respectEcheanceRate || 0],
       },
     }),
     [stats]
@@ -112,15 +118,25 @@ const Dashboard = () => {
   const renderContent = () => {
     if (!collaborateurId) {
       return (
-        <MDBox p={1} textAlign="center">
-          Veuillez sélectionner un collaborateur pour afficher ses statistiques
+        <MDBox
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          sx={{ minHeight: "300px" }}
+        >
+          <CircularProgress />
         </MDBox>
       );
     }
     if (isLoading) {
       return (
-        <MDBox p={1} textAlign="center">
-          Chargement des données...
+        <MDBox
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          sx={{ minHeight: "300px" }}
+        >
+          <CircularProgress />
         </MDBox>
       );
     }

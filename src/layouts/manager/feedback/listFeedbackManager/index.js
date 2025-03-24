@@ -70,7 +70,7 @@ function FeedbackListManager() {
       <FeedbackCard
         key={feedback.id}
         dateTime={formatDateWithTime(feedback.date_feedback)}
-        manager={`à: ${feedback.manager.nom} ${feedback.manager.prenom}`}
+        collaborateur={`à: ${feedback.collaborateur.nom} ${feedback.collaborateur.prenom}`}
         comment={feedback.commentaire}
         isNegative={feedback.type === "negatif"}
       />
