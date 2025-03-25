@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import Drawer from "@mui/material/Drawer";
@@ -14,7 +14,6 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import DataTable from "examples/Tables/DataTable";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "store/slices/authSlice";
-import { useCongesTableData } from "./data/useCongesTableData";
 import {
   TextField,
   MenuItem,
@@ -25,13 +24,16 @@ import {
   Chip,
   Tooltip,
   Badge,
+  Divider,
+  useTheme,
   TablePagination,
 } from "@mui/material";
 import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
 import AutocompleteField from "layouts/shared/autocompleteField";
 import { exportToExcel } from "functions/exportToExcel";
+import { useIssuesTableData } from "./data/useIssuesTableData";
 
-// Options pour les périodes
+// Date period options
 const PERIOD_OPTIONS = [
   { value: "today", label: "Aujourd'hui" },
   { value: "yesterday", label: "Hier" },
@@ -41,24 +43,36 @@ const PERIOD_OPTIONS = [
   { value: "custom", label: "Personnalisée" },
 ];
 
-// Options pour les types de congés
-const TYPE_OPTIONS = [
-  { value: "Tous", label: "Tous les types" },
-  { value: "A", label: "Autorisation" },
-  { value: "C", label: "Congé annuel" },
+// Status options for filter
+const STATUS_OPTIONS = [
+  "Tous",
+  "Nouveau",
+  "Résolu",
+  "Fermé",
+  "Réouvert",
+  "Assigné",
+  "Rejeté",
+  "Reporté",
+  "Dupliqué",
+  "Ambigu",
+  "En cours",
+  "Ouvert",
+  "Négociation de l'offre",
+  "Validation de l'offre",
+  "Clôture provisoire",
 ];
 
-function CongesList() {
-  const managerId = useSelector(selectCurrentUser);
+function IssuesList() {
+  const theme = useTheme();
+  const collaborateurId = useSelector(selectCurrentUser);
 
   // State management
-  const [collaborateurId, setCollaborateurId] = useState(null);
-  const [selectedCollaborateur, setSelectedCollaborateur] = useState(null);
-  const [filterType, setFilterType] = useState("Tous");
-  const [filterPeriode, setFilterPeriode] = useState("thisMonth");
+  const [filterStatus, setFilterStatus] = useState("Tous");
+  const [filterType, setFilterType] = useState("today");
   const [dateRanges, setDateRanges] = useState({
     debut: { start: "", end: "" },
     fin: { start: "", end: "" },
+    echeance: { start: "", end: "" },
   });
   const [openFilter, setOpenFilter] = useState(false);
   const [activeFilters, setActiveFilters] = useState(0);
@@ -66,18 +80,20 @@ function CongesList() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // Fetch data with API filters and pagination
-  const { columns, rows, isLoading, total } = useCongesTableData(managerId, {
+  const { columns, rows, isLoading, total } = useIssuesTableData({
     startDateDebut: dateRanges.debut.start,
     endDateDebut: dateRanges.debut.end,
     startDateFin: dateRanges.fin.start,
     endDateFin: dateRanges.fin.end,
-    collaborateurId,
-    type: filterType,
+    startDateEcheance: dateRanges.echeance.start,
+    endDateEcheance: dateRanges.echeance.end,
+    collaborateurId: collaborateurId,
+    status: filterStatus,
     page,
     pageSize: rowsPerPage,
   });
 
-  // Calculate date range based on selected period
+  // Calculate date ranges based on selected period
   const calculateDateRange = (period) => {
     const today = new Date();
     let startDate, endDate;
@@ -109,35 +125,34 @@ function CongesList() {
         return;
     }
 
-    // Format dates to YYYY-MM-DD
     const formatDate = (date) => date.toISOString().split("T")[0];
-
     setDateRanges({
       debut: {
         start: formatDate(startDate),
         end: formatDate(endDate),
       },
       fin: { start: "", end: "" },
+      echeance: { start: "", end: "" },
     });
   };
 
   // Handle period change
   useEffect(() => {
-    if (filterPeriode !== "custom") {
-      calculateDateRange(filterPeriode);
+    if (filterType !== "custom") {
+      calculateDateRange(filterType);
       setPage(0);
     }
-  }, [filterPeriode]);
+  }, [filterType]);
 
   // Count active filters
   useEffect(() => {
     let count = 0;
-    if (filterType !== "Tous") count++;
-    if (collaborateurId !== null) count++;
+    if (filterStatus !== "Tous") count++;
     if (dateRanges.debut.start || dateRanges.debut.end) count++;
     if (dateRanges.fin.start || dateRanges.fin.end) count++;
+    if (dateRanges.echeance.start || dateRanges.echeance.end) count++;
     setActiveFilters(count);
-  }, [filterType, collaborateurId, dateRanges]);
+  }, [filterStatus, dateRanges]);
 
   // Handle date range changes
   const handleDateRangeChange = (field, type, value) => {
@@ -148,21 +163,20 @@ function CongesList() {
         [type]: value,
       },
     }));
-    setFilterPeriode("custom");
+    setFilterType("custom");
     setPage(0);
   };
 
   // Reset all filters
   const handleResetFilters = () => {
-    setFilterType("Tous");
-    setCollaborateurId(null);
-    setSelectedCollaborateur(null);
+    setFilterStatus("Tous");
     setDateRanges({
       debut: { start: "", end: "" },
       fin: { start: "", end: "" },
+      echeance: { start: "", end: "" },
     });
-    setFilterPeriode("thisMonth");
-    calculateDateRange("thisMonth");
+    setFilterType("today");
+    calculateDateRange("today");
     setPage(0);
   };
 
@@ -187,9 +201,9 @@ function CongesList() {
     <DashboardLayout>
       <DashboardNavbar />
       <MDBox pt={6} pb={3}>
-        <Grid container spacing={6}>
+        <Grid container spacing={3}>
           <Grid item xs={12}>
-            <Card sx={{ boxShadow: "0 4px 20px 0 rgba(0,0,0,0.1)" }}>
+            <Card sx={{ boxShadow: theme.shadows[3] }}>
               <MDBox
                 mx={2}
                 mt={-3}
@@ -204,13 +218,13 @@ function CongesList() {
                 alignItems="center"
               >
                 <MDTypography variant="h6" color="white">
-                  Liste des Congés
+                  Liste des Tâches
                 </MDTypography>
                 <MDBox>
                   <Tooltip title="Exporter en Excel">
                     <IconButton
                       color="white"
-                      onClick={() => exportToExcel(rows, "Liste_des_Congés")}
+                      onClick={() => exportToExcel(rows, "Liste_des_Taches")}
                       sx={{ mr: 1 }}
                     >
                       <DownloadIcon />
@@ -238,10 +252,10 @@ function CongesList() {
                     <Select
                       labelId="filter-type-label"
                       label="Période"
-                      value={filterPeriode}
+                      value={filterType}
                       sx={{ height: 40 }}
                       onChange={(e) => {
-                        setFilterPeriode(e.target.value);
+                        setFilterType(e.target.value);
                         if (e.target.value === "custom") {
                           setOpenFilter(true);
                         }
@@ -270,21 +284,10 @@ function CongesList() {
                 {/* Active filters display */}
                 {activeFilters > 0 && (
                   <MDBox display="flex" flexWrap="wrap" gap={1} mb={3}>
-                    {filterType !== "Tous" && (
+                    {filterStatus !== "Tous" && (
                       <Chip
-                        label={`Type: ${TYPE_OPTIONS.find((t) => t.value === filterType)?.label}`}
-                        onDelete={() => setFilterType("Tous")}
-                        size="small"
-                        color="primary"
-                      />
-                    )}
-                    {collaborateurId !== null && (
-                      <Chip
-                        label={`Collaborateur: ${selectedCollaborateur?.nom} ${selectedCollaborateur?.prenom}`}
-                        onDelete={() => {
-                          setCollaborateurId(null);
-                          setSelectedCollaborateur(null);
-                        }}
+                        label={`Statut: ${filterStatus}`}
+                        onDelete={() => setFilterStatus("Tous")}
                         size="small"
                         color="primary"
                       />
@@ -311,13 +314,25 @@ function CongesList() {
                         color="primary"
                       />
                     )}
+                    {(dateRanges.echeance.start || dateRanges.echeance.end) && (
+                      <Chip
+                        label={`Échéance: ${dateRanges.echeance.start || ""} - ${
+                          dateRanges.echeance.end || ""
+                        }`}
+                        onDelete={() =>
+                          setDateRanges((prev) => ({ ...prev, echeance: { start: "", end: "" } }))
+                        }
+                        size="small"
+                        color="primary"
+                      />
+                    )}
                   </MDBox>
                 )}
 
                 {/* Task count summary */}
                 <MDBox mb={2}>
                   <MDTypography variant="button" fontWeight="regular" color="text">
-                    {total} {total > 1 ? "congés trouvés" : "congé trouvé"}
+                    {total} {total > 1 ? "tâches trouvées" : "tâche trouvée"}
                   </MDTypography>
                 </MDBox>
 
@@ -383,38 +398,23 @@ function CongesList() {
           </MDBox>
 
           <MDBox display="flex" flexDirection="column" gap={3} flex="1" overflow="auto">
-            {/* Collaborator filter */}
+            {/* Status filter */}
             <MDBox>
               <MDTypography variant="subtitle2" fontWeight="medium" mb={1}>
-                Collaborateur
-              </MDTypography>
-              <AutocompleteField
-                useFetchHook={() => useGetCollaborateursByManagerQuery(managerId)}
-                fullWidth
-                setSelectedItem={setSelectedCollaborateur}
-                setIdItem={setCollaborateurId}
-                selectedItem={selectedCollaborateur}
-                label="Choisir un collaborateur"
-              />
-            </MDBox>
-
-            {/* Type filter */}
-            <MDBox>
-              <MDTypography variant="subtitle2" fontWeight="medium" mb={1}>
-                Type
+                Statut
               </MDTypography>
               <FormControl fullWidth>
-                <InputLabel id="type-select-label">Type</InputLabel>
+                <InputLabel id="status-select-label">Statut</InputLabel>
                 <Select
-                  labelId="type-select-label"
+                  labelId="status-select-label"
                   sx={{ height: 40 }}
-                  label="Type"
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
+                  label="Statut"
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
                 >
-                  {TYPE_OPTIONS.map((type) => (
-                    <MenuItem key={type.value} value={type.value}>
-                      {type.label}
+                  {STATUS_OPTIONS.map((status) => (
+                    <MenuItem key={status} value={status}>
+                      {status}
                     </MenuItem>
                   ))}
                 </Select>
@@ -481,6 +481,36 @@ function CongesList() {
                 </Grid>
               </Grid>
             </MDBox>
+
+            <MDBox>
+              <MDTypography variant="subtitle2" fontWeight="medium" mb={1}>
+                {"Date d'échéance"}
+              </MDTypography>
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <TextField
+                    type="date"
+                    label="De"
+                    InputLabelProps={{ shrink: true }}
+                    value={dateRanges.echeance.start}
+                    onChange={(e) => handleDateRangeChange("echeance", "start", e.target.value)}
+                    fullWidth
+                    size="small"
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    type="date"
+                    label="À"
+                    InputLabelProps={{ shrink: true }}
+                    value={dateRanges.echeance.end}
+                    onChange={(e) => handleDateRangeChange("echeance", "end", e.target.value)}
+                    fullWidth
+                    size="small"
+                  />
+                </Grid>
+              </Grid>
+            </MDBox>
           </MDBox>
 
           {/* Action buttons */}
@@ -498,4 +528,4 @@ function CongesList() {
   );
 }
 
-export default CongesList;
+export default IssuesList;

@@ -28,10 +28,10 @@ export const PointageApi = api.injectEndpoints({
       }),
     }),
     filtrePointages: builder.query({
-      query: ({ managerId, startDate, endDate, offset, limit }) => ({
+      query: ({ managerId, startDate, endDate, collaborateurId, offset, limit }) => ({
         url: `/pointages/filtre`,
         method: "GET",
-        params: { managerId, startDate, endDate, offset, limit },
+        params: { managerId, startDate, endDate, collaborateurId, offset, limit },
       }),
     }),
   }),

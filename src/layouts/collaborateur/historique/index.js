@@ -15,9 +15,7 @@ import { HistoriqueContent } from "./components/content";
 function Historique() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const managerId = useSelector(selectCurrentUser);
-  const [collaborateurId, setCollaborateurId] = useState(null);
-  const [selectedCollaborateur, setSelectedCollaborateur] = useState(null);
+  const collaborateurId = useSelector(selectCurrentUser);
   const [selectedDate1, setSelectedDate1] = useState("");
   const [selectedDate2, setSelectedDate2] = useState("");
   const [filterType, setFilterType] = useState("today");
@@ -28,12 +26,11 @@ function Historique() {
   const [filters, setFilters] = useState({
     startDate: "",
     endDate: "",
-    collaborateurId: null,
   });
 
   // Fetch data with API filters and pagination
   const { columns, rows, isLoading, total, handlePageChange, handlePageSizeChange } =
-    usePointageTableData(managerId, {
+    usePointageTableData(collaborateurId, {
       ...filters,
       page: page,
       pageSize: rowsPerPage,
@@ -90,17 +87,6 @@ function Historique() {
     setPage(0);
   }, [filterType]);
 
-  // Update collaborateurId filter when it changes
-  useEffect(() => {
-    setFilters((prev) => ({
-      ...prev,
-      collaborateurId,
-    }));
-
-    // Reset to first page when filters change
-    setPage(0);
-  }, [collaborateurId]);
-
   // Update date filters when custom dates are selected
   useEffect(() => {
     if (filterType === "custom") {
@@ -118,22 +104,18 @@ function Historique() {
   // Compte les filtres actifs
   useEffect(() => {
     let count = 0;
-    if (collaborateurId !== null) count++;
     if (selectedDate1 || selectedDate2) count++;
     setActiveFilters(count);
-  }, [collaborateurId, selectedDate1, selectedDate2]);
+  }, [selectedDate1, selectedDate2]);
 
   // Réinitialise tous les filtres
   const handleResetFilters = () => {
-    setCollaborateurId(null);
-    setSelectedCollaborateur(null);
     setSelectedDate1("");
     setSelectedDate2("");
     setFilterType("today");
     setFilters({
       startDate: "",
       endDate: "",
-      collaborateurId: null,
     });
     setPage(0);
   };
@@ -142,7 +124,6 @@ function Historique() {
     setFilters({
       startDate: selectedDate1,
       endDate: selectedDate2,
-      collaborateurId: collaborateurId,
     });
     setPage(0);
     setOpenFilter(false);
@@ -189,12 +170,8 @@ function Historique() {
                 setFilterType={setFilterType}
                 activeFilters={activeFilters}
                 handleResetFilters={handleResetFilters}
-                collaborateurId={collaborateurId}
-                selectedCollaborateur={selectedCollaborateur}
                 selectedDate1={selectedDate1}
                 selectedDate2={selectedDate2}
-                setCollaborateurId={setCollaborateurId}
-                setSelectedCollaborateur={setSelectedCollaborateur}
                 setSelectedDate1={setSelectedDate1}
                 setSelectedDate2={setSelectedDate2}
                 setFilters={setFilters}
@@ -219,16 +196,12 @@ function Historique() {
         isMobile={isMobile}
         openFilter={openFilter}
         setOpenFilter={setOpenFilter}
-        selectedCollaborateur={selectedCollaborateur}
-        setCollaborateurId={setCollaborateurId}
         selectedDate1={selectedDate1}
         setSelectedDate1={setSelectedDate1}
         selectedDate2={selectedDate2}
         setSelectedDate2={setSelectedDate2}
-        setSelectedCollaborateur={setSelectedCollaborateur}
         theme={theme}
         alpha={alpha}
-        managerId={managerId}
         setFilterType={setFilterType}
       />
     </DashboardLayout>

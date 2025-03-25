@@ -3,13 +3,12 @@ import { formatDate, formatTime } from "functions/dateTime";
 import { useFiltreCongesQuery } from "store/api/congeApi";
 import { Chip } from "@mui/material";
 
-export function useCongesTableData(managerId, filters = {}) {
+export function useCongesTableData(collaborateurId, filters = {}) {
   const {
     startDateDebut,
     endDateDebut,
     startDateFin,
     endDateFin,
-    collaborateurId,
     type,
     page = 0,
     pageSize = 10,
@@ -23,22 +22,16 @@ export function useCongesTableData(managerId, filters = {}) {
     data = { conges: [], total: 0 },
     isLoading,
     isFetching,
-  } = useFiltreCongesQuery(
-    {
-      managerId,
-      startDateDebut,
-      endDateDebut,
-      startDateFin,
-      endDateFin,
-      ...(collaborateurId !== null && { collaborateurId }),
-      type: type !== "Tous" ? type : undefined,
-      offset,
-      limit: pageSize,
-    },
-    {
-      skip: !managerId,
-    }
-  );
+  } = useFiltreCongesQuery({
+    startDateDebut,
+    endDateDebut,
+    startDateFin,
+    endDateFin,
+    collaborateurId,
+    type: type !== "Tous" ? type : undefined,
+    offset,
+    limit: pageSize,
+  });
 
   const { conges = [], total = 0 } = data;
 
@@ -51,7 +44,6 @@ export function useCongesTableData(managerId, filters = {}) {
   const columns = useMemo(
     () => [
       { Header: "ID", accessor: "id", align: "left", width: "50px" },
-      { Header: "Collaborateur", accessor: "collaborateur", align: "left", width: "200px" },
       { Header: "Type", accessor: "type", align: "center", width: "150px" },
       { Header: "Date début", accessor: "dateDebut", align: "center" },
       { Header: "Date fin", accessor: "dateFin", align: "center" },
@@ -66,7 +58,6 @@ export function useCongesTableData(managerId, filters = {}) {
     () =>
       conges.map((conge) => ({
         id: conge.id,
-        collaborateur: `${conge.collaborateur.nom} ${conge.collaborateur.prenom}`,
         type: (
           <Chip
             label={conge.type === "A" ? "Autorisation" : "Congé annuel"}

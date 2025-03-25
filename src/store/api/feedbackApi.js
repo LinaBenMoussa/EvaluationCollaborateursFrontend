@@ -21,7 +21,18 @@ export const feedbackApi = api.injectEndpoints({
         method: "GET",
       }),
     }),
+    filtreFeedbacks: builder.query({
+      query: ({ managerId, startDate, endDate, collaborateurId, offset, limit }) => ({
+        url: `/feedback/filtre`,
+        method: "GET",
+        params: { managerId, startDate, endDate, collaborateurId, offset, limit },
+      }),
+    }),
   }),
 });
-export const { useAddFeedbackMutation, useGetFeedbackQuery, useGetFeedbackByManagerQuery } =
-  feedbackApi;
+export const {
+  useAddFeedbackMutation,
+  useGetFeedbackQuery,
+  useGetFeedbackByManagerQuery,
+  useFiltreFeedbacksQuery,
+} = feedbackApi;

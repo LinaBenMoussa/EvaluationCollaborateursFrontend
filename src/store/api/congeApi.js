@@ -27,6 +27,34 @@ export const CongeApi = api.injectEndpoints({
         method: "GET",
       }),
     }),
+    // Dans votre fichier d'API (ex: congeApi.js)
+    filtreConges: builder.query({
+      query: ({
+        managerId,
+        startDateDebut,
+        endDateDebut,
+        startDateFin,
+        endDateFin,
+        type,
+        collaborateurId,
+        offset,
+        limit,
+      }) => ({
+        url: `/conges/filtre`,
+        method: "GET",
+        params: {
+          managerId,
+          startDateDebut,
+          endDateDebut,
+          startDateFin,
+          endDateFin,
+          type,
+          collaborateurId,
+          offset,
+          limit,
+        },
+      }),
+    }),
   }),
 });
 export const {
@@ -34,4 +62,5 @@ export const {
   useGetCongesQuery,
   useGetCongesByCollaborateurQuery,
   useGetCongesByCollaborateurAndDateQuery,
+  useFiltreCongesQuery,
 } = CongeApi;

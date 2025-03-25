@@ -18,7 +18,7 @@ export function useSaisiesTableData(managerId, filters = {}) {
       managerId,
       startDate,
       endDate,
-      collaborateurId,
+      ...(collaborateurId !== null && { collaborateurId }),
       offset: offset,
       limit: pageSize,
     },

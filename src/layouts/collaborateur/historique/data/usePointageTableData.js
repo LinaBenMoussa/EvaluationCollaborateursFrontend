@@ -2,8 +2,8 @@ import { formatTime, formatDate } from "functions/dateTime";
 import { useMemo } from "react";
 import { useFiltrePointagesQuery } from "store/api/pointageApi";
 
-export function usePointageTableData(managerId, filters = {}) {
-  const { startDate, endDate, collaborateurId, page = 0, pageSize = 100 } = filters;
+export function usePointageTableData(collaborateurId, filters = {}) {
+  const { startDate, endDate, page = 0, pageSize = 15 } = filters;
 
   // Calculer l'offset pour la pagination
   const offset = page * pageSize;
@@ -13,19 +13,13 @@ export function usePointageTableData(managerId, filters = {}) {
     data = { pointages: [], total: 0 },
     isLoading,
     isFetching,
-  } = useFiltrePointagesQuery(
-    {
-      managerId,
-      startDate,
-      endDate,
-      ...(collaborateurId !== null && { collaborateurId }),
-      offset: offset,
-      limit: pageSize,
-    },
-    {
-      skip: !managerId,
-    }
-  );
+  } = useFiltrePointagesQuery({
+    startDate,
+    endDate,
+    collaborateurId,
+    offset: offset,
+    limit: pageSize,
+  });
 
   // Récupérer les pointages et le total depuis la réponse
   const { pointages = [], total = 0 } = data;
@@ -33,7 +27,6 @@ export function usePointageTableData(managerId, filters = {}) {
   const columns = useMemo(
     () => [
       { Header: "id", accessor: "id", align: "left" },
-      { Header: "collaborateur", accessor: "collaborateur", align: "center" },
       { Header: "date", accessor: "date", align: "center" },
       { Header: "heure_arrivee", accessor: "heure_arrivee", align: "center" },
       { Header: "status", accessor: "status", align: "center" },
@@ -46,7 +39,6 @@ export function usePointageTableData(managerId, filters = {}) {
     () =>
       pointages.map((pointage) => ({
         id: pointage.id,
-        collaborateur: `${pointage.collaborateur.nom} ${pointage.collaborateur.prenom}`,
         date: formatDate(pointage.date),
         heure_arrivee: formatTime(pointage.heure_arrivee),
         heure_depart: formatTime(pointage.heure_depart),

@@ -27,8 +27,6 @@ import {
   Badge,
   TablePagination,
 } from "@mui/material";
-import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
-import AutocompleteField from "layouts/shared/autocompleteField";
 import { exportToExcel } from "functions/exportToExcel";
 
 // Options pour les périodes
@@ -49,11 +47,9 @@ const TYPE_OPTIONS = [
 ];
 
 function CongesList() {
-  const managerId = useSelector(selectCurrentUser);
+  const collaborateurId = useSelector(selectCurrentUser);
 
   // State management
-  const [collaborateurId, setCollaborateurId] = useState(null);
-  const [selectedCollaborateur, setSelectedCollaborateur] = useState(null);
   const [filterType, setFilterType] = useState("Tous");
   const [filterPeriode, setFilterPeriode] = useState("thisMonth");
   const [dateRanges, setDateRanges] = useState({
@@ -66,12 +62,11 @@ function CongesList() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // Fetch data with API filters and pagination
-  const { columns, rows, isLoading, total } = useCongesTableData(managerId, {
+  const { columns, rows, isLoading, total } = useCongesTableData(collaborateurId, {
     startDateDebut: dateRanges.debut.start,
     endDateDebut: dateRanges.debut.end,
     startDateFin: dateRanges.fin.start,
     endDateFin: dateRanges.fin.end,
-    collaborateurId,
     type: filterType,
     page,
     pageSize: rowsPerPage,
@@ -133,11 +128,10 @@ function CongesList() {
   useEffect(() => {
     let count = 0;
     if (filterType !== "Tous") count++;
-    if (collaborateurId !== null) count++;
     if (dateRanges.debut.start || dateRanges.debut.end) count++;
     if (dateRanges.fin.start || dateRanges.fin.end) count++;
     setActiveFilters(count);
-  }, [filterType, collaborateurId, dateRanges]);
+  }, [filterType, dateRanges]);
 
   // Handle date range changes
   const handleDateRangeChange = (field, type, value) => {
@@ -155,8 +149,6 @@ function CongesList() {
   // Reset all filters
   const handleResetFilters = () => {
     setFilterType("Tous");
-    setCollaborateurId(null);
-    setSelectedCollaborateur(null);
     setDateRanges({
       debut: { start: "", end: "" },
       fin: { start: "", end: "" },
@@ -278,17 +270,6 @@ function CongesList() {
                         color="primary"
                       />
                     )}
-                    {collaborateurId !== null && (
-                      <Chip
-                        label={`Collaborateur: ${selectedCollaborateur?.nom} ${selectedCollaborateur?.prenom}`}
-                        onDelete={() => {
-                          setCollaborateurId(null);
-                          setSelectedCollaborateur(null);
-                        }}
-                        size="small"
-                        color="primary"
-                      />
-                    )}
                     {(dateRanges.debut.start || dateRanges.debut.end) && (
                       <Chip
                         label={`Début: ${dateRanges.debut.start || ""} - ${
@@ -383,21 +364,6 @@ function CongesList() {
           </MDBox>
 
           <MDBox display="flex" flexDirection="column" gap={3} flex="1" overflow="auto">
-            {/* Collaborator filter */}
-            <MDBox>
-              <MDTypography variant="subtitle2" fontWeight="medium" mb={1}>
-                Collaborateur
-              </MDTypography>
-              <AutocompleteField
-                useFetchHook={() => useGetCollaborateursByManagerQuery(managerId)}
-                fullWidth
-                setSelectedItem={setSelectedCollaborateur}
-                setIdItem={setCollaborateurId}
-                selectedItem={selectedCollaborateur}
-                label="Choisir un collaborateur"
-              />
-            </MDBox>
-
             {/* Type filter */}
             <MDBox>
               <MDTypography variant="subtitle2" fontWeight="medium" mb={1}>
