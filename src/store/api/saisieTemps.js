@@ -15,10 +15,10 @@ export const SasieTempsApi = api.injectEndpoints({
       }),
     }),
     filtreSaisiesTemps: builder.query({
-      query: ({ managerId, startDate, endDate, offset, limit }) => ({
+      query: ({ managerId, startDate, collaborateurId, endDate, offset, limit }) => ({
         url: `/saisietemps/filtre`,
         method: "GET",
-        params: { managerId, startDate, endDate, offset, limit },
+        params: { managerId, startDate, collaborateurId, endDate, offset, limit },
       }),
     }),
   }),

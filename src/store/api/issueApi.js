@@ -21,7 +21,40 @@ export const IssueApi = api.injectEndpoints({
         method: "GET",
       }),
     }),
+    filtreIssues: builder.query({
+      query: ({
+        managerId,
+        startDateDebut,
+        endDateDebut,
+        startDateEcheance,
+        endDateEcheance,
+        startDateFin,
+        endDateFin,
+        collaborateurId,
+        offset,
+        limit,
+      }) => ({
+        url: `/issues/filtre`,
+        method: "GET",
+        params: {
+          managerId,
+          startDateDebut,
+          endDateDebut,
+          startDateEcheance,
+          endDateEcheance,
+          startDateFin,
+          endDateFin,
+          collaborateurId,
+          offset,
+          limit,
+        },
+      }),
+    }),
   }),
 });
-export const { useAddIssueMutation, useGetIssuesQuery, useGetIssuesByCollaborateurQuery } =
-  IssueApi;
+export const {
+  useAddIssueMutation,
+  useGetIssuesQuery,
+  useGetIssuesByCollaborateurQuery,
+  useFiltreIssuesQuery,
+} = IssueApi;

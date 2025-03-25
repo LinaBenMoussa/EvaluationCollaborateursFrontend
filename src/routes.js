@@ -15,9 +15,9 @@ import Historique from "layouts/manager/pointage/historique";
 import IssuesList from "layouts/manager/issues";
 import CollaborateursList from "layouts/manager/listeCollaborateur";
 import CongesList from "layouts/manager/conges";
-import ListPointage from "layouts/collaborateur/pointage";
-import IssuesListCollaborateur from "layouts/collaborateur/issues";
-import CongesListCollaborateur from "layouts/collaborateur/conges";
+import ListPointage from "layouts/collaborateur/historique";
+import IssuesListCollaborateur from "layouts/collaborateur/issues copy";
+import CongesListCollaborateur from "layouts/collaborateur/conges copy";
 import SaisiesTemps from "layouts/manager/saisiesTemps";
 
 const routes = [

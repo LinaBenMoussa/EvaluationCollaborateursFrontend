@@ -42,7 +42,7 @@ const STATUS_TRANSLATIONS = {
   "clôture provisoire": "Clôture provisoire",
 };
 
-export function useIssuesTableData(managerId, filters = {}) {
+export function useIssuesTableData(filters = {}) {
   const {
     startDateDebut,
     endDateDebut,
@@ -65,24 +65,18 @@ export function useIssuesTableData(managerId, filters = {}) {
     data = { issues: [], total: 0 },
     isLoading,
     isFetching,
-  } = useFiltreIssuesQuery(
-    {
-      managerId,
-      startDateDebut,
-      endDateDebut,
-      startDateEcheance,
-      endDateEcheance,
-      startDateFin,
-      endDateFin,
-      ...(collaborateurId !== null && { collaborateurId }),
-      status: status !== "Tous" ? status : undefined,
-      offset,
-      limit: pageSize,
-    },
-    {
-      skip: !managerId,
-    }
-  );
+  } = useFiltreIssuesQuery({
+    startDateDebut,
+    endDateDebut,
+    startDateEcheance,
+    endDateEcheance,
+    startDateFin,
+    endDateFin,
+    collaborateurId,
+    status: status !== "Tous" ? status : undefined,
+    offset,
+    limit: pageSize,
+  });
 
   const { issues = [], total = 0 } = data;
   const navigateToSaisie = useCallback((id) => navigate(`/saisie/${id}`), [navigate]);
@@ -97,7 +91,6 @@ export function useIssuesTableData(managerId, filters = {}) {
       { Header: "Date début", accessor: "date_debut", align: "center" },
       { Header: "Date échéance", accessor: "date_echeance", align: "center" },
       { Header: "Date fin", accessor: "date_fin", align: "center" },
-      { Header: "Collaborateur", accessor: "collaborateur", align: "center" },
       { Header: "Action", accessor: "action", align: "center", width: "100px" },
     ],
     []
@@ -128,7 +121,6 @@ export function useIssuesTableData(managerId, filters = {}) {
           date_debut: formatDateWithTime(issue.date_debut),
           date_echeance: formatDateWithTime(issue.date_echeance),
           date_fin: formatDateWithTime(issue.date_fin),
-          collaborateur: `${issue.collaborateur.nom} ${issue.collaborateur.prenom}`,
           action: (
             <MDButton
               onClick={() => navigateToSaisie(issue.id)}

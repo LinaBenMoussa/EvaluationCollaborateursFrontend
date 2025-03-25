@@ -5,6 +5,7 @@ import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import DownloadIcon from "@mui/icons-material/Download";
+import CloseIcon from "@mui/icons-material/Close";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDButton from "components/MDButton";
@@ -25,50 +26,12 @@ import {
   Badge,
   Divider,
   useTheme,
+  TablePagination,
 } from "@mui/material";
 import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
 import AutocompleteField from "layouts/shared/autocompleteField";
-import { convertDateFormat, isDateInRange } from "functions/dateTime";
 import { exportToExcel } from "functions/exportToExcel";
-import { useGetIssuesQuery } from "store/api/issueApi";
-import { useNavigate } from "react-router-dom";
-import { formatDateWithTime } from "functions/dateTime";
-
-// Status colors mapping with better color choices
-const STATUS_COLORS = {
-  Nouveau: "#2196F3", // Blue
-  Résolu: "#4CAF50", // Green
-  Fermé: "#607D8B", // Blue Grey
-  Réouvert: "#FF9800", // Orange
-  Assigné: "#9C27B0", // Purple
-  Rejeté: "#F44336", // Red
-  Reporté: "#795548", // Brown
-  Dupliqué: "#9E9E9E", // Grey
-  Ambigu: "#FFEB3B", // Yellow
-  "En cours": "#00BCD4", // Cyan
-  Ouvert: "#8BC34A", // Light Green
-  "Négociation de l'offre": "#673AB7", // Deep Purple
-  "Validation de l'offre": "#3F51B5", // Indigo
-  "Clôture provisoire": "#E91E63", // Pink
-};
-
-// Translation dictionary for statuses
-const STATUS_TRANSLATIONS = {
-  New: "Nouveau",
-  Resolved: "Résolu",
-  Closed: "Fermé",
-  Reopened: "Réouvert",
-  Assigned: "Assigné",
-  Rejected: "Rejeté",
-  Deffered: "Reporté",
-  Duplicate: "Dupliqué",
-  Ambiguous: "Ambigu",
-  "in progress": "En cours",
-  open: "Ouvert",
-  "Négociation Offre": "Négociation de l'offre",
-  "Validation Offre.": "Validation de l'offre",
-  "clôture provisoire": "Clôture provisoire",
-};
+import { useIssuesTableData } from "./data/useIssuesTableData";
 
 // Date period options
 const PERIOD_OPTIONS = [
@@ -80,10 +43,28 @@ const PERIOD_OPTIONS = [
   { value: "custom", label: "Personnalisée" },
 ];
 
+// Status options for filter
+const STATUS_OPTIONS = [
+  "Tous",
+  "Nouveau",
+  "Résolu",
+  "Fermé",
+  "Réouvert",
+  "Assigné",
+  "Rejeté",
+  "Reporté",
+  "Dupliqué",
+  "Ambigu",
+  "En cours",
+  "Ouvert",
+  "Négociation de l'offre",
+  "Validation de l'offre",
+  "Clôture provisoire",
+];
+
 function IssuesList() {
   const theme = useTheme();
   const managerId = useSelector(selectCurrentUser);
-  const navigate = useNavigate();
 
   // State management
   const [collaborateurId, setCollaborateurId] = useState(null);
@@ -97,9 +78,22 @@ function IssuesList() {
   });
   const [openFilter, setOpenFilter] = useState(false);
   const [activeFilters, setActiveFilters] = useState(0);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  // Fetch data
-  const { data: issues = [], isLoading } = useGetIssuesQuery(managerId);
+  // Fetch data with API filters and pagination
+  const { columns, rows, isLoading, total } = useIssuesTableData(managerId, {
+    startDateDebut: dateRanges.debut.start,
+    endDateDebut: dateRanges.debut.end,
+    startDateFin: dateRanges.fin.start,
+    endDateFin: dateRanges.fin.end,
+    startDateEcheance: dateRanges.echeance.start,
+    endDateEcheance: dateRanges.echeance.end,
+    collaborateurId,
+    status: filterStatus,
+    page,
+    pageSize: rowsPerPage,
+  });
 
   // Calculate date ranges based on selected period
   const calculateDateRange = (period) => {
@@ -129,30 +123,26 @@ function IssuesList() {
         startDate = new Date(today.getFullYear(), 0, 1);
         endDate = new Date(today.getFullYear(), 11, 31);
         break;
-      case "custom":
-        setOpenFilter(true);
-        return;
       default:
         return;
     }
 
-    // Format dates to YYYY-MM-DD
     const formatDate = (date) => date.toISOString().split("T")[0];
-
-    // Set date ranges
-    setDateRanges((prev) => ({
-      ...prev,
+    setDateRanges({
       debut: {
         start: formatDate(startDate),
         end: formatDate(endDate),
       },
-    }));
+      fin: { start: "", end: "" },
+      echeance: { start: "", end: "" },
+    });
   };
 
   // Handle period change
   useEffect(() => {
     if (filterType !== "custom") {
       calculateDateRange(filterType);
+      setPage(0);
     }
   }, [filterType]);
 
@@ -164,105 +154,8 @@ function IssuesList() {
     if (dateRanges.debut.start || dateRanges.debut.end) count++;
     if (dateRanges.fin.start || dateRanges.fin.end) count++;
     if (dateRanges.echeance.start || dateRanges.echeance.end) count++;
-
     setActiveFilters(count);
   }, [filterStatus, collaborateurId, dateRanges]);
-
-  // Navigate to details page
-  const navigateToSaisie = (id) => navigate(`/saisie/${id}`);
-
-  // Generate table rows
-  const rows = useMemo(() => {
-    return issues.map((issue) => {
-      const translatedStatus = STATUS_TRANSLATIONS[issue.status?.name] || issue.status?.name;
-
-      return {
-        id: issue.id,
-        sujet: issue.sujet,
-        description: issue.description,
-        type: issue.type,
-        status: (
-          <Chip
-            label={translatedStatus}
-            size="small"
-            sx={{
-              backgroundColor: STATUS_COLORS[translatedStatus] || theme.palette.grey[500],
-              color: "#FFF",
-              fontWeight: "bold",
-              "& .MuiChip-label": { px: 1 },
-            }}
-          />
-        ),
-        date_debut: formatDateWithTime(issue.date_debut),
-        date_echeance: formatDateWithTime(issue.date_echeance),
-        date_fin: formatDateWithTime(issue.date_fin),
-        collaborateur: `${issue.collaborateur.nom} ${issue.collaborateur.prenom}`,
-        action: (
-          <MDButton
-            onClick={() => navigateToSaisie(issue.id)}
-            color="info"
-            variant="outlined"
-            size="small"
-          >
-            Saisies
-          </MDButton>
-        ),
-      };
-    });
-  }, [issues, theme.palette.grey]);
-
-  // Table columns definition
-  const columns = useMemo(
-    () => [
-      { Header: "ID", accessor: "id", align: "left", width: "50px" },
-      { Header: "Sujet", accessor: "sujet", align: "left", width: "200px" },
-      { Header: "Description", accessor: "description", align: "left", width: "250px" },
-      { Header: "Type", accessor: "type", align: "center", width: "100px" },
-      { Header: "Statut", accessor: "status", align: "center", width: "150px" },
-      { Header: "Date début", accessor: "date_debut", align: "center" },
-      { Header: "Date échéance", accessor: "date_echeance", align: "center" },
-      { Header: "Date fin", accessor: "date_fin", align: "center" },
-      { Header: "Collaborateur", accessor: "collaborateur", align: "center" },
-      { Header: "Action", accessor: "action", align: "center", width: "100px" },
-    ],
-    []
-  );
-
-  // Filter rows based on selected filters
-  const filteredRows = useMemo(() => {
-    return rows.filter((row) => {
-      const statusMatch = filterStatus === "Tous" ? true : row.status.props.label === filterStatus;
-
-      const collaborateurMatch =
-        collaborateurId !== null
-          ? row.collaborateur === `${selectedCollaborateur?.nom} ${selectedCollaborateur?.prenom}`
-          : true;
-
-      const dateDebutMatch = isDateInRange(
-        convertDateFormat(row.date_debut),
-        dateRanges.debut.start,
-        dateRanges.debut.end
-      );
-
-      const dateFinMatch =
-        dateRanges.fin.start || dateRanges.fin.end
-          ? isDateInRange(convertDateFormat(row.date_fin), dateRanges.fin.start, dateRanges.fin.end)
-          : true;
-
-      const dateEcheanceMatch =
-        dateRanges.echeance.start || dateRanges.echeance.end
-          ? isDateInRange(
-              convertDateFormat(row.date_echeance),
-              dateRanges.echeance.start,
-              dateRanges.echeance.end
-            )
-          : true;
-
-      return (
-        statusMatch && collaborateurMatch && dateDebutMatch && dateFinMatch && dateEcheanceMatch
-      );
-    });
-  }, [rows, filterStatus, collaborateurId, selectedCollaborateur, dateRanges]);
 
   // Handle date range changes
   const handleDateRangeChange = (field, type, value) => {
@@ -273,10 +166,8 @@ function IssuesList() {
         [type]: value,
       },
     }));
-
-    if (filterType !== "custom") {
-      setFilterType("custom");
-    }
+    setFilterType("custom");
+    setPage(0);
   };
 
   // Reset all filters
@@ -291,6 +182,24 @@ function IssuesList() {
     });
     setFilterType("today");
     calculateDateRange("today");
+    setPage(0);
+  };
+
+  // Handle page change
+  const handlePageChange = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  // Handle rows per page change
+  const handleRowsPerPageChange = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  // Apply filters when drawer is closed
+  const handleApplyFilters = () => {
+    setPage(0);
+    setOpenFilter(false);
   };
 
   return (
@@ -299,7 +208,7 @@ function IssuesList() {
       <MDBox pt={6} pb={3}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <Card sx={{ boxShadow: "0 4px 20px 0 rgba(0,0,0,0.1)" }}>
+            <Card sx={{ boxShadow: theme.shadows[3] }}>
               <MDBox
                 mx={2}
                 mt={-3}
@@ -320,7 +229,7 @@ function IssuesList() {
                   <Tooltip title="Exporter en Excel">
                     <IconButton
                       color="white"
-                      onClick={() => exportToExcel(filteredRows, "Liste_des_Taches")}
+                      onClick={() => exportToExcel(rows, "Liste_des_Taches")}
                       sx={{ mr: 1 }}
                     >
                       <DownloadIcon />
@@ -349,7 +258,7 @@ function IssuesList() {
                       labelId="filter-type-label"
                       label="Période"
                       value={filterType}
-                      sx={{ width: 110, height: 40 }}
+                      sx={{ height: 40 }}
                       onChange={(e) => {
                         setFilterType(e.target.value);
                         if (e.target.value === "custom") {
@@ -439,8 +348,7 @@ function IssuesList() {
                 {/* Task count summary */}
                 <MDBox mb={2}>
                   <MDTypography variant="button" fontWeight="regular" color="text">
-                    {filteredRows.length}{" "}
-                    {filteredRows.length > 1 ? "tâches trouvées" : "tâche trouvée"}
+                    {total} {total > 1 ? "tâches trouvées" : "tâche trouvée"}
                   </MDTypography>
                 </MDBox>
 
@@ -455,17 +363,29 @@ function IssuesList() {
                     <CircularProgress />
                   </MDBox>
                 ) : (
-                  <DataTable
-                    table={{ columns, rows: filteredRows }}
-                    isSorted={true}
-                    entriesPerPage={{
-                      defaultValue: 10,
-                      entries: [5, 10, 15, 20, 25],
-                    }}
-                    showTotalEntries={true}
-                    canSearch={true}
-                    noEndBorder={true}
-                  />
+                  <>
+                    <DataTable
+                      table={{ columns, rows }}
+                      isSorted={true}
+                      entriesPerPage={false}
+                      showTotalEntries={false}
+                      canSearch={true}
+                      noEndBorder={true}
+                    />
+                    <TablePagination
+                      component="div"
+                      count={total}
+                      page={page}
+                      onPageChange={handlePageChange}
+                      rowsPerPage={rowsPerPage}
+                      onRowsPerPageChange={handleRowsPerPageChange}
+                      rowsPerPageOptions={[5, 10, 25, 50]}
+                      labelRowsPerPage="Lignes par page:"
+                      labelDisplayedRows={({ from, to, count }) =>
+                        `${from}-${to} sur ${count !== -1 ? count : `plus de ${to}`}`
+                      }
+                    />
+                  </>
                 )}
               </MDBox>
             </Card>
@@ -488,7 +408,9 @@ function IssuesList() {
         <MDBox p={3} height="100%" display="flex" flexDirection="column">
           <MDBox display="flex" justifyContent="space-between" alignItems="center" mb={3}>
             <MDTypography variant="h5">Filtres avancés</MDTypography>
-            <IconButton onClick={() => setOpenFilter(false)}>&times;</IconButton>
+            <IconButton onClick={() => setOpenFilter(false)}>
+              <CloseIcon />
+            </IconButton>
           </MDBox>
 
           <MDBox display="flex" flexDirection="column" gap={3} flex="1" overflow="auto">
@@ -521,19 +443,9 @@ function IssuesList() {
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
                 >
-                  <MenuItem value="Tous">Tous les statuts</MenuItem>
-                  {Object.values(STATUS_TRANSLATIONS).map((status) => (
+                  {STATUS_OPTIONS.map((status) => (
                     <MenuItem key={status} value={status}>
-                      <MDBox display="flex" alignItems="center">
-                        <MDBox
-                          width={12}
-                          height={12}
-                          borderRadius="50%"
-                          mr={1}
-                          backgroundColor={STATUS_COLORS[status] || "grey"}
-                        />
-                        {status}
-                      </MDBox>
+                      {status}
                     </MenuItem>
                   ))}
                 </Select>
@@ -541,7 +453,6 @@ function IssuesList() {
             </MDBox>
 
             {/* Date ranges */}
-            {/* Start date range */}
             <MDBox>
               <MDTypography variant="subtitle2" fontWeight="medium" mb={1}>
                 Date de début
@@ -572,7 +483,6 @@ function IssuesList() {
               </Grid>
             </MDBox>
 
-            {/* End date range */}
             <MDBox>
               <MDTypography variant="subtitle2" fontWeight="medium" mb={1}>
                 Date de fin
@@ -603,7 +513,6 @@ function IssuesList() {
               </Grid>
             </MDBox>
 
-            {/* Due date range */}
             <MDBox>
               <MDTypography variant="subtitle2" fontWeight="medium" mb={1}>
                 {"Date d'échéance"}
@@ -640,7 +549,7 @@ function IssuesList() {
             <MDButton color="error" onClick={handleResetFilters} variant="outlined">
               Réinitialiser
             </MDButton>
-            <MDButton color="info" onClick={() => setOpenFilter(false)}>
+            <MDButton color="info" onClick={handleApplyFilters}>
               Appliquer
             </MDButton>
           </MDBox>

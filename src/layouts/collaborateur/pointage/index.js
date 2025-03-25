@@ -8,34 +8,27 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import DataTable from "examples/Tables/DataTable";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "store/slices/authSlice";
-import { CircularProgress, TextField } from "@mui/material";
+import { CircularProgress, TextField, TablePagination } from "@mui/material";
 import { usePointageTableData } from "./data/usePointageTableData";
-import AutocompleteField from "layouts/shared/autocompleteField";
-import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
-import { isDateInRange } from "functions/dateTime";
-import { convertDateFormat } from "functions/dateTime";
 
 function ListPointage() {
   const collaborateurId = useSelector(selectCurrentUser);
-  const { columns, rows, isLoading } = usePointageTableData(collaborateurId);
-
   const [filterStatus, setFilterStatus] = useState("Tous");
   const [selectedDate1, setSelectedDate1] = useState("");
   const [selectedDate2, setSelectedDate2] = useState("");
 
-  console.log(columns, rows, isLoading);
-  const filteredPointages = rows
-    .filter((row) => {
-      if (filterStatus === "Tous") return true;
-      return filterStatus === "En poste" ? row.status === "En poste" : row.status === "A quité";
-    })
-    .filter((row) => {
-      if (!selectedDate1 && !selectedDate2) return true;
-      return isDateInRange(convertDateFormat(row.date), selectedDate1, selectedDate2);
-    });
+  // Pass filter options to the hook
+  const { columns, rows, isLoading, pagination } = usePointageTableData(collaborateurId, {
+    status: filterStatus,
+    startDate: selectedDate1,
+    endDate: selectedDate2,
+  });
+
+  // Ensure end date is not before start date
   if (selectedDate2 && selectedDate2 < selectedDate1) {
     setSelectedDate1(selectedDate2);
   }
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -111,14 +104,33 @@ function ListPointage() {
                     <CircularProgress />
                   </MDBox>
                 ) : (
-                  <DataTable
-                    table={{ columns, rows: filteredPointages }}
-                    isSorted={true}
-                    entriesPerPage={true}
-                    showTotalEntries={false}
-                    canSearch={true}
-                    noEndBorder={false}
-                  />
+                  <>
+                    <DataTable
+                      table={{ columns, rows }}
+                      isSorted={true}
+                      entriesPerPage={true}
+                      showTotalEntries={false}
+                      canSearch={true}
+                      noEndBorder={false}
+                    />
+                    <MDBox p={2} display="flex" justifyContent="flex-end">
+                      <TablePagination
+                        component="div"
+                        count={pagination.total}
+                        page={pagination.page}
+                        onPageChange={(event, newPage) => pagination.handleChangePage(newPage)}
+                        rowsPerPage={pagination.rowsPerPage}
+                        onRowsPerPageChange={(event) =>
+                          pagination.handleChangeRowsPerPage(parseInt(event.target.value, 10))
+                        }
+                        rowsPerPageOptions={[10, 25, 50, 100]}
+                        labelRowsPerPage="Lignes par page"
+                        labelDisplayedRows={({ from, to, count }) =>
+                          `${from}-${to} sur ${count !== -1 ? count : `plus de ${to}`}`
+                        }
+                      />
+                    </MDBox>
+                  </>
                 )}
               </MDBox>
             </Card>
