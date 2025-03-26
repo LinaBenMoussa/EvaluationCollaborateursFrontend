@@ -36,6 +36,9 @@ import AutocompleteField from "layouts/shared/autocompleteField";
 import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
 import { exportToExcel } from "functions/exportToExcel";
 import exceller from "assets/images/icons/flags/exceller.png";
+import { Header } from "layouts/shared/Header";
+import FiltreRapide from "layouts/shared/FiltreRapide";
+import Table from "layouts/shared/Table";
 
 function SaisiesTemps() {
   const theme = useTheme();
@@ -191,57 +194,27 @@ function SaisiesTemps() {
   return (
     <DashboardLayout>
       <DashboardNavbar />
-      <MDBox pt={6} pb={3}>
-        <Grid container spacing={6}>
+      <MDBox pt={3} pb={3}>
+        <Grid container spacing={3}>
           <Grid item xs={12}>
-            <Card sx={{ boxShadow: "0 4px 20px 0 rgba(0,0,0,0.1)" }}>
-              <MDBox
-                mx={2}
-                mt={-3}
-                py={3}
-                px={2}
-                variant="gradient"
-                bgColor="info"
-                borderRadius="lg"
-                coloredShadow="info"
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <MDTypography variant="h6" color="white">
-                  Saisies Table
-                </MDTypography>
-                <MDBox>
-                  <Tooltip title="Exporter en Excel">
-                    <IconButton
-                      color="white"
-                      onClick={() => exportToExcel(rows, "Liste_des_Saisies")}
-                      sx={{ mr: 1 }}
-                    >
-                      <img
-                        src={exceller}
-                        alt="Exporter en Excel"
-                        style={{ width: 25, height: 25 }}
-                      />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Filtres avancés">
-                    <Badge
-                      badgeContent={activeFilters}
-                      color="secondary"
-                      sx={{ "& .MuiBadge-badge": { fontSize: 10 } }}
-                    >
-                      <IconButton color="white" onClick={() => setOpenFilter(true)}>
-                        <FilterListIcon />
-                      </IconButton>
-                    </Badge>
-                  </Tooltip>
-                </MDBox>
-              </MDBox>
+            <Card
+              sx={{
+                borderRadius: "15px",
+                boxShadow: "0 8px 24px 0 rgba(0,0,0,0.08)",
+                overflow: "hidden",
+              }}
+            >
+              <Header
+                rows={rows}
+                activeFilters={activeFilters}
+                setOpenFilter={setOpenFilter}
+                theme={theme}
+                title={"Table de saisies"}
+                filtreExiste
+              />
 
               <MDBox pt={3} pb={2} px={3}>
-                {/* Filtres rapides */}
-                <MDBox display="flex" alignItems="center" mb={2}>
+                {/* <MDBox display="flex" alignItems="center" mb={2}>
                   <FormControl sx={{ minWidth: 220, mr: 2 }}>
                     <InputLabel id="filter-type-label">Période</InputLabel>
                     <Select
@@ -272,7 +245,6 @@ function SaisiesTemps() {
                   )}
                 </MDBox>
 
-                {/* Filtres actifs */}
                 {activeFilters > 0 && (
                   <MDBox display="flex" flexWrap="wrap" gap={1} mb={3}>
                     {collaborateurId !== null && (
@@ -300,10 +272,60 @@ function SaisiesTemps() {
                       />
                     )}
                   </MDBox>
-                )}
-
-                {/* Tableau de données */}
-                {isLoading ? (
+                )} */}
+                <FiltreRapide
+                  theme={theme}
+                  children1={
+                    <FormControl sx={{ minWidth: 220, mr: 2 }}>
+                      <InputLabel id="filter-type-label">Période</InputLabel>
+                      <Select
+                        labelId="filter-type-label"
+                        label="Période"
+                        value={filterType}
+                        onChange={(e) => setFilterType(e.target.value)}
+                        sx={{ height: 40 }}
+                      >
+                        <MenuItem value="today">{"Aujourd'hui"}</MenuItem>
+                        <MenuItem value="yesterday">Hier</MenuItem>
+                        <MenuItem value="thisWeek">Cette semaine</MenuItem>
+                        <MenuItem value="thisMonth">Ce mois</MenuItem>
+                        <MenuItem value="thisYear">Cette année</MenuItem>
+                        <MenuItem value="custom">Personnalisée</MenuItem>
+                      </Select>
+                    </FormControl>
+                  }
+                  children2={
+                    activeFilters > 0 && (
+                      <MDBox display="flex" flexWrap="wrap" gap={1} mb={3}>
+                        {collaborateurId !== null && selectedCollaborateur && (
+                          <Chip
+                            label={`Collaborateur: ${selectedCollaborateur?.nom} ${selectedCollaborateur?.prenom}`}
+                            onDelete={() => {
+                              setCollaborateurId(null);
+                              setSelectedCollaborateur(null);
+                              setFilters((prev) => ({ ...prev, collaborateurId: null }));
+                            }}
+                            size="small"
+                            color="primary"
+                          />
+                        )}
+                        {(selectedDate1 || selectedDate2) && (
+                          <Chip
+                            label={`Période: ${selectedDate1 || ""} - ${selectedDate2 || ""}`}
+                            onDelete={() => {
+                              setSelectedDate1("");
+                              setSelectedDate2("");
+                              setFilters((prev) => ({ ...prev, startDate: "", endDate: "" }));
+                            }}
+                            size="small"
+                            color="primary"
+                          />
+                        )}
+                      </MDBox>
+                    )
+                  }
+                />
+                {/* {isLoading ? (
                   <MDBox
                     display="flex"
                     justifyContent="center"
@@ -324,7 +346,6 @@ function SaisiesTemps() {
                       noEndBorder={true}
                     />
 
-                    {/* Contrôles de pagination */}
                     <MDBox display="flex" justifyContent="flex-end" alignItems="center" mt={2}>
                       <TablePagination
                         component="div"
@@ -347,7 +368,18 @@ function SaisiesTemps() {
                       />
                     </MDBox>
                   </>
-                )}
+                )} */}
+                <Table
+                  columns={columns}
+                  rows={rows}
+                  isLoading={isLoading}
+                  total={total}
+                  page={page}
+                  rowsPerPage={rowsPerPage}
+                  onPageChange={onPageChange}
+                  onRowsPerPageChange={onRowsPerPageChange}
+                  theme={theme}
+                />
               </MDBox>
             </Card>
           </Grid>
