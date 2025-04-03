@@ -12,7 +12,6 @@ import MDButton from "components/MDButton";
 
 // Material Dashboard 2 React example components
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 
 // API et Redux
 import {
@@ -24,6 +23,7 @@ import { selectCurrentUser } from "store/slices/authSlice";
 
 // React hooks
 import { useState, useMemo } from "react";
+import DashboardNavbar from "../DashboardNavbar";
 
 function Notifications() {
   const collaborateurId = useSelector(selectCurrentUser);

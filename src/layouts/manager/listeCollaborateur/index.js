@@ -9,11 +9,12 @@ import DataTable from "examples/Tables/DataTable";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "store/slices/authSlice";
 import { useUsersTableData } from "./data/useUsersTableData";
-import { CircularProgress, IconButton } from "@mui/material";
-import { exportToExcel } from "functions/exportToExcel";
-import exceller from "assets/images/icons/flags/exceller.png";
+import { CircularProgress, useTheme } from "@mui/material";
+import { Header } from "layouts/shared/Header";
 
 function CollaborateursList() {
+  const theme = useTheme();
+
   const managerId = useSelector(selectCurrentUser);
   const { columns, rows, isLoading } = useUsersTableData(managerId);
   console.log(columns, rows, isLoading);
@@ -24,32 +25,14 @@ function CollaborateursList() {
       <MDBox pt={6} pb={3}>
         <Grid container spacing={6}>
           <Grid item xs={12}>
-            <Card>
-              <MDBox
-                mx={2}
-                mt={-3}
-                py={3}
-                px={2}
-                variant="gradient"
-                bgColor="info"
-                borderRadius="lg"
-                coloredShadow="info"
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <MDTypography variant="h6" color="white">
-                  Liste des Collaborateurs
-                </MDTypography>
-                <MDBox>
-                  <IconButton
-                    color="white"
-                    onClick={() => exportToExcel(rows, "Liste_des_Collaborateurs")}
-                  >
-                    <img src={exceller} alt="Exporter en Excel" style={{ width: 30, height: 30 }} />
-                  </IconButton>
-                </MDBox>
-              </MDBox>
+            <Card
+              sx={{
+                borderRadius: "15px",
+                boxShadow: "0 8px 24px 0 rgba(0,0,0,0.08)",
+                overflow: "hidden",
+              }}
+            >
+              <Header rows={rows} theme={theme} title={"Table des Collaborateurs"} />
               <MDBox pt={3}>
                 {isLoading ? (
                   <MDBox

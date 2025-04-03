@@ -7,7 +7,6 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import DataTable from "examples/Tables/DataTable";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "store/slices/authSlice";
@@ -15,6 +14,7 @@ import { useCongesTableData } from "./data/useCongesTableData";
 import { TextField, MenuItem, CircularProgress } from "@mui/material";
 import { convertDateFormat } from "functions/dateTime";
 import { isDateInRange } from "functions/dateTime";
+import DashboardNavbar from "../DashboardNavbar";
 
 function CongesListCollaborateur() {
   const collaborateurId = useSelector(selectCurrentUser);

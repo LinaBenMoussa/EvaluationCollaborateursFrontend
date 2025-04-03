@@ -6,35 +6,51 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "store/slices/authSlice";
 import { usePointageTableData } from "./data/usePointageTableData";
-import { useTheme, useMediaQuery, alpha } from "@mui/material";
-import { FiltreAvancee } from "./components/FiltreAvancee";
+import {
+  useTheme,
+  useMediaQuery,
+  alpha,
+  TextField,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
+  Chip,
+} from "@mui/material";
 import MDBox from "components/MDBox";
-import { HistoriqueHeader } from "./components/Header";
-import { HistoriqueContent } from "./components/content";
+import { Header } from "layouts/shared/Header";
+import MDTypography from "components/MDTypography";
+import AutocompleteField from "layouts/shared/autocompleteField";
+import { FiltreAvancee } from "layouts/shared/FiltreAvancee";
+import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
+import FiltreRapide from "layouts/shared/FiltreRapide";
+import Table from "layouts/shared/Table";
 
 function Historique() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const collaborateurId = useSelector(selectCurrentUser);
+  const managerId = useSelector(selectCurrentUser);
+  const [collaborateurId, setCollaborateurId] = useState(null);
+  const [selectedCollaborateur, setSelectedCollaborateur] = useState(null);
   const [selectedDate1, setSelectedDate1] = useState("");
   const [selectedDate2, setSelectedDate2] = useState("");
-  const [filterType, setFilterType] = useState("today");
+  const [filterType, setFilterType] = useState("thisMonth");
   const [openFilter, setOpenFilter] = useState(false);
   const [activeFilters, setActiveFilters] = useState(0);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(100);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [filters, setFilters] = useState({
     startDate: "",
     endDate: "",
+    collaborateurId: null,
   });
 
   // Fetch data with API filters and pagination
-  const { columns, rows, isLoading, total, handlePageChange, handlePageSizeChange } =
-    usePointageTableData(collaborateurId, {
-      ...filters,
-      page: page,
-      pageSize: rowsPerPage,
-    });
+  const { columns, rows, isLoading, total } = usePointageTableData(managerId, {
+    ...filters,
+    page: page,
+    pageSize: rowsPerPage,
+  });
 
   // Met à jour automatiquement les dates en fonction du filtre sélectionné
   useEffect(() => {
@@ -82,10 +98,17 @@ function Historique() {
       startDate: start,
       endDate: end,
     }));
-
-    // Reset to first page when filters change
     setPage(0);
   }, [filterType]);
+
+  useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      collaborateurId,
+    }));
+
+    setPage(0);
+  }, [collaborateurId]);
 
   // Update date filters when custom dates are selected
   useEffect(() => {
@@ -95,7 +118,7 @@ function Historique() {
         startDate: selectedDate1,
         endDate: selectedDate2,
       }));
-
+      setOpenFilter(true);
       // Reset to first page when filters change
       setPage(0);
     }
@@ -104,18 +127,23 @@ function Historique() {
   // Compte les filtres actifs
   useEffect(() => {
     let count = 0;
+    if (collaborateurId !== null) count++;
     if (selectedDate1 || selectedDate2) count++;
+    console.log("activeFilters", activeFilters);
     setActiveFilters(count);
-  }, [selectedDate1, selectedDate2]);
+  }, [collaborateurId, selectedDate1, selectedDate2]);
 
   // Réinitialise tous les filtres
   const handleResetFilters = () => {
+    setCollaborateurId(null);
+    setSelectedCollaborateur(null);
     setSelectedDate1("");
     setSelectedDate2("");
-    setFilterType("today");
+    setFilterType("thisMonth");
     setFilters({
       startDate: "",
       endDate: "",
+      collaborateurId: null,
     });
     setPage(0);
   };
@@ -124,6 +152,7 @@ function Historique() {
     setFilters({
       startDate: selectedDate1,
       endDate: selectedDate2,
+      collaborateurId: collaborateurId,
     });
     setPage(0);
     setOpenFilter(false);
@@ -132,7 +161,6 @@ function Historique() {
   // Handle page change
   const onPageChange = (event, newPage) => {
     setPage(newPage);
-    handlePageChange(newPage);
   };
 
   // Handle rows per page change
@@ -140,7 +168,6 @@ function Historique() {
     const newRowsPerPage = parseInt(event.target.value, 25);
     setRowsPerPage(newRowsPerPage);
     setPage(0);
-    handlePageSizeChange(newRowsPerPage);
   };
 
   return (
@@ -156,34 +183,99 @@ function Historique() {
                 overflow: "hidden",
               }}
             >
-              <HistoriqueHeader
+              <Header
                 rows={rows}
                 activeFilters={activeFilters}
                 setOpenFilter={setOpenFilter}
                 theme={theme}
+                title={"Historique des pointages"}
+                filtreExiste
               />
-
-              <HistoriqueContent
-                theme={theme}
-                isMobile={isMobile}
-                filterType={filterType}
-                setFilterType={setFilterType}
-                activeFilters={activeFilters}
-                handleResetFilters={handleResetFilters}
-                selectedDate1={selectedDate1}
-                selectedDate2={selectedDate2}
-                setSelectedDate1={setSelectedDate1}
-                setSelectedDate2={setSelectedDate2}
-                setFilters={setFilters}
-                isLoading={isLoading}
-                columns={columns}
-                rows={rows}
-                total={total}
-                page={page}
-                rowsPerPage={rowsPerPage}
-                onPageChange={onPageChange}
-                onRowsPerPageChange={onRowsPerPageChange}
-              />
+              <MDBox p={3}>
+                <FiltreRapide
+                  activeFilters={activeFilters}
+                  handleResetFilters={handleResetFilters}
+                  theme={theme}
+                  setFilters={setFilters}
+                  fields={
+                    <FormControl sx={{ minWidth: 220, mb: isMobile ? 2 : 0 }}>
+                      <InputLabel id="filter-type-label">Période</InputLabel>
+                      <Select
+                        labelId="filter-type-label"
+                        label="Période"
+                        value={filterType}
+                        onChange={(e) => setFilterType(e.target.value)}
+                        sx={{
+                          height: 45,
+                          "&.MuiOutlinedInput-root": {
+                            borderRadius: "8px",
+                          },
+                        }}
+                      >
+                        <MenuItem value="today">{"Aujourd'hui"}</MenuItem>
+                        <MenuItem value="yesterday">Hier</MenuItem>
+                        <MenuItem value="thisWeek">Cette semaine</MenuItem>
+                        <MenuItem value="thisMonth">Ce mois</MenuItem>
+                        <MenuItem value="thisYear">Cette année</MenuItem>
+                        <MenuItem value="custom">Personnalisée</MenuItem>
+                      </Select>
+                    </FormControl>
+                  }
+                  chip={
+                    activeFilters > 0 && (
+                      <MDBox display="flex" flexWrap="wrap" gap={1} mb={3}>
+                        {collaborateurId !== null && (
+                          <Chip
+                            label={`Collaborateur: ${selectedCollaborateur?.nom} ${selectedCollaborateur?.prenom}`}
+                            onDelete={() => {
+                              setCollaborateurId(null);
+                              setSelectedCollaborateur(null);
+                              setFilters((prev) => ({ ...prev, collaborateurId: null }));
+                            }}
+                            size="small"
+                            color="primary"
+                            sx={{
+                              borderRadius: "6px",
+                              fontWeight: "medium",
+                              "& .MuiChip-label": { px: 2 },
+                              "& .MuiChip-deleteIcon": { color: "white" },
+                            }}
+                          />
+                        )}
+                        {(selectedDate1 || selectedDate2) && (
+                          <Chip
+                            label={`Période: ${selectedDate1 || ""} - ${selectedDate2 || ""}`}
+                            onDelete={() => {
+                              setSelectedDate1("");
+                              setSelectedDate2("");
+                              setFilters((prev) => ({ ...prev, startDate: "", endDate: "" }));
+                            }}
+                            size="small"
+                            color="primary"
+                            sx={{
+                              borderRadius: "6px",
+                              fontWeight: "medium",
+                              "& .MuiChip-label": { px: 2 },
+                              "& .MuiChip-deleteIcon": { color: "white" },
+                            }}
+                          />
+                        )}
+                      </MDBox>
+                    )
+                  }
+                />
+                <Table
+                  columns={columns}
+                  rows={rows}
+                  isLoading={isLoading}
+                  total={total}
+                  page={page}
+                  rowsPerPage={rowsPerPage}
+                  onPageChange={onPageChange}
+                  onRowsPerPageChange={onRowsPerPageChange}
+                  theme={theme}
+                />
+              </MDBox>
             </Card>
           </Grid>
         </Grid>
@@ -191,19 +283,51 @@ function Historique() {
 
       {/* Tiroir de filtres */}
       <FiltreAvancee
-        handleApplyFilters={handleApplyFilters}
-        handleResetFilters={handleResetFilters}
-        isMobile={isMobile}
         openFilter={openFilter}
         setOpenFilter={setOpenFilter}
-        selectedDate1={selectedDate1}
-        setSelectedDate1={setSelectedDate1}
-        selectedDate2={selectedDate2}
-        setSelectedDate2={setSelectedDate2}
+        isMobile={isMobile}
         theme={theme}
+        handleApplyFilters={handleApplyFilters}
+        handleResetFilters={handleResetFilters}
         alpha={alpha}
-        setFilterType={setFilterType}
-      />
+      >
+        {/* Filtre de période */}
+        <MDBox>
+          <MDTypography variant="subtitle1" fontWeight="medium" mb={1} color="text">
+            Période personnalisée
+          </MDTypography>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <TextField
+                type="date"
+                label="De"
+                InputLabelProps={{ shrink: true }}
+                value={selectedDate1}
+                onChange={(e) => {
+                  setFilterType("custom");
+                  setSelectedDate1(e.target.value);
+                }}
+                fullWidth
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: "8px" } }}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                type="date"
+                label="À"
+                InputLabelProps={{ shrink: true }}
+                value={selectedDate2}
+                onChange={(e) => {
+                  setFilterType("custom");
+                  setSelectedDate2(e.target.value);
+                }}
+                fullWidth
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: "8px" } }}
+              />
+            </Grid>
+          </Grid>
+        </MDBox>
+      </FiltreAvancee>
     </DashboardLayout>
   );
 }

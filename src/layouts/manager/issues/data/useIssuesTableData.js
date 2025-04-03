@@ -41,6 +41,22 @@ const STATUS_TRANSLATIONS = {
   "Validation Offre.": "Validation de l'offre",
   "clôture provisoire": "Clôture provisoire",
 };
+const STATUS_TRANSLATIONS_REVERSE = {
+  Nouveau: "New",
+  Résolu: "Resolved",
+  Fermé: "Closed",
+  Réouvert: "Reopened",
+  Assigné: "Assigned",
+  Rejeté: "Rejected",
+  Reporté: "Deffered",
+  Dupliqué: "Duplicate",
+  Ambigu: "Ambiguous",
+  "En cours": "in progress",
+  Ouvert: "open",
+  "Négociation de l'offre": "Négociation Offre",
+  "Validation de l'offre": "Validation Offre.",
+  "Clôture provisoire": "clôture provisoire",
+};
 
 export function useIssuesTableData(managerId, filters = {}) {
   const {
@@ -75,7 +91,7 @@ export function useIssuesTableData(managerId, filters = {}) {
       startDateFin,
       endDateFin,
       ...(collaborateurId !== null && { collaborateurId }),
-      status: status !== "Tous" ? status : undefined,
+      status: status !== "Tous" ? STATUS_TRANSLATIONS_REVERSE[status] : undefined,
       offset,
       limit: pageSize,
     },

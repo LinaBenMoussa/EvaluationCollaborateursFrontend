@@ -4,12 +4,12 @@ import Card from "@mui/material/Card";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import DataTable from "examples/Tables/DataTable";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "store/slices/authSlice";
 import { CircularProgress, TextField, TablePagination } from "@mui/material";
 import { usePointageTableData } from "./data/usePointageTableData";
+import DashboardNavbar from "../DashboardNavbar";
 
 function ListPointage() {
   const collaborateurId = useSelector(selectCurrentUser);

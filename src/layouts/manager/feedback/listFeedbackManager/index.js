@@ -7,6 +7,7 @@ import {
   IconButton,
   TextField,
   Pagination,
+  useTheme,
 } from "@mui/material";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
@@ -24,8 +25,7 @@ import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
 import { formatDateWithTime } from "functions/dateTime";
 import { selectCurrentUser } from "store/slices/authSlice";
 import { useFiltreFeedbacksQuery } from "store/api/feedbackApi";
-import { exportToExcel } from "functions/exportToExcel";
-import exceller from "assets/images/icons/flags/exceller.png";
+import { Header } from "layouts/shared/Header";
 
 function FeedbackListManager() {
   const [collaborateurId, setCollaborateurId] = useState(null);
@@ -35,11 +35,11 @@ function FeedbackListManager() {
   const [selectedDate2, setSelectedDate2] = useState("");
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const theme = useTheme();
 
   const navigate = useNavigate();
   const managerId = useSelector(selectCurrentUser);
 
-  // Use the new filter API query
   const {
     data: feedbackResponse = {
       feedbacks: [],
@@ -51,14 +51,14 @@ function FeedbackListManager() {
     startDate: selectedDate1,
     endDate: selectedDate2,
     ...(collaborateurId !== null && { collaborateurId }),
-    type: filterType === "all" ? null : filterType,
+    ...(filterType !== "all" && { type: filterType }),
     offset: (page - 1) * rowsPerPage,
     limit: rowsPerPage,
   });
 
   const exportData = feedbackResponse.feedbacks.map((feedback) => ({
     id: feedback.id,
-    date_feedback: formatDateWithTime(feedback.date_feedback),
+    date: formatDateWithTime(feedback.date_feedback),
     manager: `${feedback.manager.nom} ${feedback.manager.prenom}`,
     collaborateur: `${feedback.collaborateur.nom} ${feedback.collaborateur.prenom}`,
     commentaire: feedback.commentaire,
@@ -90,32 +90,19 @@ function FeedbackListManager() {
       <MDBox pt={6} pb={3}>
         <Grid container spacing={6}>
           <Grid item xs={12}>
-            <Card>
-              <MDBox
-                mx={2}
-                mt={-3}
-                py={3}
-                px={2}
-                variant="gradient"
-                bgColor="info"
-                borderRadius="lg"
-                coloredShadow="info"
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <MDTypography variant="h6" color="white">
-                  {"Liste d'évaluations"}
-                </MDTypography>
-                <MDBox>
-                  <IconButton
-                    color="white"
-                    onClick={() => exportToExcel(exportData, "Liste_des_Evaluations")}
-                  >
-                    <img src={exceller} alt="Exporter en Excel" style={{ width: 30, height: 30 }} />
-                  </IconButton>
-                </MDBox>
-              </MDBox>
+            <Card
+              sx={{
+                borderRadius: "15px",
+                boxShadow: "0 8px 24px 0 rgba(0,0,0,0.08)",
+                overflow: "hidden",
+              }}
+            >
+              <Header
+                rows={exportData}
+                theme={theme}
+                fileName="Évaluations"
+                title={"Liste d'évaluations"}
+              />
 
               <MDBox p={3}>
                 <Grid container spacing={2} alignItems="center">

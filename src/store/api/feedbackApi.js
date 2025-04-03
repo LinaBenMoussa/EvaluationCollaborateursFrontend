@@ -22,10 +22,10 @@ export const feedbackApi = api.injectEndpoints({
       }),
     }),
     filtreFeedbacks: builder.query({
-      query: ({ managerId, startDate, endDate, collaborateurId, offset, limit }) => ({
+      query: ({ managerId, type, startDate, endDate, collaborateurId, offset, limit }) => ({
         url: `/feedback/filtre`,
         method: "GET",
-        params: { managerId, startDate, endDate, collaborateurId, offset, limit },
+        params: { managerId, type, startDate, endDate, collaborateurId, offset, limit },
       }),
     }),
   }),

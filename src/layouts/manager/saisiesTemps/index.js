@@ -14,31 +14,23 @@ import DataTable from "examples/Tables/DataTable";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "store/slices/authSlice";
 import {
-  CircularProgress,
   FormControl,
   InputLabel,
   MenuItem,
   Select,
   TextField,
   Chip,
-  Tooltip,
-  Badge,
-  Paper,
-  Box,
   useTheme,
   useMediaQuery,
   alpha,
-  Pagination,
-  TablePagination,
 } from "@mui/material";
 import { useSaisiesTableData } from "./data/useSaisiesTableData";
 import AutocompleteField from "layouts/shared/autocompleteField";
 import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
-import { exportToExcel } from "functions/exportToExcel";
-import exceller from "assets/images/icons/flags/exceller.png";
 import { Header } from "layouts/shared/Header";
 import FiltreRapide from "layouts/shared/FiltreRapide";
 import Table from "layouts/shared/Table";
+import { FiltreAvancee } from "layouts/shared/FiltreAvancee";
 
 function SaisiesTemps() {
   const theme = useTheme();
@@ -52,7 +44,7 @@ function SaisiesTemps() {
   const [openFilter, setOpenFilter] = useState(false);
   const [activeFilters, setActiveFilters] = useState(0);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(25);
+  const [rowsPerPage, setRowsPerPage] = useState(15);
   const [filters, setFilters] = useState({
     startDate: "",
     endDate: "",
@@ -60,14 +52,12 @@ function SaisiesTemps() {
   });
 
   // Fetch data with API filters and pagination
-  const { columns, rows, isLoading, total, handlePageChange, handlePageSizeChange } =
-    useSaisiesTableData(managerId, {
-      ...filters,
-      page: page,
-      pageSize: rowsPerPage,
-    });
+  const { columns, rows, isLoading, total } = useSaisiesTableData(managerId, {
+    ...filters,
+    page: page,
+    pageSize: rowsPerPage,
+  });
 
-  // Met à jour automatiquement les dates en fonction du filtre sélectionné
   useEffect(() => {
     const now = new Date();
     let start = "";
@@ -180,15 +170,13 @@ function SaisiesTemps() {
   // Handle page change
   const onPageChange = (event, newPage) => {
     setPage(newPage);
-    handlePageChange(newPage);
   };
 
   // Handle rows per page change
   const onRowsPerPageChange = (event) => {
-    const newRowsPerPage = parseInt(event.target.value, 25);
+    const newRowsPerPage = parseInt(event.target.value, 10);
     setRowsPerPage(newRowsPerPage);
     setPage(0);
-    handlePageSizeChange(newRowsPerPage);
   };
 
   return (
@@ -210,72 +198,17 @@ function SaisiesTemps() {
                 setOpenFilter={setOpenFilter}
                 theme={theme}
                 title={"Table de saisies"}
+                fileName={"table_de_saisies"}
                 filtreExiste
               />
 
               <MDBox pt={3} pb={2} px={3}>
-                {/* <MDBox display="flex" alignItems="center" mb={2}>
-                  <FormControl sx={{ minWidth: 220, mr: 2 }}>
-                    <InputLabel id="filter-type-label">Période</InputLabel>
-                    <Select
-                      labelId="filter-type-label"
-                      label="Période"
-                      value={filterType}
-                      onChange={(e) => setFilterType(e.target.value)}
-                      sx={{ height: 40 }}
-                    >
-                      <MenuItem value="today">{"Aujourd'hui"}</MenuItem>
-                      <MenuItem value="yesterday">Hier</MenuItem>
-                      <MenuItem value="thisWeek">Cette semaine</MenuItem>
-                      <MenuItem value="thisMonth">Ce mois</MenuItem>
-                      <MenuItem value="thisYear">Cette année</MenuItem>
-                      <MenuItem value="custom">Personnalisée</MenuItem>
-                    </Select>
-                  </FormControl>
-
-                  {activeFilters > 0 && (
-                    <MDButton
-                      variant="text"
-                      color="error"
-                      size="small"
-                      onClick={handleResetFilters}
-                    >
-                      Réinitialiser les filtres
-                    </MDButton>
-                  )}
-                </MDBox>
-
-                {activeFilters > 0 && (
-                  <MDBox display="flex" flexWrap="wrap" gap={1} mb={3}>
-                    {collaborateurId !== null && (
-                      <Chip
-                        label={`Collaborateur: ${selectedCollaborateur?.nom} ${selectedCollaborateur?.prenom}`}
-                        onDelete={() => {
-                          setCollaborateurId(null);
-                          setSelectedCollaborateur(null);
-                          setFilters((prev) => ({ ...prev, collaborateurId: null }));
-                        }}
-                        size="small"
-                        color="primary"
-                      />
-                    )}
-                    {(selectedDate1 || selectedDate2) && (
-                      <Chip
-                        label={`Période: ${selectedDate1 || ""} - ${selectedDate2 || ""}`}
-                        onDelete={() => {
-                          setSelectedDate1("");
-                          setSelectedDate2("");
-                          setFilters((prev) => ({ ...prev, startDate: "", endDate: "" }));
-                        }}
-                        size="small"
-                        color="primary"
-                      />
-                    )}
-                  </MDBox>
-                )} */}
                 <FiltreRapide
+                  activeFilters={activeFilters}
+                  handleResetFilters={handleResetFilters}
                   theme={theme}
-                  children1={
+                  setFilters={setFilters}
+                  fields={
                     <FormControl sx={{ minWidth: 220, mr: 2 }}>
                       <InputLabel id="filter-type-label">Période</InputLabel>
                       <Select
@@ -294,7 +227,7 @@ function SaisiesTemps() {
                       </Select>
                     </FormControl>
                   }
-                  children2={
+                  chip={
                     activeFilters > 0 && (
                       <MDBox display="flex" flexWrap="wrap" gap={1} mb={3}>
                         {collaborateurId !== null && selectedCollaborateur && (
@@ -325,50 +258,6 @@ function SaisiesTemps() {
                     )
                   }
                 />
-                {/* {isLoading ? (
-                  <MDBox
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                    sx={{ minHeight: "300px" }}
-                  >
-                    <CircularProgress />
-                  </MDBox>
-                ) : (
-                  <>
-                    <DataTable
-                      table={{ columns, rows }}
-                      isSorted={true}
-                      entriesPerPage={{ defaultValue: 25, entries: [5, 10, 15, 20, 25] }} // 25 par défaut
-                      // Désactiver la pagination interne
-                      showTotalEntries={false}
-                      canSearch={true}
-                      noEndBorder={true}
-                    />
-
-                    <MDBox display="flex" justifyContent="flex-end" alignItems="center" mt={2}>
-                      <TablePagination
-                        component="div"
-                        count={total}
-                        page={page}
-                        onPageChange={onPageChange}
-                        rowsPerPage={rowsPerPage}
-                        onRowsPerPageChange={onRowsPerPageChange}
-                        rowsPerPageOptions={[5, 10, 25, 50]}
-                        labelRowsPerPage="Lignes par page:"
-                        labelDisplayedRows={({ from, to, count }) =>
-                          `${from}-${to} sur ${count !== -1 ? count : `plus de ${to}`}`
-                        }
-                        sx={{
-                          "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
-                            {
-                              margin: 0,
-                            },
-                        }}
-                      />
-                    </MDBox>
-                  </>
-                )} */}
                 <Table
                   columns={columns}
                   rows={rows}
@@ -385,165 +274,77 @@ function SaisiesTemps() {
           </Grid>
         </Grid>
       </MDBox>
-
-      {/* Tiroir de filtres */}
-      <Drawer
-        anchor="right"
-        open={openFilter}
-        onClose={() => setOpenFilter(false)}
-        sx={{
-          "& .MuiDrawer-paper": {
-            width: { xs: "100%", sm: 450 },
-            padding: 0,
-            borderTopLeftRadius: isMobile ? 0 : "15px",
-            borderBottomLeftRadius: isMobile ? 0 : "15px",
-          },
-        }}
+      <FiltreAvancee
+        openFilter={openFilter}
+        setOpenFilter={setOpenFilter}
+        isMobile={isMobile}
+        theme={theme}
+        handleApplyFilters={handleApplyFilters}
+        handleResetFilters={handleResetFilters}
+        alpha={alpha}
       >
-        <MDBox height="100%" display="flex" flexDirection="column">
-          <MDBox
-            p={3}
+        <MDBox>
+          <MDTypography variant="subtitle1" fontWeight="medium" mb={1} color="text">
+            Collaborateur
+          </MDTypography>
+          <AutocompleteField
+            useFetchHook={() => useGetCollaborateursByManagerQuery(managerId)}
+            fullWidth
+            setSelectedItem={setSelectedCollaborateur}
+            setIdItem={setCollaborateurId}
+            selectedItem={selectedCollaborateur}
+            label="Choisir un collaborateur"
             sx={{
-              borderBottom: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
-              backgroundColor: theme.palette.background.default,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "8px",
+              },
             }}
-          >
-            <MDBox display="flex" justifyContent="space-between" alignItems="center">
-              <MDTypography variant="h5" fontWeight="bold">
-                Filtres avancés
-              </MDTypography>
-              <IconButton
-                onClick={() => setOpenFilter(false)}
-                sx={{
-                  backgroundColor: alpha(theme.palette.text.primary, 0.05),
-                  "&:hover": { backgroundColor: alpha(theme.palette.text.primary, 0.1) },
+          />
+        </MDBox>
+        <MDBox>
+          <MDTypography variant="subtitle1" fontWeight="medium" mb={1} color="text">
+            Période personnalisée
+          </MDTypography>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <TextField
+                type="date"
+                label="De"
+                InputLabelProps={{ shrink: true }}
+                value={selectedDate1}
+                onChange={(e) => {
+                  setSelectedDate1(e.target.value);
+                  setFilterType("custom");
                 }}
-              >
-                <CloseIcon />
-              </IconButton>
-            </MDBox>
-          </MDBox>
-
-          <MDBox
-            p={3}
-            display="flex"
-            flexDirection="column"
-            gap={4}
-            flex="1"
-            overflow="auto"
-            sx={{
-              "&::-webkit-scrollbar": {
-                width: "8px",
-              },
-              "&::-webkit-scrollbar-thumb": {
-                backgroundColor: alpha(theme.palette.text.primary, 0.2),
-                borderRadius: "4px",
-              },
-            }}
-          >
-            {/* Filtre collaborateur */}
-            <MDBox>
-              <MDTypography variant="subtitle1" fontWeight="medium" mb={1} color="text">
-                Collaborateur
-              </MDTypography>
-              <AutocompleteField
-                useFetchHook={() => useGetCollaborateursByManagerQuery(managerId)}
                 fullWidth
-                setSelectedItem={setSelectedCollaborateur}
-                setIdItem={setCollaborateurId}
-                selectedItem={selectedCollaborateur}
-                label="Choisir un collaborateur"
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "8px",
                   },
                 }}
               />
-            </MDBox>
-            {/* Filtre de période */}
-            <MDBox>
-              <MDTypography variant="subtitle1" fontWeight="medium" mb={1} color="text">
-                Période personnalisée
-              </MDTypography>
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <TextField
-                    type="date"
-                    label="De"
-                    InputLabelProps={{ shrink: true }}
-                    value={selectedDate1}
-                    onChange={(e) => {
-                      setSelectedDate1(e.target.value);
-                      setFilterType("custom");
-                    }}
-                    fullWidth
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "8px",
-                      },
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    type="date"
-                    label="À"
-                    InputLabelProps={{ shrink: true }}
-                    value={selectedDate2}
-                    onChange={(e) => {
-                      setSelectedDate2(e.target.value);
-                      setFilterType("custom");
-                    }}
-                    fullWidth
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "8px",
-                      },
-                    }}
-                  />
-                </Grid>
-              </Grid>
-            </MDBox>
-          </MDBox>
-
-          {/* Boutons d'action */}
-          <MDBox
-            p={3}
-            display="flex"
-            justifyContent="space-between"
-            sx={{
-              borderTop: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
-              backgroundColor: theme.palette.background.default,
-            }}
-          >
-            <MDButton
-              color="error"
-              onClick={handleResetFilters}
-              variant="outlined"
-              sx={{
-                borderRadius: "8px",
-                textTransform: "none",
-                fontWeight: "medium",
-                px: 3,
-              }}
-            >
-              Réinitialiser
-            </MDButton>
-            <MDButton
-              color="info"
-              onClick={handleApplyFilters}
-              sx={{
-                borderRadius: "8px",
-                textTransform: "none",
-                fontWeight: "medium",
-                px: 3,
-              }}
-            >
-              Appliquer
-            </MDButton>
-          </MDBox>
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                type="date"
+                label="À"
+                InputLabelProps={{ shrink: true }}
+                value={selectedDate2}
+                onChange={(e) => {
+                  setSelectedDate2(e.target.value);
+                  setFilterType("custom");
+                }}
+                fullWidth
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "8px",
+                  },
+                }}
+              />
+            </Grid>
+          </Grid>
         </MDBox>
-      </Drawer>
+      </FiltreAvancee>
     </DashboardLayout>
   );
 }

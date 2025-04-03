@@ -41,8 +41,24 @@ const STATUS_TRANSLATIONS = {
   "Validation Offre.": "Validation de l'offre",
   "clôture provisoire": "Clôture provisoire",
 };
+const STATUS_TRANSLATIONS_REVERSE = {
+  Nouveau: "New",
+  Résolu: "Resolved",
+  Fermé: "Closed",
+  Réouvert: "Reopened",
+  Assigné: "Assigned",
+  Rejeté: "Rejected",
+  Reporté: "Deffered",
+  Dupliqué: "Duplicate",
+  Ambigu: "Ambiguous",
+  "En cours": "in progress",
+  Ouvert: "open",
+  "Négociation de l'offre": "Négociation Offre",
+  "Validation de l'offre": "Validation Offre.",
+  "Clôture provisoire": "clôture provisoire",
+};
 
-export function useIssuesTableData(filters = {}) {
+export function useIssuesTableData(collaborateurId, filters = {}) {
   const {
     startDateDebut,
     endDateDebut,
@@ -50,7 +66,6 @@ export function useIssuesTableData(filters = {}) {
     endDateEcheance,
     startDateFin,
     endDateFin,
-    collaborateurId,
     status,
     page = 0,
     pageSize = 10,
@@ -65,18 +80,23 @@ export function useIssuesTableData(filters = {}) {
     data = { issues: [], total: 0 },
     isLoading,
     isFetching,
-  } = useFiltreIssuesQuery({
-    startDateDebut,
-    endDateDebut,
-    startDateEcheance,
-    endDateEcheance,
-    startDateFin,
-    endDateFin,
-    collaborateurId,
-    status: status !== "Tous" ? status : undefined,
-    offset,
-    limit: pageSize,
-  });
+  } = useFiltreIssuesQuery(
+    {
+      collaborateurId,
+      startDateDebut,
+      endDateDebut,
+      startDateEcheance,
+      endDateEcheance,
+      startDateFin,
+      endDateFin,
+      status: status !== "Tous" ? STATUS_TRANSLATIONS_REVERSE[status] : undefined,
+      offset,
+      limit: pageSize,
+    },
+    {
+      skip: !collaborateurId,
+    }
+  );
 
   const { issues = [], total = 0 } = data;
   const navigateToSaisie = useCallback((id) => navigate(`/saisie/${id}`), [navigate]);

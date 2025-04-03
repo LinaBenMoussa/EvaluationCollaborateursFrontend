@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import {
   Box,
@@ -11,14 +11,13 @@ import {
   Select,
   TextField,
   Divider,
-  Paper,
   IconButton,
   Chip,
   Typography,
-  Badge,
-  Tooltip,
+  useTheme,
+  useMediaQuery,
+  alpha,
 } from "@mui/material";
-import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import TodayIcon from "@mui/icons-material/Today";
 import PersonIcon from "@mui/icons-material/Person";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -26,6 +25,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
@@ -35,6 +35,9 @@ import { useGetEmployeeCardsQuery } from "store/api/employeeCardApi";
 import { selectCurrentUser } from "store/slices/authSlice";
 import EmployeeCard from "./employeeCard";
 import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
+import { Header } from "layouts/shared/Header";
+import FiltreRapide from "layouts/shared/FiltreRapide";
+import { FiltreAvancee } from "layouts/shared/FiltreAvancee";
 
 // Status filter options with icons
 const statusOptions = [
@@ -64,12 +67,14 @@ const statusOptions = [
 ];
 
 function Pointage() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [collaborateurId, setCollaborateurId] = useState(null);
   const [selectedCollaborateur, setSelectedCollaborateur] = useState(null);
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
   const [filterType, setFilterType] = useState("today");
-  const [filtersExpanded, setFiltersExpanded] = useState(true);
+  const [openFilter, setOpenFilter] = useState(false);
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
 
   const managerId = useSelector(selectCurrentUser);
@@ -78,7 +83,10 @@ function Pointage() {
     data: employeeCards = [],
     isLoading,
     refetch: refetchEmployeeCards,
-  } = useGetEmployeeCardsQuery({ managerId, selectedDate });
+  } = useGetEmployeeCardsQuery({
+    managerId,
+    selectedDate,
+  });
 
   useEffect(() => {
     if (filterType === "today") {
@@ -87,12 +95,28 @@ function Pointage() {
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       setSelectedDate(yesterday.toISOString().split("T")[0]);
+    } else {
+      setOpenFilter(true);
     }
   }, [filterType]);
 
   useEffect(() => {
     refetchEmployeeCards();
   }, [selectedDate]);
+  useEffect(() => {
+    refetchEmployeeCards();
+  }, [collaborateurId]);
+
+  // Handle date change in the advanced filter
+  const handleDateChange = (e) => {
+    const newDate = e.target.value;
+    setSelectedDate(newDate);
+
+    // Change filter type to custom when date is manually selected
+    if (newDate !== new Date().toISOString().split("T")[0]) {
+      setFilterType("custom");
+    }
+  };
 
   // Count active filters
   useEffect(() => {
@@ -106,7 +130,8 @@ function Pointage() {
   const filteredEmployeeCards = useMemo(() => {
     return employeeCards.filter((card) => {
       const matchesCollaborateur =
-        collaborateurId === null || card.collaborateurId === collaborateurId;
+        collaborateurId === null ||
+        card.collaborateurNom === selectedCollaborateur.nom + " " + selectedCollaborateur.prenom;
       const matchesStatus = filterStatus === "all" || filterStatus === card.status;
       return matchesCollaborateur && matchesStatus;
     });
@@ -121,194 +146,118 @@ function Pointage() {
     setSelectedDate(new Date().toISOString().split("T")[0]);
   };
 
+  // Apply filters when drawer is closed
+  const handleApplyFilters = () => {
+    setOpenFilter(false);
+    refetchEmployeeCards();
+  };
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
-      <MDBox pt={6} pb={3}>
+      <MDBox pt={3} pb={3}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <Card>
-              <MDBox
-                mx={2}
-                mt={-3}
-                py={3}
-                px={2}
-                variant="gradient"
-                bgColor="info"
-                borderRadius="lg"
-                coloredShadow="info"
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Box display="flex" alignItems="center">
-                  <TodayIcon sx={{ mr: 1 }} />
-                  <MDTypography variant="h6" color="white">
-                    Pointage
-                  </MDTypography>
-                </Box>
-                <Badge badgeContent={activeFiltersCount} color="error" sx={{ mr: 1 }}>
-                  <Tooltip title={filtersExpanded ? "Réduire les filtres" : "Étendre les filtres"}>
-                    <IconButton
-                      color="white"
-                      size="small"
-                      onClick={() => setFiltersExpanded(!filtersExpanded)}
-                    >
-                      <FilterAltIcon />
-                    </IconButton>
-                  </Tooltip>
-                </Badge>
-              </MDBox>
+            <Card
+              sx={{
+                borderRadius: "15px",
+                boxShadow: "0 8px 24px 0 rgba(0,0,0,0.08)",
+                overflow: "hidden",
+              }}
+            >
+              <Header
+                rows={filteredEmployeeCards}
+                activeFilters={activeFiltersCount}
+                setOpenFilter={setOpenFilter}
+                theme={theme}
+                title={"Pointage"}
+                fileName={"pointage"}
+                filtreExiste
+                icon={<TodayIcon />}
+              />
 
-              {filtersExpanded && (
-                <Paper
-                  elevation={0}
-                  sx={{
-                    m: 2,
-                    p: 2,
-                    backgroundColor: "#f5f5f5",
-                    borderRadius: "8px",
-                  }}
-                >
-                  <Box display="flex" flexWrap="wrap" alignItems="center" gap={2}>
-                    <Box display="flex" alignItems="center" sx={{ minWidth: 260 }}>
-                      <PersonIcon sx={{ mr: 1, color: "text.secondary" }} />
-                      <AutocompleteField
-                        useFetchHook={() => useGetCollaborateursByManagerQuery(managerId)}
-                        fullWidth
-                        setSelectedItem={setSelectedCollaborateur}
-                        setIdItem={setCollaborateurId}
-                        selectedItem={selectedCollaborateur}
-                        label="Choisir un collaborateur"
-                        sx={{ backgroundColor: "white", borderRadius: "8px" }}
-                      />
-                    </Box>
-
-                    <FormControl sx={{ minWidth: 220 }}>
-                      <InputLabel id="filter-type-label">Période</InputLabel>
-                      <Select
-                        labelId="filter-type-label"
-                        label="Période"
-                        value={filterType}
-                        onChange={(e) => setFilterType(e.target.value)}
-                        sx={{ height: "45px", backgroundColor: "white", borderRadius: "8px" }}
-                        startAdornment={
-                          <CalendarTodayIcon
-                            fontSize="small"
-                            sx={{ mr: 1, ml: -0.5, color: "text.secondary" }}
+              <MDBox pt={3} pb={2} px={3}>
+                <FiltreRapide
+                  activeFilters={activeFiltersCount}
+                  handleResetFilters={handleResetFilters}
+                  theme={theme}
+                  fields={
+                    <>
+                      <FormControl sx={{ minWidth: 220, mr: 2 }}>
+                        <InputLabel id="filter-type-label">Période</InputLabel>
+                        <Select
+                          labelId="filter-type-label"
+                          label="Période"
+                          value={filterType}
+                          onChange={(e) => setFilterType(e.target.value)}
+                          sx={{ height: 40 }}
+                          startAdornment={
+                            <CalendarTodayIcon
+                              fontSize="small"
+                              sx={{ mr: 1, ml: -0.5, color: "text.secondary" }}
+                            />
+                          }
+                        >
+                          <MenuItem value="today">{"Aujourd'hui"}</MenuItem>
+                          <MenuItem value="yesterday">Hier</MenuItem>
+                          <MenuItem value="custom">Personnalisée</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </>
+                  }
+                  chip={
+                    activeFiltersCount > 0 && (
+                      <MDBox display="flex" flexWrap="wrap" gap={1} mb={3}>
+                        {collaborateurId !== null && (
+                          <Chip
+                            label={`Collaborateur: ${
+                              selectedCollaborateur?.nom + " " + selectedCollaborateur?.prenom ||
+                              "Sélectionné"
+                            }`}
+                            onDelete={() => {
+                              setCollaborateurId(null);
+                              setSelectedCollaborateur(null);
+                            }}
+                            size="small"
+                            color="primary"
+                            icon={<PersonIcon fontSize="small" />}
                           />
-                        }
-                      >
-                        <MenuItem value="today">{"Aujourd'hui"}</MenuItem>
-                        <MenuItem value="yesterday">Hier</MenuItem>
-                        <MenuItem value="custom">Personnalisée</MenuItem>
-                      </Select>
-                    </FormControl>
+                        )}
+                        {filterStatus !== "all" && (
+                          <Chip
+                            label={`Status: ${
+                              statusOptions.find((o) => o.value === filterStatus)?.label ||
+                              filterStatus
+                            }`}
+                            onDelete={() => setFilterStatus("all")}
+                            size="small"
+                            color="primary"
+                            icon={statusOptions.find((o) => o.value === filterStatus)?.icon}
+                          />
+                        )}
+                        {filterType !== "today" && (
+                          <Chip
+                            label={`Période: ${
+                              filterType === "yesterday"
+                                ? "Hier"
+                                : "Date personnalisée: " + selectedDate
+                            }`}
+                            onDelete={() => {
+                              setFilterType("today");
+                              setSelectedDate(new Date().toISOString().split("T")[0]);
+                            }}
+                            size="small"
+                            color="primary"
+                            icon={<CalendarTodayIcon fontSize="small" />}
+                          />
+                        )}
+                      </MDBox>
+                    )
+                  }
+                />
 
-                    <FormControl sx={{ minWidth: 220 }}>
-                      <InputLabel id="status-label">Status</InputLabel>
-                      <Select
-                        labelId="status-label"
-                        label="Status"
-                        value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
-                        sx={{ height: "45px", backgroundColor: "white", borderRadius: "8px" }}
-                        startAdornment={
-                          <Box sx={{ mr: 1, ml: -0.5, color: "text.secondary" }}>
-                            {statusOptions.find((option) => option.value === filterStatus)
-                              ?.icon || <FilterAltIcon fontSize="small" />}
-                          </Box>
-                        }
-                      >
-                        {statusOptions.map((option) => (
-                          <MenuItem key={option.value} value={option.value}>
-                            <Box display="flex" alignItems="center">
-                              {option.icon}
-                              <Box ml={1}>{option.label}</Box>
-                            </Box>
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+                <Divider sx={{ my: 2 }} />
 
-                    {filterType === "custom" && (
-                      <TextField
-                        type="date"
-                        label="Date personnalisée"
-                        InputLabelProps={{ shrink: true }}
-                        value={selectedDate}
-                        onChange={(e) => setSelectedDate(e.target.value)}
-                        inputProps={{ max: new Date().toISOString().split("T")[0] }}
-                        sx={{ minWidth: 220, backgroundColor: "white", borderRadius: "8px" }}
-                      />
-                    )}
-
-                    <Tooltip title="Rafraîchir les données">
-                      <IconButton
-                        onClick={() => refetchEmployeeCards()}
-                        sx={{ backgroundColor: "white", boxShadow: 1 }}
-                      >
-                        <RefreshIcon />
-                      </IconButton>
-                    </Tooltip>
-
-                    <Tooltip title="Réinitialiser les filtres">
-                      <IconButton
-                        onClick={handleResetFilters}
-                        sx={{ backgroundColor: "white", boxShadow: 1 }}
-                        disabled={activeFiltersCount === 0}
-                      >
-                        <ClearIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-
-                  {activeFiltersCount > 0 && (
-                    <Box display="flex" flexWrap="wrap" gap={1} mt={2}>
-                      {collaborateurId !== null && (
-                        <Chip
-                          label={`Collaborateur: ${selectedCollaborateur?.label || "Sélectionné"}`}
-                          onDelete={() => {
-                            setCollaborateurId(null);
-                            setSelectedCollaborateur(null);
-                          }}
-                          color="primary"
-                          variant="outlined"
-                          icon={<PersonIcon fontSize="small" />}
-                        />
-                      )}
-                      {filterStatus !== "all" && (
-                        <Chip
-                          label={`Status: ${
-                            statusOptions.find((o) => o.value === filterStatus)?.label ||
-                            filterStatus
-                          }`}
-                          onDelete={() => setFilterStatus("all")}
-                          color="primary"
-                          variant="outlined"
-                          icon={statusOptions.find((o) => o.value === filterStatus)?.icon}
-                        />
-                      )}
-                      {filterType !== "today" && (
-                        <Chip
-                          label={`Période: ${filterType === "yesterday" ? "Hier" : selectedDate}`}
-                          onDelete={() => {
-                            setFilterType("today");
-                            setSelectedDate(new Date().toISOString().split("T")[0]);
-                          }}
-                          color="primary"
-                          variant="outlined"
-                          icon={<CalendarTodayIcon fontSize="small" />}
-                        />
-                      )}
-                    </Box>
-                  )}
-                </Paper>
-              )}
-
-              <Divider />
-
-              <MDBox p={3}>
                 {isLoading ? (
                   <Box
                     display="flex"
@@ -327,7 +276,7 @@ function Pointage() {
                         {filteredEmployeeCards.length !== 1 ? "s" : ""}
                       </Typography>
 
-                      {/* Summary stats could go here */}
+                      {/* Summary stats */}
                       <Box display="flex" gap={2}>
                         <Chip
                           label={`${employeeCards.filter((c) => !c.late).length} à l'heure`}
@@ -385,6 +334,74 @@ function Pointage() {
           </Grid>
         </Grid>
       </MDBox>
+
+      <FiltreAvancee
+        openFilter={openFilter}
+        setOpenFilter={setOpenFilter}
+        isMobile={isMobile}
+        theme={theme}
+        handleApplyFilters={handleApplyFilters}
+        handleResetFilters={handleResetFilters}
+        alpha={alpha}
+      >
+        <MDBox>
+          <MDTypography variant="subtitle1" fontWeight="medium" mb={1} color="text">
+            Collaborateur
+          </MDTypography>
+          <AutocompleteField
+            useFetchHook={() => useGetCollaborateursByManagerQuery(managerId)}
+            fullWidth
+            setSelectedItem={setSelectedCollaborateur}
+            setIdItem={setCollaborateurId}
+            selectedItem={selectedCollaborateur}
+            label="Choisir un collaborateur"
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "8px",
+              },
+            }}
+          />
+        </MDBox>
+        <MDBox>
+          <MDTypography variant="subtitle1" fontWeight="medium" mb={1} color="text">
+            Status
+          </MDTypography>
+          <FormControl fullWidth>
+            <InputLabel id="status-advanced-label">Status</InputLabel>
+            <Select
+              labelId="status-advanced-label"
+              label="Status"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              sx={{ height: 45 }}
+            >
+              {statusOptions.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  <Box display="flex" alignItems="center">
+                    {option.icon}
+                    <Box ml={1}>{option.label}</Box>
+                  </Box>
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </MDBox>
+        <MDBox>
+          <MDTypography variant="subtitle1" fontWeight="medium" mb={1} color="text">
+            Date
+          </MDTypography>
+          <TextField
+            type="date"
+            label="Date personnalisée"
+            InputLabelProps={{ shrink: true }}
+            value={selectedDate}
+            onChange={handleDateChange}
+            inputProps={{ max: new Date().toISOString().split("T")[0] }}
+            fullWidth
+            sx={{ height: 45 }}
+          />
+        </MDBox>
+      </FiltreAvancee>
     </DashboardLayout>
   );
 }

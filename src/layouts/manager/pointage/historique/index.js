@@ -34,11 +34,11 @@ function Historique() {
   const [selectedCollaborateur, setSelectedCollaborateur] = useState(null);
   const [selectedDate1, setSelectedDate1] = useState("");
   const [selectedDate2, setSelectedDate2] = useState("");
-  const [filterType, setFilterType] = useState("today");
+  const [filterType, setFilterType] = useState("thisMonth");
   const [openFilter, setOpenFilter] = useState(false);
   const [activeFilters, setActiveFilters] = useState(0);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(100);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [filters, setFilters] = useState({
     startDate: "",
     endDate: "",
@@ -46,12 +46,11 @@ function Historique() {
   });
 
   // Fetch data with API filters and pagination
-  const { columns, rows, isLoading, total, handlePageChange, handlePageSizeChange } =
-    usePointageTableData(managerId, {
-      ...filters,
-      page: page,
-      pageSize: rowsPerPage,
-    });
+  const { columns, rows, isLoading, total } = usePointageTableData(managerId, {
+    ...filters,
+    page: page,
+    pageSize: rowsPerPage,
+  });
 
   // Met à jour automatiquement les dates en fonction du filtre sélectionné
   useEffect(() => {
@@ -99,19 +98,15 @@ function Historique() {
       startDate: start,
       endDate: end,
     }));
-
-    // Reset to first page when filters change
     setPage(0);
   }, [filterType]);
 
-  // Update collaborateurId filter when it changes
   useEffect(() => {
     setFilters((prev) => ({
       ...prev,
       collaborateurId,
     }));
 
-    // Reset to first page when filters change
     setPage(0);
   }, [collaborateurId]);
 
@@ -144,7 +139,7 @@ function Historique() {
     setSelectedCollaborateur(null);
     setSelectedDate1("");
     setSelectedDate2("");
-    setFilterType("today");
+    setFilterType("thisMonth");
     setFilters({
       startDate: "",
       endDate: "",
@@ -166,7 +161,6 @@ function Historique() {
   // Handle page change
   const onPageChange = (event, newPage) => {
     setPage(newPage);
-    handlePageChange(newPage);
   };
 
   // Handle rows per page change
@@ -174,7 +168,6 @@ function Historique() {
     const newRowsPerPage = parseInt(event.target.value, 25);
     setRowsPerPage(newRowsPerPage);
     setPage(0);
-    handlePageSizeChange(newRowsPerPage);
   };
 
   return (
@@ -204,7 +197,7 @@ function Historique() {
                   handleResetFilters={handleResetFilters}
                   theme={theme}
                   setFilters={setFilters}
-                  children1={
+                  fields={
                     <FormControl sx={{ minWidth: 220, mb: isMobile ? 2 : 0 }}>
                       <InputLabel id="filter-type-label">Période</InputLabel>
                       <Select
@@ -228,7 +221,7 @@ function Historique() {
                       </Select>
                     </FormControl>
                   }
-                  children2={
+                  chip={
                     activeFilters > 0 && (
                       <MDBox display="flex" flexWrap="wrap" gap={1} mb={3}>
                         {collaborateurId !== null && (

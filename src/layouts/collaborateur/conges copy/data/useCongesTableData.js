@@ -22,16 +22,21 @@ export function useCongesTableData(collaborateurId, filters = {}) {
     data = { conges: [], total: 0 },
     isLoading,
     isFetching,
-  } = useFiltreCongesQuery({
-    startDateDebut,
-    endDateDebut,
-    startDateFin,
-    endDateFin,
-    collaborateurId,
-    type: type !== "Tous" ? type : undefined,
-    offset,
-    limit: pageSize,
-  });
+  } = useFiltreCongesQuery(
+    {
+      collaborateurId,
+      startDateDebut,
+      endDateDebut,
+      startDateFin,
+      endDateFin,
+      type: type !== "Tous" ? type : undefined,
+      offset,
+      limit: pageSize,
+    },
+    {
+      skip: !collaborateurId,
+    }
+  );
 
   const { conges = [], total = 0 } = data;
 

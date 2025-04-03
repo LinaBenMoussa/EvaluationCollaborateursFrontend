@@ -2,11 +2,12 @@
 import Tooltip from "@mui/material/Tooltip";
 import MDTypography from "components/MDTypography";
 import { exportToExcel } from "functions/exportToExcel";
-import exceller from "assets/images/icons/flags/exceller.png";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import { HeaderContainer, ExportButton, FilterButton, CustomBadge } from "./headerStyle";
+import { HeaderContainer, FilterButton, CustomBadge } from "./headerStyle";
+import { IconButton } from "@mui/material";
+import DownloadIcon from "@mui/icons-material/Download";
 
-export const Header = ({ rows, title, filtreExiste, activeFilters, setOpenFilter }) => {
+export const Header = ({ rows, title, filtreExiste, activeFilters, setOpenFilter, fileName }) => {
   return (
     <HeaderContainer>
       <MDTypography variant="h5" color="white" fontWeight="bold">
@@ -15,15 +16,15 @@ export const Header = ({ rows, title, filtreExiste, activeFilters, setOpenFilter
 
       <div style={{ display: "flex", alignItems: "center" }}>
         <Tooltip title="Exporter en Excel">
-          <ExportButton onClick={() => exportToExcel(rows, "Liste_des_Pointages")}>
-            <img src={exceller} alt="Exporter en Excel" style={{ width: 25, height: 25 }} />
-          </ExportButton>
+          <IconButton color="white" onClick={() => exportToExcel(rows, fileName)}>
+            <DownloadIcon />
+          </IconButton>
         </Tooltip>
 
         {filtreExiste && (
           <Tooltip title="Filtres avancés">
             <CustomBadge badgeContent={activeFilters} color="secondary">
-              <FilterButton onClick={() => setOpenFilter(true)}>
+              <FilterButton color="white" onClick={() => setOpenFilter(true)}>
                 <FilterListIcon />
               </FilterButton>
             </CustomBadge>

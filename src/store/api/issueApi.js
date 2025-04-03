@@ -31,6 +31,7 @@ export const IssueApi = api.injectEndpoints({
         startDateFin,
         endDateFin,
         collaborateurId,
+        status,
         offset,
         limit,
       }) => ({
@@ -45,6 +46,7 @@ export const IssueApi = api.injectEndpoints({
           startDateFin,
           endDateFin,
           collaborateurId,
+          status,
           offset,
           limit,
         },

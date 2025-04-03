@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { useFiltrePointagesQuery } from "store/api/pointageApi";
 
 export function usePointageTableData(managerId, filters = {}) {
-  const { startDate, endDate, collaborateurId, page = 0, pageSize = 100 } = filters;
+  const { startDate, endDate, collaborateurId, page = 0, pageSize = 10 } = filters;
 
   // Calculer l'offset pour la pagination
   const offset = page * pageSize;
@@ -55,24 +55,10 @@ export function usePointageTableData(managerId, filters = {}) {
     [pointages]
   );
 
-  // Fonction pour changer de page
-  const handlePageChange = (newPage) => {
-    // Cette fonction est appelée par le composant parent
-    // Les changements d'état sont gérés dans le composant parent
-  };
-
-  // Fonction pour changer le nombre d'éléments par page
-  const handlePageSizeChange = (newPageSize) => {
-    // Cette fonction est appelée par le composant parent
-    // Les changements d'état sont gérés dans le composant parent
-  };
-
   return {
     columns,
     rows,
     isLoading: isLoading || isFetching,
     total,
-    handlePageChange,
-    handlePageSizeChange,
   };
 }

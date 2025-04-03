@@ -12,15 +12,15 @@ const FiltreRapide = ({
   activeFilters,
   handleResetFilters,
   setFilters,
-  children1,
-  children2,
+  fields,
+  chip,
 }) => {
   const classes = filtreRapideStyles(theme);
 
   return (
     <Paper elevation={0} sx={classes.paper}>
       <MDBox sx={classes.box(isMobile)}>
-        {children1}
+        {fields}
         {activeFilters > 0 && (
           <MDButton
             variant="outlined"
@@ -36,7 +36,7 @@ const FiltreRapide = ({
       </MDBox>
 
       <MDBox display="flex" flexWrap="wrap" gap={1} mt={2}>
-        {children2}
+        {chip}
       </MDBox>
     </Paper>
   );

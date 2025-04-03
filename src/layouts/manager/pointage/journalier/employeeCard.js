@@ -16,9 +16,6 @@ import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { formatTime } from "functions/dateTime";
 
 const EmployeeCard = ({ card }) => {
-  // Calculate if employee completed their work day
-  const isOnTime = !card.late && card.completedWorkDay;
-
   // Calculate work hours if both arrival and departure times exist
   const calculateWorkHours = () => {
     if (!card.heureArrivee || !card.heureDepart) return null;
@@ -184,7 +181,8 @@ const EmployeeCard = ({ card }) => {
 
             {card.dureeAutorisation > 0 && (
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Autorisation: {card.dureeAutorisation}h
+                Autorisation: {formatTime(card.deb_Autorisation)} -{" "}
+                {formatTime(card.fin_Autorisation)}
               </Typography>
             )}
           </>

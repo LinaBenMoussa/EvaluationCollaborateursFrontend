@@ -10,18 +10,25 @@ export const NotificationApi = api.injectEndpoints({
       }),
     }),
 
-    // Supprimer une notification par son ID (DELETE)
     deleteNotificationByCollaborateur: builder.mutation({
       query: (id) => ({
         url: `/notification/${id}`,
         method: "DELETE",
       }),
     }),
+
+    markNotificationsAsRead: builder.mutation({
+      query: (notificationIds) => ({
+        url: `/notification/lu`,
+        method: "PUT",
+        body: notificationIds,
+      }),
+    }),
   }),
 });
 
-// Export des hooks générés par RTK Query
 export const {
-  useGetNotificationByCollaborateurQuery, // Hook pour GET
-  useDeleteNotificationByCollaborateurMutation, // Hook pour DELETE
+  useGetNotificationByCollaborateurQuery,
+  useDeleteNotificationByCollaborateurMutation,
+  useMarkNotificationsAsReadMutation,
 } = NotificationApi;

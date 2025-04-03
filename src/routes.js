@@ -9,7 +9,6 @@ import Dashboard from "layouts/manager/dashboard";
 import Tables from "layouts/admin/tables";
 import Notifications from "layouts/collaborateur/notifications";
 import FeedbackListManager from "layouts/manager/feedback/listFeedbackManager";
-import ListFeedback from "layouts/manager/feedback/listFeedback";
 import Pointage from "layouts/manager/pointage/journalier";
 import Historique from "layouts/manager/pointage/historique";
 import IssuesList from "layouts/manager/issues";
@@ -33,7 +32,7 @@ const routes = [
   {
     type: "collapse",
     name: "Utilisateurs",
-    key: "Utilisateurs",
+    key: "utilisateurs",
     icon: <Icon fontSize="small">group</Icon>,
     route: "/utilisateurs",
     component: <Tables />,
@@ -42,7 +41,7 @@ const routes = [
   {
     type: "collapse",
     name: "Notifications",
-    key: "Notifications",
+    key: "notification",
     icon: <NotificationsNone fontSize="small" />,
     route: "/notification",
     component: <Notifications />,
@@ -51,7 +50,7 @@ const routes = [
   {
     type: "collapse",
     name: "Pointage",
-    key: "Pointage",
+    key: "pointage",
     icon: <EventIcon fontSize="small" />,
     route: "/pointage",
     component: <ListPointage />,
@@ -60,7 +59,7 @@ const routes = [
   {
     type: "collapse",
     name: "Évaluation",
-    key: "listFeedback",
+    key: "feedback",
     icon: <Feedback fontSize="small" />,
     route: "/feedback",
     component: <FeedbackListManager />,
@@ -78,7 +77,7 @@ const routes = [
   {
     type: "collapse",
     name: "Saisies des temps",
-    key: "saisies",
+    key: "saisie",
     icon: <Feedback fontSize="small" />,
     route: "/saisie",
     component: <SaisiesTemps />,
@@ -96,7 +95,7 @@ const routes = [
   {
     type: "collapse",
     name: "Collaborateurs",
-    key: "collaborateursList",
+    key: "collaborateurs",
     icon: <Icon fontSize="small">group</Icon>,
     route: "/collaborateurs",
     component: <CollaborateursList />,
@@ -112,7 +111,7 @@ const routes = [
     subRoutes: [
       {
         type: "collapse",
-        key: "Journalier",
+        key: "journalier",
         icon: <EventIcon fontSize="small" />,
         roles: ["ROLE_MANAGER"],
         name: "Journalier",
@@ -120,6 +119,8 @@ const routes = [
         component: <Pointage />,
       },
       {
+        type: "collapse",
+        key: "historique",
         icon: <HistoryIcon fontSize="small" />,
         name: "Historique",
         route: "/historique",
@@ -132,7 +133,7 @@ const routes = [
     name: "Congés",
     key: "conge",
     icon: <TodayIcon fontSize="small" />,
-    route: "/congé",
+    route: "/conge",
     component: <CongesList />,
     roles: ["ROLE_MANAGER"],
   },
@@ -141,7 +142,7 @@ const routes = [
     name: "Congés",
     key: "conge",
     icon: <TodayIcon fontSize="small" />,
-    route: "/congé",
+    route: "/conge",
     component: <CongesListCollaborateur />,
     roles: ["ROLE_COLLABORATEUR"],
   },
