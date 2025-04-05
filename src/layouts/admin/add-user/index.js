@@ -198,7 +198,7 @@ function AddUser() {
                             </>
                           )}
                           <MDButton variant="gradient" color="info" type="submit" fullWidth>
-                            Add User
+                            Ajouter
                           </MDButton>
                         </>
                       )}

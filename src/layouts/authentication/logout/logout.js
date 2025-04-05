@@ -23,7 +23,7 @@ const LogoutButton = () => {
         backgroundColor: (theme) => theme.palette.secondary.dark,
       }}
     >
-      Logout
+      Déconnexion
     </MDButton>
   );
 };

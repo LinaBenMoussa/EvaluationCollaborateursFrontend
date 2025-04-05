@@ -36,8 +36,8 @@ export function usePointageTableData(managerId, filters = {}) {
       { Header: "collaborateur", accessor: "collaborateur", align: "center" },
       { Header: "date", accessor: "date", align: "center" },
       { Header: "heure_arrivee", accessor: "heure_arrivee", align: "center" },
-      { Header: "status", accessor: "status", align: "center" },
       { Header: "heure_depart", accessor: "heure_depart", align: "center" },
+      { Header: "status", accessor: "status", align: "center" },
     ],
     []
   );

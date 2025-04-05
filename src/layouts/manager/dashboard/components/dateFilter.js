@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { Grid, TextField, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import MDBox from "components/MDBox";
 import { formatDate } from "../utils/formatUtils";
+import { getStartDate } from "functions/startDate";
 
 const DateFilter = ({
   filterType,
@@ -15,44 +16,20 @@ const DateFilter = ({
   const today = new Date();
   const formattedToday = formatDate(today);
 
-  // Calculer le début de la période (pour mois ou année)
-  const getStartDate = (periodType) => {
-    const currentDate = new Date();
-    if (periodType === "month") {
-      return new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    } else if (periodType === "year") {
-      return new Date(currentDate.getFullYear(), 0, 1);
-    } else if (periodType === "week") {
-      // Obtenir le premier jour de la semaine (lundi)
-      const day = currentDate.getDay();
-      const diff = currentDate.getDate() - day + (day === 0 ? -6 : 1); // ajuster quand jour = dimanche
-      return new Date(currentDate.getFullYear(), currentDate.getMonth(), diff);
-    }
-    return currentDate;
-  };
-
-  // Limiter la fin de la période à aujourd'hui
-  const getEndDate = (periodType) => {
-    const currentDate = new Date();
-    // Toujours limiter la date de fin à aujourd'hui
-    return today;
-  };
-
-  // Effet pour mettre à jour les dates lorsque le type de filtre change
   useEffect(() => {
     if (filterType === "thisMonth") {
       const monthStart = getStartDate("month");
-      const endLimit = getEndDate("month");
+      const endLimit = today;
       onStartDateChange(monthStart);
       onEndDateChange(endLimit);
     } else if (filterType === "thisWeek") {
       const weekStart = getStartDate("week");
-      const endLimit = getEndDate("week");
+      const endLimit = today;
       onStartDateChange(weekStart);
       onEndDateChange(endLimit);
     } else if (filterType === "thisYear") {
       const yearStart = getStartDate("year");
-      const endLimit = getEndDate("year");
+      const endLimit = today;
       onStartDateChange(yearStart);
       onEndDateChange(endLimit);
     }
@@ -90,7 +67,7 @@ const DateFilter = ({
                 InputLabelProps={{ shrink: true }}
                 sx={{ height: "45px", width: "220px", mx: 0.5 }}
                 inputProps={{
-                  max: formattedToday, // Limite à aujourd'hui
+                  max: formattedToday,
                 }}
               />
             </Grid>
@@ -104,7 +81,7 @@ const DateFilter = ({
                 InputLabelProps={{ shrink: true }}
                 sx={{ height: "45px", width: "220px", mx: 0.5 }}
                 inputProps={{
-                  max: formattedToday, // Date max = aujourd'hui (jamais au-delà)
+                  max: formattedToday,
                 }}
               />
             </Grid>

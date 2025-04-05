@@ -5,15 +5,9 @@ import {
   useGetCollaborateursStatsQuery,
 } from "store/api/userApi";
 import { selectCurrentUser } from "store/slices/authSlice";
-import {
-  Grid,
-  Card,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  CircularProgress,
-} from "@mui/material";
+import { Grid, Card, Select, MenuItem, CircularProgress } from "@mui/material";
+import html2pdf from "html2pdf.js";
+import AssessmentIcon from "@mui/icons-material/Assessment";
 import ReportsPieChart from "examples/Charts/PieChart";
 import { formatDate } from "./utils/formatUtils";
 import PerformanceSummaryCard from "./components/performanceSummaryCard";
@@ -22,16 +16,21 @@ import AutocompleteField from "layouts/shared/autocompleteField";
 import DateFilter from "./components/dateFilter";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
+import MDButton from "components/MDButton";
 import ReportsLineChart from "examples/Charts/LineCharts/ReportsLineChart";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import { MetricsAvancees } from "./components/metricsAvancees";
+import { useGetReportMutation } from "store/api/reportApi";
+import ReportViewer from "./components/ReportViewer";
 
 const Dashboard = () => {
   const [collaborateurId, setCollaborateurId] = useState(null);
   const [selectedCollaborateur, setSelectedCollaborateur] = useState(null);
   const [filterType, setFilterType] = useState("thisMonth");
   const [filterTypeCourbe, setFilterTypeCourbe] = useState("month");
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [reportData, setReportData] = useState(null);
 
   const [startDate, setStartDate] = useState(
     new Date(new Date().getFullYear(), new Date().getMonth(), 1)
@@ -63,6 +62,10 @@ const Dashboard = () => {
       setCollaborateurId(collaborateurs[0].id);
     }
   }, [collaborateurs, selectedCollaborateur]);
+
+  const getPeriodText = () => {
+    return `${formatDate(startDate, "dd MMMM yyyy")} - ${formatDate(endDate, "dd MMMM yyyy")}`;
+  };
 
   const taskStatusPieChart = useMemo(
     () => ({
@@ -114,6 +117,30 @@ const Dashboard = () => {
       setEndDate(newEnd);
     }
   }, []);
+
+  const [getReport, { isLoading: isGeneratingReport }] = useGetReportMutation();
+
+  const handleGenerateReport = async () => {
+    if (!stats || !selectedCollaborateur) return;
+
+    const reportPayload = {
+      employeeName: selectedCollaborateur.nom + " " + selectedCollaborateur.prenom,
+      period: getPeriodText(),
+      productivityScore: stats.productivityScore,
+      respectEcheanceRate: stats.respectEcheanceRate,
+      retardRate: 100 - stats.respectEcheanceRate,
+    };
+
+    try {
+      const result = await getReport(reportPayload).unwrap();
+      setReportData(result);
+      console.log("Rapport généré :", result);
+      setReportDialogOpen(true);
+    } catch (error) {
+      console.error("Erreur lors de la génération du rapport :", error);
+      // Tu peux afficher une notification ici par exemple
+    }
+  };
 
   const renderContent = () => {
     if (!collaborateurId) {
@@ -206,6 +233,29 @@ const Dashboard = () => {
           </Grid>
         </Grid>
         <MetricsAvancees stats={stats} />
+
+        {/* Bouton pour générer le rapport */}
+        <MDBox mt={3} display="flex" justifyContent="flex-end">
+          <MDButton
+            variant="contained"
+            color="info"
+            startIcon={<AssessmentIcon />}
+            onClick={handleGenerateReport}
+            disabled={isGeneratingReport || !stats}
+          >
+            {isGeneratingReport ? "Génération en cours..." : "Générer un rapport"}
+          </MDButton>
+        </MDBox>
+
+        <ReportViewer
+          open={reportDialogOpen}
+          onClose={() => setReportDialogOpen(false)}
+          reportData={reportData}
+          isLoading={isGeneratingReport}
+          employeeName={selectedCollaborateur?.nom + " " + selectedCollaborateur?.prenom}
+          period={getPeriodText()}
+          stats={stats}
+        />
       </MDBox>
     );
   };

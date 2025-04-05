@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 
 // MUI components
@@ -46,7 +46,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
   const route = useLocation().pathname.split("/").slice(1);
   // Supposons que selectCurrentUser renvoie l'ID du collaborateur connecté
   const collaborateurId = useSelector(selectCurrentUser);
-
+  const navigate = useNavigate();
   // Récupération des notifications
   const { data: notifications = [], refetch } =
     useGetNotificationByCollaborateurQuery(collaborateurId);
@@ -70,6 +70,9 @@ function DashboardNavbar({ absolute, light, isMini }) {
       await markNotificationsAsRead(unreadIds);
       refetch();
     }
+  };
+  const handleNavigateToNotifications = () => {
+    navigate("/notification");
   };
 
   const handleCloseMenu = () => setOpenMenu(false);
@@ -104,6 +107,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
         ))}
         {extraCount > 0 && (
           <NotificationItem
+            onClick={handleNavigateToNotifications}
             icon={<Icon>more_horiz</Icon>}
             title={`+ ${extraCount} notifications`}
           />

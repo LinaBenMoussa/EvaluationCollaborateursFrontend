@@ -20,18 +20,18 @@ import {
 import MDBox from "components/MDBox";
 import { Header } from "layouts/shared/Header";
 import MDTypography from "components/MDTypography";
-import AutocompleteField from "layouts/shared/autocompleteField";
 import { FiltreAvancee } from "layouts/shared/FiltreAvancee";
-import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
 import FiltreRapide from "layouts/shared/FiltreRapide";
 import Table from "layouts/shared/Table";
+import { convertDateFormat } from "functions/dateTime";
+import { formatDate } from "functions/dateTime";
+import { getStartDate } from "functions/startDate";
+import PointageExportDialog from "./exportToExcelDialog";
 
 function Historique() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const managerId = useSelector(selectCurrentUser);
-  const [collaborateurId, setCollaborateurId] = useState(null);
-  const [selectedCollaborateur, setSelectedCollaborateur] = useState(null);
+  const collaborateurId = useSelector(selectCurrentUser);
   const [selectedDate1, setSelectedDate1] = useState("");
   const [selectedDate2, setSelectedDate2] = useState("");
   const [filterType, setFilterType] = useState("thisMonth");
@@ -42,11 +42,10 @@ function Historique() {
   const [filters, setFilters] = useState({
     startDate: "",
     endDate: "",
-    collaborateurId: null,
   });
 
   // Fetch data with API filters and pagination
-  const { columns, rows, isLoading, total } = usePointageTableData(managerId, {
+  const { columns, rows, isLoading, total } = usePointageTableData(collaborateurId, {
     ...filters,
     page: page,
     pageSize: rowsPerPage,
@@ -59,13 +58,14 @@ function Historique() {
     let end = "";
 
     if (filterType === "today") {
-      const today = now.toISOString().split("T")[0];
+      const today = convertDateFormat(formatDate(now));
+
       start = today;
       end = today;
     } else if (filterType === "yesterday") {
       const yesterday = new Date(now);
       yesterday.setDate(yesterday.getDate() - 1);
-      const yest = yesterday.toISOString().split("T")[0];
+      const yest = convertDateFormat(formatDate(yesterday));
       start = yest;
       end = yest;
     } else if (filterType === "thisWeek") {
@@ -75,20 +75,19 @@ function Historique() {
       monday.setDate(now.getDate() + diffToMonday);
       const sunday = new Date(monday);
       sunday.setDate(monday.getDate() + 6);
-      start = monday.toISOString().split("T")[0];
-      end = sunday.toISOString().split("T")[0];
+      start = convertDateFormat(formatDate(monday));
+      end = convertDateFormat(formatDate(sunday));
     } else if (filterType === "thisMonth") {
-      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      start = firstDay.toISOString().split("T")[0];
-      end = lastDay.toISOString().split("T")[0];
+      const firstDay = getStartDate("month");
+      const lastDay = now;
+      start = convertDateFormat(formatDate(firstDay));
+      end = convertDateFormat(formatDate(lastDay));
     } else if (filterType === "thisYear") {
-      const firstDay = new Date(now.getFullYear(), 0, 1);
-      const lastDay = new Date(now.getFullYear(), 11, 31);
-      start = firstDay.toISOString().split("T")[0];
-      end = lastDay.toISOString().split("T")[0];
+      const firstDay = getStartDate("year");
+      const lastDay = now;
+      start = convertDateFormat(formatDate(firstDay));
+      end = convertDateFormat(formatDate(lastDay));
     }
-
     setSelectedDate1(start);
     setSelectedDate2(end);
 
@@ -100,15 +99,6 @@ function Historique() {
     }));
     setPage(0);
   }, [filterType]);
-
-  useEffect(() => {
-    setFilters((prev) => ({
-      ...prev,
-      collaborateurId,
-    }));
-
-    setPage(0);
-  }, [collaborateurId]);
 
   // Update date filters when custom dates are selected
   useEffect(() => {
@@ -127,23 +117,19 @@ function Historique() {
   // Compte les filtres actifs
   useEffect(() => {
     let count = 0;
-    if (collaborateurId !== null) count++;
     if (selectedDate1 || selectedDate2) count++;
     console.log("activeFilters", activeFilters);
     setActiveFilters(count);
-  }, [collaborateurId, selectedDate1, selectedDate2]);
+  }, [selectedDate1, selectedDate2]);
 
   // Réinitialise tous les filtres
   const handleResetFilters = () => {
-    setCollaborateurId(null);
-    setSelectedCollaborateur(null);
     setSelectedDate1("");
     setSelectedDate2("");
     setFilterType("thisMonth");
     setFilters({
       startDate: "",
       endDate: "",
-      collaborateurId: null,
     });
     setPage(0);
   };
@@ -152,7 +138,6 @@ function Historique() {
     setFilters({
       startDate: selectedDate1,
       endDate: selectedDate2,
-      collaborateurId: collaborateurId,
     });
     setPage(0);
     setOpenFilter(false);
@@ -165,7 +150,7 @@ function Historique() {
 
   // Handle rows per page change
   const onRowsPerPageChange = (event) => {
-    const newRowsPerPage = parseInt(event.target.value, 25);
+    const newRowsPerPage = parseInt(event.target.value, 10);
     setRowsPerPage(newRowsPerPage);
     setPage(0);
   };
@@ -190,6 +175,9 @@ function Historique() {
                 theme={theme}
                 title={"Historique des pointages"}
                 filtreExiste
+                dialog={PointageExportDialog}
+                columns={columns}
+                fileName={"table_des_pointages"}
               />
               <MDBox p={3}>
                 <FiltreRapide
@@ -224,24 +212,6 @@ function Historique() {
                   chip={
                     activeFilters > 0 && (
                       <MDBox display="flex" flexWrap="wrap" gap={1} mb={3}>
-                        {collaborateurId !== null && (
-                          <Chip
-                            label={`Collaborateur: ${selectedCollaborateur?.nom} ${selectedCollaborateur?.prenom}`}
-                            onDelete={() => {
-                              setCollaborateurId(null);
-                              setSelectedCollaborateur(null);
-                              setFilters((prev) => ({ ...prev, collaborateurId: null }));
-                            }}
-                            size="small"
-                            color="primary"
-                            sx={{
-                              borderRadius: "6px",
-                              fontWeight: "medium",
-                              "& .MuiChip-label": { px: 2 },
-                              "& .MuiChip-deleteIcon": { color: "white" },
-                            }}
-                          />
-                        )}
                         {(selectedDate1 || selectedDate2) && (
                           <Chip
                             label={`Période: ${selectedDate1 || ""} - ${selectedDate2 || ""}`}

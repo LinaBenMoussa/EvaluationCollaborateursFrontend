@@ -1,62 +1,70 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.2.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
-import { useMemo, useEffect, useState } from "react";
-
-// prop-types is a library for typechecking of props
+import { useMemo, useEffect, useState, useRef } from "react";
 import PropTypes from "prop-types";
-
-// react-table components
-import { useTable, usePagination, useGlobalFilter, useAsyncDebounce, useSortBy } from "react-table";
+import { useTable, useGlobalFilter, useAsyncDebounce, useSortBy, usePagination } from "react-table";
 
 // @mui material components
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableContainer from "@mui/material/TableContainer";
 import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+import InputAdornment from "@mui/material/InputAdornment";
 import Icon from "@mui/material/Icon";
-import Autocomplete from "@mui/material/Autocomplete";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Pagination from "@mui/material/Pagination";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDInput from "components/MDInput";
-import MDPagination from "components/MDPagination";
+import MDButton from "components/MDButton";
 
 // Material Dashboard 2 React example components
 import DataTableHeadCell from "examples/Tables/DataTable/DataTableHeadCell";
 import DataTableBodyCell from "examples/Tables/DataTable/DataTableBodyCell";
 
 function DataTable({
-  entriesPerPage,
   canSearch,
   showTotalEntries,
   table,
-  pagination,
   isSorted,
   noEndBorder,
+  tableTitle,
+  tableDescription,
+  elevation,
+  colorMode,
+  stripedRows,
+  hoverEffect,
+  maxHeight,
+  enablePagination,
+  pageSize: initialPageSize,
+  pageSizeOptions,
+  enableExport,
+  enableColumnVisibility,
+  rowActions,
+  onRowClick,
+  emptyMessage,
+  refreshAction,
 }) {
-  const defaultValue = entriesPerPage.defaultValue ? entriesPerPage.defaultValue : 15;
-  const entries = entriesPerPage.entries
-    ? entriesPerPage.entries.map((el) => el.toString())
-    : ["15"];
   const columns = useMemo(() => table.columns, [table]);
   const data = useMemo(() => table.rows, [table]);
+  const tableContainerRef = useRef(null);
+
+  // Set up pagination
+  const defaultPageSize = initialPageSize || 10;
 
   const tableInstance = useTable(
-    { columns, data, initialState: { pageIndex: 0 } },
+    {
+      columns,
+      data,
+      initialState: { pageSize: defaultPageSize },
+    },
     useGlobalFilter,
     useSortBy,
     usePagination
@@ -67,49 +75,42 @@ function DataTable({
     getTableBodyProps,
     headerGroups,
     prepareRow,
-    rows,
-    page,
-    pageOptions,
-    canPreviousPage,
-    canNextPage,
-    gotoPage,
-    nextPage,
-    previousPage,
-    setPageSize,
     setGlobalFilter,
-    state: { pageIndex, pageSize, globalFilter },
+    page,
+    rows,
+    pageCount,
+    gotoPage,
+    setPageSize,
+    state: { globalFilter, pageIndex, pageSize },
+    allColumns,
+    toggleHideColumn,
   } = tableInstance;
-
-  // Set the default value for the entries per page when component mounts
-  useEffect(() => setPageSize(defaultValue || 15), [defaultValue]);
-
-  // Set the entries per page value based on the select value
-  const setEntriesPerPage = (value) => setPageSize(value);
-
-  // Render the paginations
-  const renderPagination = pageOptions.map((option) => (
-    <MDPagination
-      item
-      key={option}
-      onClick={() => gotoPage(Number(option))}
-      active={pageIndex === option}
-    >
-      {option + 1}
-    </MDPagination>
-  ));
-
-  // Handler for the input to set the pagination index
-  const handleInputPagination = ({ target: { value } }) =>
-    value > pageOptions.length || value < 0 ? gotoPage(0) : gotoPage(Number(value));
-
-  // Customized page options starting from 1
-  const customizedPageOptions = pageOptions.map((option) => option + 1);
-
-  // Setting value for the pagination input
-  const handleInputPaginationValue = ({ target: value }) => gotoPage(Number(value.value - 1));
 
   // Search input value state
   const [search, setSearch] = useState(globalFilter);
+
+  // Scroll shadow states
+  const [showLeftShadow, setShowLeftShadow] = useState(false);
+  const [showRightShadow, setShowRightShadow] = useState(false);
+
+  // Column visibility menu state
+  const [columnMenuAnchor, setColumnMenuAnchor] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Handle scroll events to show/hide shadows
+  const handleScroll = (event) => {
+    const container = event.target;
+    setShowLeftShadow(container.scrollLeft > 0);
+    setShowRightShadow(container.scrollLeft < container.scrollWidth - container.clientWidth);
+  };
+
+  // Check scroll shadow on initial load
+  useEffect(() => {
+    const container = tableContainerRef.current;
+    if (container) {
+      setShowRightShadow(container.scrollWidth > container.clientWidth);
+    }
+  }, [rows, pageSize]);
 
   // Search input state handle
   const onSearchChange = useAsyncDebounce((value) => {
@@ -131,181 +132,628 @@ function DataTable({
     return sortedValue;
   };
 
-  // Setting the entries starting point
-  const entriesStart = pageIndex === 0 ? pageIndex + 1 : pageIndex * pageSize + 1;
+  // Calculate zebra stripes for rows if enabled
+  const getRowStyle = (index) => {
+    if (!stripedRows) return {};
+    return index % 2 === 0
+      ? {
+          backgroundColor:
+            colorMode === "dark" ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.02)",
+        }
+      : {};
+  };
 
-  // Setting the entries ending point
-  let entriesEnd;
+  // Handle column visibility menu
+  const handleColumnMenuOpen = (event) => {
+    setColumnMenuAnchor(event.currentTarget);
+  };
 
-  if (pageIndex === 0) {
-    entriesEnd = pageSize;
-  } else if (pageIndex === pageOptions.length - 1) {
-    entriesEnd = rows.length;
-  } else {
-    entriesEnd = pageSize * (pageIndex + 1);
-  }
+  const handleColumnMenuClose = () => {
+    setColumnMenuAnchor(null);
+  };
+
+  // Handle refresh action with loading state
+  const handleRefresh = () => {
+    if (refreshAction) {
+      setIsLoading(true);
+      refreshAction().finally(() => {
+        setTimeout(() => setIsLoading(false), 500);
+      });
+    }
+  };
+
+  // Calculate which rows to display based on pagination
+  const displayRows = enablePagination ? page : rows;
+
+  // Handle page change
+  const handlePageChange = (event, value) => {
+    gotoPage(value - 1);
+  };
+
+  // Handle page size change
+  const handlePageSizeChange = (event) => {
+    setPageSize(Number(event.target.value));
+  };
 
   return (
-    <TableContainer sx={{ boxShadow: "none" }}>
-      {entriesPerPage || canSearch ? (
-        <MDBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
-          {entriesPerPage && (
-            <MDBox display="flex" alignItems="center">
-              <Autocomplete
-                disableClearable
-                value={pageSize.toString()}
-                options={entries}
-                onChange={(event, newValue) => {
-                  setEntriesPerPage(parseInt(newValue, 15));
-                }}
-                size="small"
-                sx={{ width: "5rem" }}
-                renderInput={(params) => <MDInput {...params} />}
-              />
-              <MDTypography variant="caption" color="secondary">
-                &nbsp;&nbsp;
-              </MDTypography>
-            </MDBox>
-          )}
-          {canSearch && (
-            <MDBox width="12rem" ml="auto">
-              <MDInput
-                placeholder="Search..."
-                value={search}
-                size="small"
-                fullWidth
-                onChange={({ currentTarget }) => {
-                  setSearch(search);
-                  onSearchChange(currentTarget.value);
-                }}
-              />
-            </MDBox>
-          )}
-        </MDBox>
-      ) : null}
-      <Table {...getTableProps()}>
-        <MDBox component="thead">
-          {headerGroups.map((headerGroup, key) => (
-            <TableRow key={key} {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column, idx) => (
-                <DataTableHeadCell
-                  key={idx}
-                  {...column.getHeaderProps(isSorted && column.getSortByToggleProps())}
-                  width={column.width ? column.width : "auto"}
-                  align={column.align ? column.align : "left"}
-                  sorted={setSortedValue(column)}
-                >
-                  {column.render("Header")}
-                </DataTableHeadCell>
-              ))}
-            </TableRow>
-          ))}
-        </MDBox>
-        <TableBody {...getTableBodyProps()}>
-          {page.map((row, key) => {
-            prepareRow(row);
-            return (
-              <TableRow key={key} {...row.getRowProps()}>
-                {row.cells.map((cell, idx) => (
-                  <DataTableBodyCell
-                    key={idx}
-                    noBorder={noEndBorder && rows.length - 1 === key}
-                    align={cell.column.align ? cell.column.align : "left"}
-                    {...cell.getCellProps()}
-                  >
-                    {cell.render("Cell")}
-                  </DataTableBodyCell>
-                ))}
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
-
-      <MDBox
-        display="flex"
-        flexDirection={{ xs: "column", sm: "row" }}
-        justifyContent="space-between"
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        p={!showTotalEntries && pageOptions.length === 1 ? 0 : 3}
+    <Box sx={{ position: "relative" }}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          boxShadow: elevation ? elevation : "none",
+          borderRadius: "12px",
+          overflow: "hidden",
+          backgroundColor: colorMode === "dark" ? "#1a2035" : "#fff",
+          position: "relative",
+          border:
+            colorMode === "dark"
+              ? "1px solid rgba(255,255,255,0.05)"
+              : "1px solid rgba(0,0,0,0.05)",
+        }}
       >
-        {showTotalEntries && (
-          <MDBox mb={{ xs: 3, sm: 0 }}>
-            <MDTypography variant="button" color="secondary" fontWeight="regular">
-              Showing {entriesStart} to {entriesEnd} of {rows.length} entries
-            </MDTypography>
+        {/* Table header with title and search */}
+        {(tableTitle || canSearch || enableColumnVisibility || refreshAction) && (
+          <MDBox
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            p={3}
+            sx={{
+              borderBottom: "1px solid",
+              borderColor: colorMode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+              position: "sticky",
+              top: 0,
+              zIndex: 2,
+              backgroundColor: colorMode === "dark" ? "#1a2035" : "#fff",
+            }}
+          >
+            <MDBox display="flex" alignItems="center">
+              {tableTitle && (
+                <MDBox mr={3}>
+                  <MDTypography
+                    variant="h6"
+                    fontWeight="medium"
+                    color={colorMode === "dark" ? "white" : "dark"}
+                  >
+                    {tableTitle}
+                  </MDTypography>
+                  {tableDescription && (
+                    <MDTypography variant="button" color="text">
+                      {tableDescription}
+                    </MDTypography>
+                  )}
+                </MDBox>
+              )}
+
+              {refreshAction && (
+                <Tooltip title="Rafraîchir">
+                  <IconButton
+                    onClick={handleRefresh}
+                    disabled={isLoading}
+                    sx={{
+                      mr: 1,
+                      color: colorMode === "dark" ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)",
+                    }}
+                  >
+                    <Icon
+                      sx={{
+                        animation: isLoading ? "spin 1s linear infinite" : "none",
+                        "@keyframes spin": {
+                          "0%": { transform: "rotate(0deg)" },
+                          "100%": { transform: "rotate(360deg)" },
+                        },
+                      }}
+                    >
+                      refresh
+                    </Icon>
+                  </IconButton>
+                </Tooltip>
+              )}
+            </MDBox>
+
+            <MDBox display="flex" alignItems="center">
+              {canSearch && (
+                <MDBox width="12rem" mr={enableColumnVisibility || enableExport ? 2 : 0}>
+                  <MDInput
+                    placeholder="Rechercher..."
+                    value={search}
+                    size="small"
+                    fullWidth
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Icon fontSize="small" color="text">
+                            search
+                          </Icon>
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        "& fieldset": {
+                          borderColor:
+                            colorMode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)",
+                        },
+                        "&:hover fieldset": {
+                          borderColor:
+                            colorMode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.2)",
+                        },
+                      },
+                    }}
+                    onChange={({ currentTarget }) => {
+                      setSearch(currentTarget.value);
+                      onSearchChange(currentTarget.value);
+                    }}
+                  />
+                </MDBox>
+              )}
+
+              {enableColumnVisibility && (
+                <Tooltip title="Colonnes visibles">
+                  <IconButton
+                    onClick={handleColumnMenuOpen}
+                    sx={{
+                      mr: enableExport ? 2 : 0,
+                      color: colorMode === "dark" ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)",
+                    }}
+                  >
+                    <Icon>view_column</Icon>
+                  </IconButton>
+                </Tooltip>
+              )}
+
+              {enableExport && (
+                <MDButton
+                  variant="outlined"
+                  color={colorMode === "dark" ? "white" : "info"}
+                  size="small"
+                  startIcon={<Icon>download</Icon>}
+                >
+                  Exporter
+                </MDButton>
+              )}
+
+              <Menu
+                anchorEl={columnMenuAnchor}
+                open={Boolean(columnMenuAnchor)}
+                onClose={handleColumnMenuClose}
+                PaperProps={{
+                  sx: {
+                    maxHeight: 300,
+                    backgroundColor: colorMode === "dark" ? "#1a2035" : "#fff",
+                    color: colorMode === "dark" ? "white" : "inherit",
+                    border:
+                      colorMode === "dark"
+                        ? "1px solid rgba(255,255,255,0.1)"
+                        : "1px solid rgba(0,0,0,0.1)",
+                  },
+                }}
+              >
+                {allColumns.map((column) => (
+                  <MenuItem
+                    key={column.id}
+                    onClick={() => toggleHideColumn(column.id)}
+                    sx={{
+                      color: colorMode === "dark" ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)",
+                      "&:hover": {
+                        backgroundColor:
+                          colorMode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+                      },
+                    }}
+                  >
+                    <Box component="span" display="flex" alignItems="center">
+                      <Icon fontSize="small" sx={{ mr: 1 }}>
+                        {column.isVisible ? "check_box" : "check_box_outline_blank"}
+                      </Icon>
+                      {column.Header}
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Menu>
+            </MDBox>
           </MDBox>
         )}
-        {pageOptions.length > 1 && (
-          <MDPagination
-            variant={pagination.variant ? pagination.variant : "gradient"}
-            color={pagination.color ? pagination.color : "info"}
+
+        {/* Scroll container for table */}
+        <Box
+          ref={tableContainerRef}
+          onScroll={handleScroll}
+          sx={{
+            overflowX: "auto",
+            maxHeight: maxHeight || "none",
+            position: "relative",
+            "&::-webkit-scrollbar": {
+              height: "8px",
+              width: "8px",
+            },
+            "&::-webkit-scrollbar-track": {
+              backgroundColor: colorMode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: colorMode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)",
+              borderRadius: "4px",
+              "&:hover": {
+                backgroundColor: colorMode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)",
+              },
+            },
+          }}
+        >
+          {/* Left shadow indicator for scroll */}
+          {showLeftShadow && (
+            <Box
+              sx={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: "15px",
+                zIndex: 1,
+                pointerEvents: "none",
+                background: `linear-gradient(90deg, ${
+                  colorMode === "dark" ? "rgba(26, 32, 53, 0.7)" : "rgba(255, 255, 255, 0.7)"
+                } 0%, ${
+                  colorMode === "dark" ? "rgba(26, 32, 53, 0)" : "rgba(255, 255, 255, 0)"
+                } 100%)`,
+              }}
+            />
+          )}
+
+          {/* Right shadow indicator for scroll */}
+          {showRightShadow && (
+            <Box
+              sx={{
+                position: "absolute",
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: "15px",
+                zIndex: 1,
+                pointerEvents: "none",
+                background: `linear-gradient(270deg, ${
+                  colorMode === "dark" ? "rgba(26, 32, 53, 0.7)" : "rgba(255, 255, 255, 0.7)"
+                } 0%, ${
+                  colorMode === "dark" ? "rgba(26, 32, 53, 0)" : "rgba(255, 255, 255, 0)"
+                } 100%)`,
+              }}
+            />
+          )}
+
+          {/* Main table */}
+          <Table
+            {...getTableProps()}
+            sx={{
+              width: "100%",
+              backgroundColor: colorMode === "dark" ? "#1a2035" : "#fff",
+              color: colorMode === "dark" ? "white" : "inherit",
+              tableLayout: "auto",
+            }}
           >
-            {canPreviousPage && (
-              <MDPagination item onClick={() => previousPage()}>
-                <Icon sx={{ fontWeight: "bold" }}>chevron_left</Icon>
-              </MDPagination>
+            <MDBox
+              component="thead"
+              sx={{
+                backgroundColor:
+                  colorMode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)",
+                borderBottom: "1px solid",
+                borderColor: colorMode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+                position: "sticky",
+                top: 0,
+                zIndex: 1,
+              }}
+            >
+              {headerGroups.map((headerGroup, key) => (
+                <TableRow key={key} {...headerGroup.getHeaderGroupProps()}>
+                  {headerGroup.headers.map((column, idx) => (
+                    <DataTableHeadCell
+                      key={idx}
+                      {...column.getHeaderProps(isSorted && column.getSortByToggleProps())}
+                      width={column.width ? column.width : "auto"}
+                      align={column.align ? column.align : "left"}
+                      sorted={setSortedValue(column)}
+                      sx={{
+                        color: colorMode === "dark" ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.7)",
+                        fontSize: "0.75rem",
+                        fontWeight: "700",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.025rem",
+                        padding: "16px",
+                        position: "sticky",
+                        top: 0,
+                        backgroundColor:
+                          colorMode === "dark"
+                            ? "rgba(26, 32, 53, 0.95)"
+                            : "rgba(255, 255, 255, 0.95)",
+                        backdropFilter: "blur(4px)",
+                        boxShadow: "0 1px 0 0 rgba(0, 0, 0, 0.1)",
+                        whiteSpace: "nowrap",
+                        cursor: isSorted ? "pointer" : "default",
+                        transition: "all 0.2s",
+                        "&:hover": isSorted
+                          ? {
+                              backgroundColor:
+                                colorMode === "dark"
+                                  ? "rgba(255,255,255,0.08)"
+                                  : "rgba(0,0,0,0.04)",
+                            }
+                          : {},
+                      }}
+                    >
+                      <MDBox display="flex" alignItems="center">
+                        {column.render("Header")}
+                        {isSorted && column.isSorted && (
+                          <Icon fontSize="small" sx={{ ml: 0.5 }}>
+                            {column.isSortedDesc ? "arrow_downward" : "arrow_upward"}
+                          </Icon>
+                        )}
+                      </MDBox>
+                    </DataTableHeadCell>
+                  ))}
+                  {rowActions && (
+                    <DataTableHeadCell
+                      width="100px"
+                      align="center"
+                      sx={{
+                        color: colorMode === "dark" ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.7)",
+                        fontSize: "0.75rem",
+                        fontWeight: "700",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.025rem",
+                        padding: "16px",
+                        position: "sticky",
+                        top: 0,
+                        backgroundColor:
+                          colorMode === "dark"
+                            ? "rgba(26, 32, 53, 0.95)"
+                            : "rgba(255, 255, 255, 0.95)",
+                        backdropFilter: "blur(4px)",
+                        boxShadow: "0 1px 0 0 rgba(0, 0, 0, 0.1)",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      Actions
+                    </DataTableHeadCell>
+                  )}
+                </TableRow>
+              ))}
+            </MDBox>
+            <TableBody {...getTableBodyProps()}>
+              {displayRows.length > 0 ? (
+                displayRows.map((row, key) => {
+                  prepareRow(row);
+                  return (
+                    <TableRow
+                      key={key}
+                      {...row.getRowProps()}
+                      onClick={onRowClick ? () => onRowClick(row.original) : undefined}
+                      sx={{
+                        ...getRowStyle(key),
+                        transition: "all 0.2s",
+                        cursor: onRowClick ? "pointer" : "default",
+                        "&:hover": hoverEffect
+                          ? {
+                              backgroundColor:
+                                colorMode === "dark"
+                                  ? "rgba(255,255,255,0.08)"
+                                  : "rgba(0,0,0,0.04)",
+                              boxShadow: "0 4px 20px 0 rgba(0, 0, 0, 0.05)",
+                            }
+                          : {},
+                        borderBottom: "1px solid",
+                        borderColor:
+                          colorMode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+                      }}
+                    >
+                      {row.cells.map((cell, idx) => (
+                        <DataTableBodyCell
+                          key={idx}
+                          noBorder={noEndBorder && displayRows.length - 1 === key}
+                          align={cell.column.align ? cell.column.align : "left"}
+                          {...cell.getCellProps()}
+                          sx={{
+                            color: colorMode === "dark" ? "rgba(255,255,255,0.7)" : "inherit",
+                            padding: "16px",
+                            fontSize: "0.875rem",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {cell.render("Cell")}
+                        </DataTableBodyCell>
+                      ))}
+                      {rowActions && (
+                        <DataTableBodyCell
+                          noBorder={noEndBorder && displayRows.length - 1 === key}
+                          align="center"
+                          sx={{
+                            color: colorMode === "dark" ? "rgba(255,255,255,0.7)" : "inherit",
+                            padding: "16px",
+                            fontSize: "0.875rem",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          <MDBox display="flex" justifyContent="center" gap={1}>
+                            {rowActions(row.original)}
+                          </MDBox>
+                        </DataTableBodyCell>
+                      )}
+                    </TableRow>
+                  );
+                })
+              ) : (
+                <TableRow>
+                  <DataTableBodyCell
+                    colSpan={columns.length + (rowActions ? 1 : 0)}
+                    align="center"
+                    sx={{ py: 8 }}
+                  >
+                    <MDBox textAlign="center" py={3}>
+                      <Icon
+                        sx={{
+                          fontSize: 48,
+                          color: colorMode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)",
+                          mb: 2,
+                        }}
+                      >
+                        search_off
+                      </Icon>
+                      <MDTypography variant="h6" color="text">
+                        {emptyMessage || "Aucune donnée disponible"}
+                      </MDTypography>
+                    </MDBox>
+                  </DataTableBodyCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </Box>
+
+        {/* Table footer with total entries and pagination */}
+        {(showTotalEntries || enablePagination) && rows.length > 0 && (
+          <MDBox
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            p={3}
+            sx={{
+              borderTop: "1px solid",
+              borderColor: colorMode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+              position: "sticky",
+              bottom: 0,
+              backgroundColor: colorMode === "dark" ? "#1a2035" : "#fff",
+              zIndex: 2,
+            }}
+          >
+            {showTotalEntries && (
+              <MDBox>
+                <MDTypography
+                  variant="button"
+                  color={colorMode === "dark" ? "white" : "secondary"}
+                  fontWeight="regular"
+                >
+                  Affichage de{" "}
+                  {enablePagination
+                    ? `${pageIndex * pageSize + 1}-${Math.min(
+                        (pageIndex + 1) * pageSize,
+                        rows.length
+                      )} sur ${rows.length}`
+                    : `${rows.length}`}{" "}
+                  entrée{rows.length > 1 ? "s" : ""}
+                </MDTypography>
+              </MDBox>
             )}
-            {renderPagination.length > 6 ? (
-              <MDBox width="5rem" mx={1}>
-                <MDInput
-                  inputProps={{ type: "number", min: 1, max: customizedPageOptions.length }}
-                  value={customizedPageOptions[pageIndex]}
-                  onChange={(handleInputPagination, handleInputPaginationValue)}
+
+            {enablePagination && (
+              <MDBox display="flex" alignItems="center">
+                {pageSizeOptions && (
+                  <FormControl
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      mr: 2,
+                      minWidth: 80,
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "8px",
+                        "& fieldset": {
+                          borderColor:
+                            colorMode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)",
+                        },
+                      },
+                    }}
+                  >
+                    <Select
+                      value={pageSize}
+                      onChange={handlePageSizeChange}
+                      sx={{
+                        color: colorMode === "dark" ? "white" : "inherit",
+                        fontSize: "0.875rem",
+                      }}
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            backgroundColor: colorMode === "dark" ? "#1a2035" : "#fff",
+                            color: colorMode === "dark" ? "white" : "inherit",
+                          },
+                        },
+                      }}
+                    >
+                      {pageSizeOptions.map((option) => (
+                        <MenuItem key={option} value={option}>
+                          {option} par page
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+
+                <Pagination
+                  count={pageCount}
+                  page={pageIndex + 1}
+                  onChange={handlePageChange}
+                  shape="rounded"
+                  color={colorMode === "dark" ? "primary" : "info"}
+                  sx={{
+                    "& .MuiPaginationItem-root": {
+                      color: colorMode === "dark" ? "rgba(255,255,255,0.7)" : undefined,
+                      "&.Mui-selected": {
+                        color: colorMode === "dark" ? "white" : undefined,
+                      },
+                    },
+                  }}
                 />
               </MDBox>
-            ) : (
-              renderPagination
             )}
-            {canNextPage && (
-              <MDPagination item onClick={() => nextPage()}>
-                <Icon sx={{ fontWeight: "bold" }}>chevron_right</Icon>
-              </MDPagination>
-            )}
-          </MDPagination>
+          </MDBox>
         )}
-      </MDBox>
-    </TableContainer>
+      </TableContainer>
+    </Box>
   );
 }
 
 // Setting default values for the props of DataTable
 DataTable.defaultProps = {
-  entriesPerPage: { defaultValue: 15, entries: [15] },
   canSearch: false,
   showTotalEntries: true,
-  pagination: { variant: "gradient", color: "info" },
   isSorted: true,
   noEndBorder: false,
+  tableTitle: null,
+  tableDescription: null,
+  elevation: 1,
+  colorMode: "light",
+  stripedRows: true,
+  hoverEffect: true,
+  maxHeight: null,
+  enablePagination: false,
+  pageSize: 10,
+  pageSizeOptions: [5, 10, 25, 50],
+  enableExport: false,
+  enableColumnVisibility: false,
+  rowActions: null,
+  onRowClick: null,
+  emptyMessage: "Aucune donnée disponible",
+  refreshAction: null,
 };
 
 // Typechecking props for the DataTable
 DataTable.propTypes = {
-  entriesPerPage: PropTypes.oneOfType([
-    PropTypes.shape({
-      defaultValue: PropTypes.number,
-      entries: PropTypes.arrayOf(PropTypes.number),
-    }),
-    PropTypes.bool,
-  ]),
   canSearch: PropTypes.bool,
   showTotalEntries: PropTypes.bool,
   table: PropTypes.objectOf(PropTypes.array).isRequired,
-  pagination: PropTypes.shape({
-    variant: PropTypes.oneOf(["contained", "gradient"]),
-    color: PropTypes.oneOf([
-      "primary",
-      "secondary",
-      "info",
-      "success",
-      "warning",
-      "error",
-      "dark",
-      "light",
-    ]),
-  }),
   isSorted: PropTypes.bool,
   noEndBorder: PropTypes.bool,
+  tableTitle: PropTypes.string,
+  tableDescription: PropTypes.string,
+  elevation: PropTypes.number,
+  colorMode: PropTypes.oneOf(["light", "dark"]),
+  stripedRows: PropTypes.bool,
+  hoverEffect: PropTypes.bool,
+  maxHeight: PropTypes.string,
+  enablePagination: PropTypes.bool,
+  pageSize: PropTypes.number,
+  pageSizeOptions: PropTypes.arrayOf(PropTypes.number),
+  enableExport: PropTypes.bool,
+  enableColumnVisibility: PropTypes.bool,
+  rowActions: PropTypes.func,
+  onRowClick: PropTypes.func,
+  emptyMessage: PropTypes.string,
+  refreshAction: PropTypes.func,
 };
 
 export default DataTable;

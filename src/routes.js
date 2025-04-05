@@ -15,9 +15,10 @@ import IssuesList from "layouts/manager/issues";
 import CollaborateursList from "layouts/manager/listeCollaborateur";
 import CongesList from "layouts/manager/conges";
 import ListPointage from "layouts/collaborateur/historique";
-import IssuesListCollaborateur from "layouts/collaborateur/issues copy";
-import CongesListCollaborateur from "layouts/collaborateur/conges copy";
+import IssuesListCollaborateur from "layouts/collaborateur/issues";
 import SaisiesTemps from "layouts/manager/saisiesTemps";
+import CongesListCollaborateur from "layouts/collaborateur/conges";
+import SaisiesTempsCollaborateur from "layouts/collaborateur/saisiesTemps";
 
 const routes = [
   {
@@ -90,6 +91,15 @@ const routes = [
     icon: <Icon fontSize="small">task</Icon>,
     route: "/issues",
     component: <IssuesListCollaborateur />,
+    roles: ["ROLE_COLLABORATEUR"],
+  },
+  {
+    type: "collapse",
+    name: "Saisies des temps",
+    key: "saisie",
+    icon: <Feedback fontSize="small" />,
+    route: "/saisie",
+    component: <SaisiesTempsCollaborateur />,
     roles: ["ROLE_COLLABORATEUR"],
   },
   {

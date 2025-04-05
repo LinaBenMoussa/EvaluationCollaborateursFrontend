@@ -31,6 +31,10 @@ import { Header } from "layouts/shared/Header";
 import FiltreRapide from "layouts/shared/FiltreRapide";
 import Table from "layouts/shared/Table";
 import { FiltreAvancee } from "layouts/shared/FiltreAvancee";
+import { convertDateFormat } from "functions/dateTime";
+import { formatDate } from "functions/dateTime";
+import { getStartDate } from "functions/startDate";
+import SaisieExportToExcelDialog from "./exportToExcelDialog";
 
 function SaisiesTemps() {
   const theme = useTheme();
@@ -64,13 +68,14 @@ function SaisiesTemps() {
     let end = "";
 
     if (filterType === "today") {
-      const today = now.toISOString().split("T")[0];
+      const today = convertDateFormat(formatDate(now));
+
       start = today;
       end = today;
     } else if (filterType === "yesterday") {
       const yesterday = new Date(now);
       yesterday.setDate(yesterday.getDate() - 1);
-      const yest = yesterday.toISOString().split("T")[0];
+      const yest = convertDateFormat(formatDate(yesterday));
       start = yest;
       end = yest;
     } else if (filterType === "thisWeek") {
@@ -80,46 +85,41 @@ function SaisiesTemps() {
       monday.setDate(now.getDate() + diffToMonday);
       const sunday = new Date(monday);
       sunday.setDate(monday.getDate() + 6);
-      start = monday.toISOString().split("T")[0];
-      end = sunday.toISOString().split("T")[0];
+      start = convertDateFormat(formatDate(monday));
+      end = convertDateFormat(formatDate(sunday));
     } else if (filterType === "thisMonth") {
-      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      start = firstDay.toISOString().split("T")[0];
-      end = lastDay.toISOString().split("T")[0];
+      const firstDay = getStartDate("month");
+      const lastDay = now;
+      start = convertDateFormat(formatDate(firstDay));
+      end = convertDateFormat(formatDate(lastDay));
     } else if (filterType === "thisYear") {
-      const firstDay = new Date(now.getFullYear(), 0, 1);
-      const lastDay = new Date(now.getFullYear(), 11, 31);
-      start = firstDay.toISOString().split("T")[0];
-      end = lastDay.toISOString().split("T")[0];
+      const firstDay = getStartDate("year");
+      const lastDay = now;
+      start = convertDateFormat(formatDate(firstDay));
+      end = convertDateFormat(formatDate(lastDay));
     }
 
     setSelectedDate1(start);
     setSelectedDate2(end);
 
-    // Update filters for API call when dates change
     setFilters((prev) => ({
       ...prev,
       startDate: start,
       endDate: end,
     }));
 
-    // Reset to first page when filters change
     setPage(0);
   }, [filterType]);
 
-  // Update collaborateurId filter when it changes
   useEffect(() => {
     setFilters((prev) => ({
       ...prev,
       collaborateurId,
     }));
 
-    // Reset to first page when filters change
     setPage(0);
   }, [collaborateurId]);
 
-  // Update date filters when custom dates are selected
   useEffect(() => {
     if (filterType === "custom") {
       setFilters((prev) => ({
@@ -128,12 +128,10 @@ function SaisiesTemps() {
         endDate: selectedDate2,
       }));
 
-      // Reset to first page when filters change
       setPage(0);
     }
   }, [selectedDate1, selectedDate2, filterType]);
 
-  // Compte les filtres actifs
   useEffect(() => {
     let count = 0;
     if (collaborateurId !== null) count++;
@@ -141,7 +139,6 @@ function SaisiesTemps() {
     setActiveFilters(count);
   }, [collaborateurId, selectedDate1, selectedDate2]);
 
-  // Réinitialise tous les filtres
   const handleResetFilters = () => {
     setCollaborateurId(null);
     setSelectedCollaborateur(null);
@@ -197,9 +194,11 @@ function SaisiesTemps() {
                 activeFilters={activeFilters}
                 setOpenFilter={setOpenFilter}
                 theme={theme}
-                title={"Table de saisies"}
-                fileName={"table_de_saisies"}
+                title={"Table des saisies de temps"}
+                fileName={"table_des_saisies"}
                 filtreExiste
+                dialog={SaisieExportToExcelDialog}
+                columns={columns}
               />
 
               <MDBox pt={3} pb={2} px={3}>

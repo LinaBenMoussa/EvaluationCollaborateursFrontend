@@ -34,7 +34,7 @@ export default function AutocompleteField({
         <TextField
           {...params}
           label={label}
-          sx={{ "& .MuiInputBase-root": { height: 44 } }}
+          sx={{ "& .MuiInputBase-root": { height: 40 } }}
           disabled={isLoading}
         />
       )}

@@ -1,10 +1,5 @@
 import * as XLSX from "xlsx";
 
-/**
- * Exporte un tableau d'objets au format Excel (.xlsx).
- * @param {Array<Object>} data - Tableau d'objets à exporter.
- * @param {string} fileName - Nom de fichier sans extension.
- */
 export function exportToExcel(data, fileName) {
   const sanitizedData = data.map((item) => {
     const newItem = {};

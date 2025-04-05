@@ -3,7 +3,7 @@ import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import Icon from "@mui/material/Icon";
 import Pagination from "@mui/material/Pagination";
-import { CircularProgress, Tooltip, Chip, Divider } from "@mui/material";
+import { CircularProgress, Tooltip, Chip, Divider, Box } from "@mui/material";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
@@ -74,7 +74,7 @@ function Notifications() {
     const category =
       Object.keys(categorizedNotifications).find((cat) =>
         notification.contenu.toLowerCase().includes(cat.toLowerCase())
-      ) || "Système";
+      ) || "Rappel";
 
     return categorizedNotifications[category];
   };
@@ -97,19 +97,14 @@ function Notifications() {
             background: "linear-gradient(145deg, #f0f0f0 0%, #e6e6e6 100%)",
           }}
         >
-          <CircularProgress color="primary" size={80} thickness={4} />
-          <MDTypography
-            variant="h5"
-            color="text"
-            mt={3}
-            sx={{
-              background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            sx={{ minHeight: "300px" }}
           >
-            Chargement des notifications...
-          </MDTypography>
+            <CircularProgress />
+          </Box>
         </Card>
       </MDBox>
     </DashboardLayout>

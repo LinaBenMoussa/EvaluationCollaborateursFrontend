@@ -77,7 +77,7 @@ function Basic() {
           textAlign="center"
         >
           <MDTypography variant="h4" fontWeight="medium" color="white" mt={1}>
-            Sign in
+            Se connecter
           </MDTypography>
         </MDBox>
         <MDBox pt={4} pb={3} px={3}>
@@ -113,7 +113,7 @@ function Basic() {
               </MDBox>
               <MDBox mt={4} mb={1}>
                 <MDButton type="submit" variant="gradient" color="info" fullWidth>
-                  sign in
+                  Connexion
                 </MDButton>
               </MDBox>
               <ToastContainer />

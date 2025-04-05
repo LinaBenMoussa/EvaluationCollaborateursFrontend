@@ -11,12 +11,15 @@ import MDButton from "components/MDButton";
 import { useNavigate } from "react-router-dom";
 import { useUsersTableData } from "./data/useUsersTableData";
 import SelectFieldRole from "../add-user/SelectFieldRole";
+import { Header } from "layouts/shared/Header";
+import { useTheme } from "@emotion/react";
 
 function Tables() {
   const navigate = useNavigate();
   const [role, setRole] = useState("Admin");
   const { columns, rows, isLoading, open, handleCloseDialog, handleConfirmDelete } =
     useUsersTableData(role);
+  const theme = useTheme();
 
   return (
     <DashboardLayout>
@@ -24,21 +27,22 @@ function Tables() {
       <MDBox pt={6} pb={3}>
         <Grid container spacing={6}>
           <Grid item xs={12}>
-            <Card>
-              <MDBox
-                mx={2}
-                mt={-3}
-                py={3}
-                px={2}
-                variant="gradient"
-                bgColor="info"
-                borderRadius="lg"
-                coloredShadow="info"
-              >
-                <MDTypography variant="h6" color="white">
-                  Liste des utilisateurs
-                </MDTypography>
-              </MDBox>
+            <Card
+              sx={{
+                borderRadius: "15px",
+                boxShadow: "0 8px 24px 0 rgba(0,0,0,0.08)",
+                overflow: "hidden",
+              }}
+            >
+              <Header
+                rows={rows.map((row) => ({
+                  ...row,
+                }))}
+                theme={theme}
+                title={`Liste des ${role}`}
+                fileName={`Liste des ${role}`}
+                columns={columns}
+              />
               <MDBox pt={0}>
                 <MDBox display="flex" justifyContent="space-between" alignItems="center">
                   <MDBox m={2} sx={{ width: 280 }}>

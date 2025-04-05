@@ -1,31 +1,60 @@
-import { formatDate } from "functions/dateTime";
-import { formatTime } from "functions/dateTime";
-import { formatDateWithTime } from "functions/dateTime";
 import { useMemo } from "react";
-import { useGetCongesByCollaborateurQuery } from "store/api/congeApi";
-import { useGetCongesQuery } from "store/api/congeApi";
+import { formatDate, formatTime } from "functions/dateTime";
+import { useFiltreCongesQuery } from "store/api/congeApi";
+import { Chip } from "@mui/material";
 
-// Fonction pour formater la date
+export function useCongesTableData(collaborateurId, filters = {}) {
+  const {
+    startDateDebut,
+    endDateDebut,
+    startDateFin,
+    endDateFin,
+    type,
+    page = 0,
+    pageSize = 10,
+  } = filters;
 
-export function useCongesTableData(idCollaborateur) {
-  const { data: conges = [], isLoading } = useGetCongesByCollaborateurQuery(idCollaborateur);
+  // Calculer l'offset pour la pagination
+  const offset = page * pageSize;
 
-  const statusColors = {
-    Terminé: "green",
-    "En cours": "orange",
-    Bloqué: "red",
-    "À faire": "gray",
+  // Appel à l'API avec pagination
+  const {
+    data = { conges: [], total: 0 },
+    isLoading,
+    isFetching,
+  } = useFiltreCongesQuery(
+    {
+      collaborateurId,
+      startDateDebut,
+      endDateDebut,
+      startDateFin,
+      endDateFin,
+      type: type !== "Tous" ? type : undefined,
+      offset,
+      limit: pageSize,
+    },
+    {
+      skip: !collaborateurId,
+    }
+  );
+
+  const { conges = [], total = 0 } = data;
+
+  // Colors for types
+  const TYPE_COLORS = {
+    "Congé annuel": "#4CAF50", // Green
+    Autorisation: "#2196F3", // Blue
   };
 
   const columns = useMemo(
     () => [
-      { Header: "id", accessor: "id", align: "left" },
-      { Header: "type", accessor: "type", align: "center" },
-      { Header: "date_debut", accessor: "date_debut", align: "center" },
-      { Header: "date_fin", accessor: "date_fin", align: "center" },
-      { Header: "nombre des jours", accessor: "nbrjour", align: "center" },
-      { Header: "heureDeb", accessor: "heureDeb", align: "center" },
-      { Header: "heureFin", accessor: "heureFin", align: "center" },
+      { Header: "ID", accessor: "id", align: "left", width: "50px" },
+      { Header: "Type", accessor: "type", align: "center", width: "150px" },
+      { Header: "Date début", accessor: "dateDebut", align: "center" },
+      { Header: "Date fin", accessor: "dateFin", align: "center" },
+      { Header: "Nombre de jours", accessor: "nbrjour", align: "center" },
+      { Header: "Heure début", accessor: "heureDeb", align: "center" },
+      { Header: "Heure fin", accessor: "heureFin", align: "center" },
     ],
     []
   );
@@ -34,15 +63,32 @@ export function useCongesTableData(idCollaborateur) {
     () =>
       conges.map((conge) => ({
         id: conge.id,
-        type: conge.type === "A" ? "Autorisation" : "Congé annuel",
-        date_debut: formatDate(conge.date_debut),
-        date_fin: formatDate(conge.date_fin),
+        type: (
+          <Chip
+            label={conge.type === "A" ? "Autorisation" : "Congé annuel"}
+            size="small"
+            sx={{
+              backgroundColor:
+                conge.type === "A" ? TYPE_COLORS.Autorisation : TYPE_COLORS["Congé annuel"],
+              color: "#FFF",
+              fontWeight: "bold",
+              "& .MuiChip-label": { px: 1 },
+            }}
+          />
+        ),
+        dateDebut: formatDate(conge.dateDebut),
+        dateFin: formatDate(conge.dateFin),
         nbrjour: conge.nbrjour,
-        heureFin: formatTime(conge.heureFin),
         heureDeb: formatTime(conge.heureDeb),
+        heureFin: formatTime(conge.heureFin),
       })),
     [conges]
   );
 
-  return { columns, rows, isLoading };
+  return {
+    columns,
+    rows,
+    isLoading: isLoading || isFetching,
+    total,
+  };
 }

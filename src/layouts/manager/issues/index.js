@@ -10,6 +10,9 @@ import {
   Chip,
   useTheme,
   alpha,
+  Tabs,
+  Tab,
+  Box,
 } from "@mui/material";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
@@ -24,6 +27,12 @@ import { Header } from "layouts/shared/Header";
 import FiltreRapide from "layouts/shared/FiltreRapide";
 import Table from "layouts/shared/Table";
 import { FiltreAvancee } from "layouts/shared/FiltreAvancee";
+import { convertDateFormat } from "functions/dateTime";
+import { formatDate } from "functions/dateTime";
+import { getStartDate } from "functions/startDate";
+import { useFiltreIssuesQuery } from "store/api/issueApi";
+import { STATUS_OPTIONS } from "./constants";
+import ExcelExportDialog from "./exportToExcelDialog";
 
 // Period options
 const PERIOD_OPTIONS = [
@@ -35,24 +44,12 @@ const PERIOD_OPTIONS = [
   { value: "custom", label: "Personnalisée" },
 ];
 
-// Status options for filter
-const STATUS_OPTIONS = [
-  "Tous",
-  "Nouveau",
-  "Résolu",
-  "Fermé",
-  "Réouvert",
-  "Assigné",
-  "Rejeté",
-  "Reporté",
-  "Dupliqué",
-  "Ambigu",
-  "En cours",
-  "Ouvert",
-  "Négociation de l'offre",
-  "Validation de l'offre",
-  "Clôture provisoire",
-];
+// Date filter types
+const DATE_FILTER_TYPES = {
+  DATE_DEBUT: "date_debut",
+  DATE_ECHEANCE: "date_echeance",
+  DATE_FIN: "date_fin",
+};
 
 function IssuesList() {
   const theme = useTheme();
@@ -63,8 +60,27 @@ function IssuesList() {
   const [selectedCollaborateur, setSelectedCollaborateur] = useState(null);
   const [filterStatus, setFilterStatus] = useState("Tous");
   const [filterType, setFilterType] = useState("thisWeek");
+
+  // Date type tabs for advanced filter
+  const [dateFilterTab, setDateFilterTab] = useState(0);
+
+  // Date filter states for all three date types
+  // Date début
+  const [selectedStartDateDebut, setSelectedStartDateDebut] = useState("");
+  const [selectedEndDateDebut, setSelectedEndDateDebut] = useState("");
+
+  // Date échéance
+  const [selectedStartDateEcheance, setSelectedStartDateEcheance] = useState("");
+  const [selectedEndDateEcheance, setSelectedEndDateEcheance] = useState("");
+
+  // Date fin
+  const [selectedStartDateFin, setSelectedStartDateFin] = useState("");
+  const [selectedEndDateFin, setSelectedEndDateFin] = useState("");
+
+  // For compatibility with existing code - maps to selectedStartDateDebut and selectedEndDateDebut
   const [selectedDate1, setSelectedDate1] = useState(new Date().toISOString().split("T")[0]);
   const [selectedDate2, setSelectedDate2] = useState(new Date().toISOString().split("T")[0]);
+
   const [openFilter, setOpenFilter] = useState(false);
   const [activeFilters, setActiveFilters] = useState(0);
   const [page, setPage] = useState(0);
@@ -80,6 +96,11 @@ function IssuesList() {
     status: "Tous",
   });
 
+  // Handle date tab change in advanced filters
+  const handleDateTabChange = (event, newValue) => {
+    setDateFilterTab(newValue);
+  };
+
   // Fetch data with API filters and pagination
   const { columns, rows, isLoading, total } = useIssuesTableData(managerId, {
     ...filters,
@@ -87,20 +108,21 @@ function IssuesList() {
     pageSize: rowsPerPage,
   });
 
-  // Calculate date ranges based on selected period
+  // Calculate date ranges based on selected period (for quick filter)
   useEffect(() => {
     const now = new Date();
     let start = "";
     let end = "";
 
     if (filterType === "today") {
-      const today = now.toISOString().split("T")[0];
+      const today = convertDateFormat(formatDate(now));
+
       start = today;
       end = today;
     } else if (filterType === "yesterday") {
       const yesterday = new Date(now);
       yesterday.setDate(yesterday.getDate() - 1);
-      const yest = yesterday.toISOString().split("T")[0];
+      const yest = convertDateFormat(formatDate(yesterday));
       start = yest;
       end = yest;
     } else if (filterType === "thisWeek") {
@@ -110,22 +132,26 @@ function IssuesList() {
       monday.setDate(now.getDate() + diffToMonday);
       const sunday = new Date(monday);
       sunday.setDate(monday.getDate() + 6);
-      start = monday.toISOString().split("T")[0];
-      end = sunday.toISOString().split("T")[0];
+      start = convertDateFormat(formatDate(monday));
+      end = convertDateFormat(formatDate(sunday));
     } else if (filterType === "thisMonth") {
-      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      start = firstDay.toISOString().split("T")[0];
-      end = lastDay.toISOString().split("T")[0];
+      const firstDay = getStartDate("month");
+      const lastDay = now;
+      start = convertDateFormat(formatDate(firstDay));
+      end = convertDateFormat(formatDate(lastDay));
     } else if (filterType === "thisYear") {
-      const firstDay = new Date(now.getFullYear(), 0, 1);
-      const lastDay = new Date(now.getFullYear(), 11, 31);
-      start = firstDay.toISOString().split("T")[0];
-      end = lastDay.toISOString().split("T")[0];
+      const firstDay = getStartDate("year");
+      const lastDay = now;
+      start = convertDateFormat(formatDate(firstDay));
+      end = convertDateFormat(formatDate(lastDay));
     }
 
     setSelectedDate1(start);
     setSelectedDate2(end);
+
+    // Set these for the advanced date filter too
+    setSelectedStartDateDebut(start);
+    setSelectedEndDateDebut(end);
 
     // Update filters for API call when dates change
     setFilters((prev) => ({
@@ -149,7 +175,7 @@ function IssuesList() {
     setPage(0);
   }, [collaborateurId]);
 
-  // Update date filters when custom dates are selected
+  // Update date filters when custom dates are selected in quick filter
   useEffect(() => {
     if (filterType === "custom") {
       setFilters((prev) => ({
@@ -157,6 +183,10 @@ function IssuesList() {
         startDateDebut: selectedDate1,
         endDateDebut: selectedDate2,
       }));
+
+      // Mirror these values to the advanced filter
+      setSelectedStartDateDebut(selectedDate1);
+      setSelectedEndDateDebut(selectedDate2);
 
       // Reset to first page when filters change
       setPage(0);
@@ -179,17 +209,40 @@ function IssuesList() {
     let count = 0;
     if (filterStatus !== "Tous") count++;
     if (collaborateurId !== null) count++;
-    if (selectedDate1 || selectedDate2) count++;
+
+    // Count date filters
+    if (selectedStartDateDebut || selectedEndDateDebut) count++;
+    if (selectedStartDateEcheance || selectedEndDateEcheance) count++;
+    if (selectedStartDateFin || selectedEndDateFin) count++;
+
     setActiveFilters(count);
-  }, [filterStatus, collaborateurId, selectedDate1, selectedDate2]);
+  }, [
+    filterStatus,
+    collaborateurId,
+    selectedStartDateDebut,
+    selectedEndDateDebut,
+    selectedStartDateEcheance,
+    selectedEndDateEcheance,
+    selectedStartDateFin,
+    selectedEndDateFin,
+  ]);
 
   // Reset all filters
   const handleResetFilters = () => {
     setFilterStatus("Tous");
     setCollaborateurId(null);
     setSelectedCollaborateur(null);
+
+    // Reset all date filters
     setSelectedDate1(new Date().toISOString().split("T")[0]);
     setSelectedDate2(new Date().toISOString().split("T")[0]);
+    setSelectedStartDateDebut("");
+    setSelectedEndDateDebut("");
+    setSelectedStartDateEcheance("");
+    setSelectedEndDateEcheance("");
+    setSelectedStartDateFin("");
+    setSelectedEndDateFin("");
+
     setFilterType("today");
     setFilters({
       startDateDebut: "",
@@ -207,11 +260,20 @@ function IssuesList() {
   // Apply filters when drawer is closed
   const handleApplyFilters = () => {
     setFilters({
-      startDateDebut: selectedDate1,
-      endDateDebut: selectedDate2,
+      startDateDebut: selectedStartDateDebut,
+      endDateDebut: selectedEndDateDebut,
+      startDateEcheance: selectedStartDateEcheance,
+      endDateEcheance: selectedEndDateEcheance,
+      startDateFin: selectedStartDateFin,
+      endDateFin: selectedEndDateFin,
       collaborateurId,
       status: filterStatus,
     });
+
+    // Update quick filter values for compatibility
+    setSelectedDate1(selectedStartDateDebut);
+    setSelectedDate2(selectedEndDateDebut);
+
     setPage(0);
     setOpenFilter(false);
   };
@@ -226,6 +288,25 @@ function IssuesList() {
     const newRowsPerPage = parseInt(event.target.value, 10);
     setRowsPerPage(newRowsPerPage);
     setPage(0);
+  };
+
+  // Generate a label for date period chips
+  const getDatePeriodLabel = (startDate, endDate, type) => {
+    let label = "";
+    switch (type) {
+      case DATE_FILTER_TYPES.DATE_DEBUT:
+        label = "Date début";
+        break;
+      case DATE_FILTER_TYPES.DATE_ECHEANCE:
+        label = "Date échéance";
+        break;
+      case DATE_FILTER_TYPES.DATE_FIN:
+        label = "Date fin";
+        break;
+      default:
+        label = "Période";
+    }
+    return `${label}: ${startDate || ""} - ${endDate || ""}`;
   };
 
   return (
@@ -249,9 +330,11 @@ function IssuesList() {
                 activeFilters={activeFilters}
                 setOpenFilter={setOpenFilter}
                 theme={theme}
-                title={"Table des Taches"}
-                fileName={"table_de_taches"}
+                title={"Table des tâches"}
+                fileName={"table_des_taches"}
                 filtreExiste
+                dialog={ExcelExportDialog}
+                columns={columns}
               />
 
               <MDBox pt={3} pb={2} px={3}>
@@ -306,16 +389,62 @@ function IssuesList() {
                             color="primary"
                           />
                         )}
-                        {(selectedDate1 || selectedDate2) && (
+                        {(selectedStartDateDebut || selectedEndDateDebut) && (
                           <Chip
-                            label={`Période: ${selectedDate1 || ""} - ${selectedDate2 || ""}`}
+                            label={getDatePeriodLabel(
+                              selectedStartDateDebut,
+                              selectedEndDateDebut,
+                              DATE_FILTER_TYPES.DATE_DEBUT
+                            )}
                             onDelete={() => {
+                              setSelectedStartDateDebut("");
+                              setSelectedEndDateDebut("");
                               setSelectedDate1("");
                               setSelectedDate2("");
                               setFilters((prev) => ({
                                 ...prev,
                                 startDateDebut: "",
                                 endDateDebut: "",
+                              }));
+                            }}
+                            size="small"
+                            color="primary"
+                          />
+                        )}
+                        {(selectedStartDateEcheance || selectedEndDateEcheance) && (
+                          <Chip
+                            label={getDatePeriodLabel(
+                              selectedStartDateEcheance,
+                              selectedEndDateEcheance,
+                              DATE_FILTER_TYPES.DATE_ECHEANCE
+                            )}
+                            onDelete={() => {
+                              setSelectedStartDateEcheance("");
+                              setSelectedEndDateEcheance("");
+                              setFilters((prev) => ({
+                                ...prev,
+                                startDateEcheance: "",
+                                endDateEcheance: "",
+                              }));
+                            }}
+                            size="small"
+                            color="primary"
+                          />
+                        )}
+                        {(selectedStartDateFin || selectedEndDateFin) && (
+                          <Chip
+                            label={getDatePeriodLabel(
+                              selectedStartDateFin,
+                              selectedEndDateFin,
+                              DATE_FILTER_TYPES.DATE_FIN
+                            )}
+                            onDelete={() => {
+                              setSelectedStartDateFin("");
+                              setSelectedEndDateFin("");
+                              setFilters((prev) => ({
+                                ...prev,
+                                startDateFin: "",
+                                endDateFin: "",
                               }));
                             }}
                             size="small"
@@ -390,48 +519,145 @@ function IssuesList() {
             </Select>
           </FormControl>
         </MDBox>
+
+        {/* Date Filters with Tabs */}
         <MDBox>
           <MDTypography variant="subtitle1" fontWeight="medium" mb={1} color="text">
-            Période personnalisée
+            Filtres par période
           </MDTypography>
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <TextField
-                type="date"
-                label="De"
-                InputLabelProps={{ shrink: true }}
-                value={selectedDate1}
-                onChange={(e) => {
-                  setSelectedDate1(e.target.value);
-                  setFilterType("custom");
-                }}
-                fullWidth
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "8px",
-                  },
-                }}
-              />
+
+          <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>
+            <Tabs
+              value={dateFilterTab}
+              onChange={handleDateTabChange}
+              variant="fullWidth"
+              aria-label="date filter tabs"
+            >
+              <Tab label="Date début" />
+              <Tab label="Date échéance" />
+              <Tab label="Date fin" />
+            </Tabs>
+          </Box>
+
+          {/* Date Début Filter (Tab 0) */}
+          {dateFilterTab === 0 && (
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <TextField
+                  type="date"
+                  label="De"
+                  InputLabelProps={{ shrink: true }}
+                  value={selectedStartDateDebut}
+                  onChange={(e) => {
+                    setSelectedStartDateDebut(e.target.value);
+                  }}
+                  fullWidth
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  type="date"
+                  label="À"
+                  InputLabelProps={{ shrink: true }}
+                  value={selectedEndDateDebut}
+                  onChange={(e) => {
+                    setSelectedEndDateDebut(e.target.value);
+                  }}
+                  fullWidth
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                    },
+                  }}
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={6}>
-              <TextField
-                type="date"
-                label="À"
-                InputLabelProps={{ shrink: true }}
-                value={selectedDate2}
-                onChange={(e) => {
-                  setSelectedDate2(e.target.value);
-                  setFilterType("custom");
-                }}
-                fullWidth
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "8px",
-                  },
-                }}
-              />
+          )}
+
+          {/* Date Échéance Filter (Tab 1) */}
+          {dateFilterTab === 1 && (
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <TextField
+                  type="date"
+                  label="De"
+                  InputLabelProps={{ shrink: true }}
+                  value={selectedStartDateEcheance}
+                  onChange={(e) => {
+                    setSelectedStartDateEcheance(e.target.value);
+                  }}
+                  fullWidth
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  type="date"
+                  label="À"
+                  InputLabelProps={{ shrink: true }}
+                  value={selectedEndDateEcheance}
+                  onChange={(e) => {
+                    setSelectedEndDateEcheance(e.target.value);
+                  }}
+                  fullWidth
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                    },
+                  }}
+                />
+              </Grid>
             </Grid>
-          </Grid>
+          )}
+
+          {/* Date Fin Filter (Tab 2) */}
+          {dateFilterTab === 2 && (
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <TextField
+                  type="date"
+                  label="De"
+                  InputLabelProps={{ shrink: true }}
+                  value={selectedStartDateFin}
+                  onChange={(e) => {
+                    setSelectedStartDateFin(e.target.value);
+                  }}
+                  fullWidth
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  type="date"
+                  label="À"
+                  InputLabelProps={{ shrink: true }}
+                  value={selectedEndDateFin}
+                  onChange={(e) => {
+                    setSelectedEndDateFin(e.target.value);
+                  }}
+                  fullWidth
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                    },
+                  }}
+                />
+              </Grid>
+            </Grid>
+          )}
         </MDBox>
       </FiltreAvancee>
     </DashboardLayout>

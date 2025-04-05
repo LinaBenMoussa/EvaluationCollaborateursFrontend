@@ -54,7 +54,7 @@ const Table = ({
                     },
                   });
                 }}
-                rowsPerPageOptions={[10]}
+                rowsPerPageOptions={[5, 10, 15, 20, 25]}
                 labelRowsPerPage="Lignes par page:"
                 labelDisplayedRows={({ from, to, count }) =>
                   `${from}-${to} sur ${count !== -1 ? count : `plus de ${to}`}`

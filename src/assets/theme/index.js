@@ -102,6 +102,9 @@ export default createTheme({
       styleOverrides: {
         ...globals,
         ...container,
+        img: {
+          display: "initial",
+        },
       },
     },
     MuiDrawer: { ...sidenav },

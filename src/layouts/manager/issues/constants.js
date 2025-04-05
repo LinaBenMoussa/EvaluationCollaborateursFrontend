@@ -1,0 +1,35 @@
+// constants.js
+export const STATUS_OPTIONS = [
+  "Tous",
+  "Nouveau",
+  "Résolu",
+  "Fermé",
+  "Réouvert",
+  "Assigné",
+  "Rejeté",
+  "Reporté",
+  "Dupliqué",
+  "Ambigu",
+  "En cours",
+  "Ouvert",
+  "Négociation de l'offre",
+  "Validation de l'offre",
+  "Clôture provisoire",
+];
+
+export const STATUS_COLORS = {
+  Nouveau: "#2196F3",
+  Résolu: "#4CAF50",
+  Fermé: "#607D8B",
+  Réouvert: "#FF9800",
+  Assigné: "#9C27B0",
+  Rejeté: "#F44336",
+  Reporté: "#795548",
+  Dupliqué: "#9E9E9E",
+  Ambigu: "#FFEB3B",
+  "En cours": "#00BCD4",
+  Ouvert: "#8BC34A",
+  "Négociation de l'offre": "#673AB7",
+  "Validation de l'offre": "#3F51B5",
+  "Clôture provisoire": "#E91E63",
+};
