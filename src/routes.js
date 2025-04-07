@@ -19,6 +19,7 @@ import IssuesListCollaborateur from "layouts/collaborateur/issues";
 import SaisiesTemps from "layouts/manager/saisiesTemps";
 import CongesListCollaborateur from "layouts/collaborateur/conges";
 import SaisiesTempsCollaborateur from "layouts/collaborateur/saisiesTemps";
+import Profile from "layouts/collaborateur/profile";
 
 const routes = [
   {
@@ -38,6 +39,15 @@ const routes = [
     route: "/utilisateurs",
     component: <Tables />,
     roles: ["ROLE_ADMIN"],
+  },
+  {
+    type: "collapse",
+    name: "profile",
+    key: "profile",
+    icon: <Icon fontSize="small">profile</Icon>,
+    route: "/profile",
+    component: <Profile />,
+    roles: ["ROLE_COLLABORATEUR"],
   },
   {
     type: "collapse",

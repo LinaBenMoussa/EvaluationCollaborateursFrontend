@@ -4,6 +4,7 @@ const initialState = {
   id: null,
   token: null,
   role: null,
+  user: null,
   isAuthenticated: false,
 };
 
@@ -16,12 +17,14 @@ const authSlice = createSlice({
       state.token = action.payload.accessToken;
       state.isAuthenticated = true;
       state.role = action.payload.role;
+      state.user = action.payload.user;
     },
     logout: (state) => {
       state.id = null;
       state.token = null;
       state.isAuthenticated = false;
       state.role = null;
+      state.user = null;
     },
   },
 });
@@ -32,3 +35,4 @@ export const selectCurrentUser = (state) => state.auth.id;
 export const selectCurrentToken = (state) => state.auth.token;
 export const selectCurrentRole = (state) => state.auth.role;
 export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;
+export const selectCurrentNom = (state) => state.auth.user;
