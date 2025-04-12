@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "store/slices/authSlice";
 import { usePointageTableData } from "./data/usePointageTableData";
@@ -27,6 +26,7 @@ import { convertDateFormat } from "functions/dateTime";
 import { formatDate } from "functions/dateTime";
 import { getStartDate } from "functions/startDate";
 import PointageExportDialog from "./exportToExcelDialog";
+import DashboardNavbar from "../DashboardNavbar";
 
 function Historique() {
   const theme = useTheme();

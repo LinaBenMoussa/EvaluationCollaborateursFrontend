@@ -17,7 +17,6 @@ import {
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "store/slices/authSlice";
 import { useIssuesTableData } from "./data/useIssuesTableData";
@@ -31,6 +30,7 @@ import { getStartDate } from "functions/startDate";
 import { useFiltreIssuesQuery } from "store/api/issueApi";
 import { STATUS_OPTIONS } from "./constants";
 import ExcelExportDialog from "./exportToExcelDialog";
+import DashboardNavbar from "../DashboardNavbar";
 
 // Period options
 const PERIOD_OPTIONS = [

@@ -52,12 +52,12 @@ export function useCongesTableData(managerId, filters = {}) {
     () => [
       { Header: "ID", accessor: "id", align: "left", width: "50px" },
       { Header: "Collaborateur", accessor: "collaborateur", align: "left", width: "200px" },
-      { Header: "Type", accessor: "type", align: "center", width: "150px" },
-      { Header: "Date début", accessor: "dateDebut", align: "center" },
-      { Header: "Date fin", accessor: "dateFin", align: "center" },
-      { Header: "Nombre de jours", accessor: "nbrjour", align: "center" },
-      { Header: "Heure début", accessor: "heureDeb", align: "center" },
-      { Header: "Heure fin", accessor: "heureFin", align: "center" },
+      { Header: "Type", accessor: "type", align: "left", width: "150px" },
+      { Header: "Date début", accessor: "dateDebut", align: "left" },
+      { Header: "Date fin", accessor: "dateFin", align: "left" },
+      { Header: "Nombre de jours", accessor: "nbrjour", align: "left" },
+      { Header: "Heure début", accessor: "heureDeb", align: "left" },
+      { Header: "Heure fin", accessor: "heureFin", align: "left" },
     ],
     []
   );

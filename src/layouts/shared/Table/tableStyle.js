@@ -13,7 +13,7 @@ const TableStyles = (theme) => ({
     },
     "& .MuiTableCell-head": {
       backgroundColor: theme.palette.background.default,
-      color: theme.palette.text.primary,
+      color: "#000000",
       fontWeight: "bold",
     },
   },

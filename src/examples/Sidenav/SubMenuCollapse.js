@@ -21,7 +21,6 @@ function SubMenuCollapse({ item, collapseName }) {
       {/* L'item principal du sous-menu */}
       <MDBox onClick={handleClick} sx={{ cursor: "pointer" }} display="flex" alignItems="center">
         <SidenavCollapse name={name} icon={icon} active={key === collapseName} />
-        {open ? <ExpandLess /> : <ExpandMore />}
       </MDBox>
       {/* Les sous-items */}
       <Collapse in={open} timeout="auto" unmountOnExit>

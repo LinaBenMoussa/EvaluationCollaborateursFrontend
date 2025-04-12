@@ -33,10 +33,10 @@ export function useSaisiesTableData(managerId, filters = {}) {
   const columns = useMemo(
     () => [
       { Header: "id", accessor: "id", align: "left" },
-      { Header: "date", accessor: "date", align: "center" },
-      { Header: "heures", accessor: "heures", align: "center" },
-      { Header: "commentaire", accessor: "commentaire", align: "center" },
-      { Header: "collaborateur", accessor: "collaborateur", align: "center" },
+      { Header: "date", accessor: "date", align: "left" },
+      { Header: "heures", accessor: "heures", align: "left" },
+      { Header: "commentaire", accessor: "commentaire", align: "left" },
+      { Header: "collaborateur", accessor: "collaborateur", align: "left" },
     ],
     []
   );

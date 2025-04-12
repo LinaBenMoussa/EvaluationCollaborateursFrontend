@@ -5,6 +5,7 @@ import MDButton from "components/MDButton";
 import CloseIcon from "@mui/icons-material/Close";
 import filtreRapideStyles from "./filtreRapideStyle"; // Import styles
 import React from "react";
+import { GrPowerReset } from "react-icons/gr";
 
 const FiltreRapide = ({
   theme,
@@ -28,9 +29,8 @@ const FiltreRapide = ({
             size="small"
             onClick={handleResetFilters}
             sx={classes.button}
-            startIcon={<CloseIcon />}
           >
-            Réinitialiser les filtres
+            <GrPowerReset color="#FF0000" />
           </MDButton>
         )}
       </MDBox>

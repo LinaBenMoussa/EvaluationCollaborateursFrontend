@@ -105,16 +105,22 @@ export function useIssuesTableData(managerId, filters = {}) {
 
   const columns = useMemo(
     () => [
-      { Header: "ID", accessor: "id", align: "left", width: "50px" },
-      { Header: "Sujet", accessor: "sujet", align: "left", width: "200px" },
-      { Header: "Description", accessor: "description", align: "left", width: "250px" },
-      { Header: "Type", accessor: "type", align: "center", width: "100px" },
-      { Header: "Statut", accessor: "status", align: "center", width: "150px" },
-      { Header: "Date début", accessor: "date_debut", align: "center" },
-      { Header: "Date échéance", accessor: "date_echeance", align: "center" },
-      { Header: "Date fin", accessor: "date_fin", align: "center" },
-      { Header: "Collaborateur", accessor: "collaborateur", align: "center" },
-      { Header: "Action", accessor: "action", align: "center", width: "100px" },
+      { Header: "ID", accessor: "id", align: "left", allowWrap: true },
+      { Header: "Sujet", accessor: "sujet", align: "left", allowWrap: true, width: "200px" },
+      {
+        Header: "Description",
+        accessor: "description",
+        align: "left",
+        allowWrap: true,
+        width: "500px",
+      },
+      { Header: "Type", accessor: "type", align: "left", allowWrap: true },
+      { Header: "Statut", accessor: "status", align: "left", allowWrap: true },
+      { Header: "Date début", accessor: "date_debut", align: "left", allowWrap: true },
+      { Header: "Date échéance", accessor: "date_echeance", align: "left", allowWrap: true },
+      { Header: "Date fin", accessor: "date_fin", align: "left", allowWrap: true },
+      { Header: "Collaborateur", accessor: "collaborateur", align: "left", allowWrap: true },
+      { Header: "Action", accessor: "action", align: "left", allowWrap: true },
     ],
     []
   );

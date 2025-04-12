@@ -17,7 +17,6 @@ import {
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "store/slices/authSlice";
 import { Header } from "layouts/shared/Header";
@@ -26,6 +25,7 @@ import Table from "layouts/shared/Table";
 import { FiltreAvancee } from "layouts/shared/FiltreAvancee";
 import { useCongesTableData } from "./data/useCongesTableData";
 import CongeExcelExportDialog from "./exportToExcelDialog";
+import DashboardNavbar from "../DashboardNavbar";
 
 // Period options
 const PERIOD_OPTIONS = [

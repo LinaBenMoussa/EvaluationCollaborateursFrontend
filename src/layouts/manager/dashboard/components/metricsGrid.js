@@ -32,7 +32,9 @@ const MetricsGrid = ({ stats }) => (
           percentage={{
             color: (stats?.respectEcheanceRate || 0) >= 75 ? "success" : "warning",
             amount: (stats?.respectEcheanceRate || 0) >= 75 ? "↑" : "↓",
-            label: `${stats?.tasksInLate || 0} tâches en retard`,
+            label: `${stats?.tasksInLate || 0} tâches en retard/ ${
+              stats?.task_total_echeance_not_null
+            } tâches`,
           }}
         />
       </MDBox>

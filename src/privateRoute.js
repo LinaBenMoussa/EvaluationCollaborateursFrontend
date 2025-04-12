@@ -5,7 +5,7 @@ export const PrivateRoute = ({ role }) => {
   if (role?.[0] === "ROLE_MANAGER") {
     return <Navigate to="/dashboard" />;
   } else if (role?.[0] === "ROLE_COLLABORATEUR") {
-    return <Navigate to="/pointage" />;
+    return <Navigate to="/dashboard" />;
   } else if (role?.[0] === "ROLE_ADMIN") {
     console.log("role", role);
     return <Navigate to="/utilisateurs" />;

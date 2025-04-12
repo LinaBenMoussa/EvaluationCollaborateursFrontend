@@ -279,12 +279,6 @@ function Pointage() {
                       {/* Summary stats */}
                       <Box display="flex" gap={2}>
                         <Chip
-                          label={`${employeeCards.filter((c) => !c.late).length} à l'heure`}
-                          color="success"
-                          variant="outlined"
-                          size="small"
-                        />
-                        <Chip
                           label={`${employeeCards.filter((c) => c.late).length} en retard`}
                           color="error"
                           variant="outlined"

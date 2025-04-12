@@ -1,10 +1,5 @@
-/* eslint-disable react/prop-types */
-import { useEffect } from "react";
-
-// react-router-dom components
+import React, { useEffect } from "react";
 import { useLocation, NavLink } from "react-router-dom";
-
-// prop-types is a library for typechecking of props.
 import PropTypes from "prop-types";
 
 // @mui material components
@@ -16,6 +11,7 @@ import Icon from "@mui/material/Icon";
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
+
 // Material Dashboard 2 React example components
 import SidenavCollapse from "examples/Sidenav/SidenavCollapse";
 
@@ -147,7 +143,8 @@ function Sidenav({ color, brand, brandName, routes, footerComponent, ...rest }) 
           </MDTypography>
         </MDBox>
         <MDBox component={NavLink} to="/" display="flex" alignItems="center">
-          {brand && <MDBox component="img" src={brand} alt="Brand" width="12rem" />}
+          {/* Only show the brand when not in mini sidenav mode */}
+          {brand && !miniSidenav && <MDBox component="img" src={brand} alt="Brand" width="12rem" />}
           <MDBox
             width={!brandName && "100%"}
             sx={(theme) => sidenavLogoLabel(theme, { miniSidenav })}
@@ -167,7 +164,10 @@ function Sidenav({ color, brand, brandName, routes, footerComponent, ...rest }) 
       <MDBox display="flex" flexDirection="column" height="100%">
         <List sx={{ flexGrow: 1 }}>{renderRoutes}</List>
         <MDBox display="flex" justifyContent="center" p={2} mt="auto">
-          {footerComponent}
+          {/* Pass miniSidenav prop to footerComponent */}
+          {footerComponent && React.isValidElement(footerComponent)
+            ? React.cloneElement(footerComponent, { miniSidenav })
+            : footerComponent}
         </MDBox>
       </MDBox>
     </SidenavRoot>
@@ -186,6 +186,7 @@ Sidenav.propTypes = {
   brand: PropTypes.string,
   brandName: PropTypes.string.isRequired,
   routes: PropTypes.arrayOf(PropTypes.object).isRequired,
+  footerComponent: PropTypes.node,
 };
 
 export default Sidenav;

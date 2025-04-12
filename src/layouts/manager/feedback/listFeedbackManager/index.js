@@ -8,6 +8,7 @@ import {
   TextField,
   Pagination,
   useTheme,
+  Icon,
 } from "@mui/material";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
@@ -26,6 +27,7 @@ import { formatDateWithTime } from "functions/dateTime";
 import { selectCurrentUser } from "store/slices/authSlice";
 import { useFiltreFeedbacksQuery } from "store/api/feedbackApi";
 import { Header } from "layouts/shared/Header";
+import { GrPowerReset } from "react-icons/gr";
 
 function FeedbackListManager() {
   const [collaborateurId, setCollaborateurId] = useState(null);
@@ -156,26 +158,25 @@ function FeedbackListManager() {
                       </Grid>
                     </Grid>
                   </Grid>
-
-                  <Grid item xs={12} md={2}>
+                  <Grid item xs={12} md={1}>
                     <MDButton
                       variant="outlined"
                       color="secondary"
                       onClick={resetDateFilter}
                       fullWidth
                     >
-                      Réinitialiser
+                      <GrPowerReset color="#FF0000" />
                     </MDButton>
                   </Grid>
-
-                  <Grid item xs={12} md={2}>
+                  <Grid item xs={12} md={2}></Grid>
+                  <Grid item xs={12} md={1}>
                     <MDButton
                       variant="contained"
                       color="info"
                       onClick={() => navigate("/addfeedback")}
                       fullWidth
                     >
-                      Ajouter
+                      <Icon>add</Icon>
                     </MDButton>
                   </Grid>
                 </Grid>

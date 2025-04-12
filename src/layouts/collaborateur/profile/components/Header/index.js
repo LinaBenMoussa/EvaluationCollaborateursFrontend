@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 
 // prop-types is a library for typechecking of props.
@@ -17,13 +18,13 @@ import breakpoints from "assets/theme/base/breakpoints";
 
 import backgroundImage from "assets/images/bg-profile.jpeg";
 import { useSelector } from "react-redux";
-import { selectCurrentUser } from "store/slices/authSlice";
-import { useGetUserByIdQuery } from "store/api/userApi";
+import { selectCurrentNom } from "store/slices/authSlice";
+import { selectCurrentPrenom } from "store/slices/authSlice";
 
-function Header({ children }) {
+function Header({ children, collaborateur }) {
+  const firstName = useSelector(selectCurrentNom);
+  const lastName = useSelector(selectCurrentPrenom);
   const [tabsOrientation, setTabsOrientation] = useState("horizontal");
-  const collaborateurId = useSelector(selectCurrentUser);
-  const { data: collaborateur } = useGetUserByIdQuery(collaborateurId);
   useEffect(() => {
     function handleTabsOrientation() {
       return window.innerWidth < breakpoints.values.sm
@@ -36,10 +37,8 @@ function Header({ children }) {
     */
     window.addEventListener("resize", handleTabsOrientation);
 
-    // Call the handleTabsOrientation function to set the state with the initial value.
     handleTabsOrientation();
 
-    // Remove event listener on cleanup
     return () => window.removeEventListener("resize", handleTabsOrientation);
   }, [tabsOrientation]);
   const getInitials = (firstName, lastName) => {
@@ -83,13 +82,13 @@ function Header({ children }) {
                 border: "2px solid #fff",
               }}
             >
-              {getInitials(collaborateur?.prenom, collaborateur?.nom)}
+              {getInitials(firstName, lastName)}
             </MDAvatar>
           </Grid>
           <Grid item>
             <MDBox height="100%" mt={0.5} lineHeight={1}>
               <MDTypography variant="h5" fontWeight="medium">
-                {collaborateur?.nom} {collaborateur?.prenom}
+                {firstName} {lastName}
               </MDTypography>
             </MDBox>
           </Grid>

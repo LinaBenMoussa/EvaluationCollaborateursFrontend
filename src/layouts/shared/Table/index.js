@@ -34,6 +34,7 @@ const Table = ({
             canSearch={false}
             noEndBorder={true}
             sx={classes.dataTable}
+            initialHiddenColumns={["id"]}
           />
 
           {/* Pagination */}

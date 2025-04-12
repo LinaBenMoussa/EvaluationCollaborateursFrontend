@@ -10,9 +10,7 @@ export default styled(Drawer)(({ theme, ownerState }) => {
   const { xxl } = boxShadows;
   const { pxToRem, linearGradient } = functions;
 
-  let backgroundValue = darkMode
-    ? background.sidenav
-    : linearGradient(gradients.dark.main, gradients.dark.state);
+  let backgroundValue = linearGradient("#072E5AFF", "#0E3C4EFF");
 
   if (transparentSidenav) {
     backgroundValue = transparent.main;

@@ -1,16 +1,9 @@
 import { useState, useEffect } from "react";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
-import Drawer from "@mui/material/Drawer";
-import IconButton from "@mui/material/IconButton";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import CloseIcon from "@mui/icons-material/Close";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
-import MDButton from "components/MDButton";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import DataTable from "examples/Tables/DataTable";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "store/slices/authSlice";
 import {
@@ -33,6 +26,7 @@ import { convertDateFormat } from "functions/dateTime";
 import { formatDate } from "functions/dateTime";
 import { getStartDate } from "functions/startDate";
 import SaisieExportToExcelDialog from "./exportToExcelDialog";
+import DashboardNavbar from "../DashboardNavbar";
 
 function SaisiesTempsCollaborateur() {
   const theme = useTheme();

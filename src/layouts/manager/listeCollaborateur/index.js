@@ -51,6 +51,7 @@ function CollaborateursList() {
                     showTotalEntries={false}
                     canSearch={true}
                     noEndBorder={false}
+                    initialHiddenColumns={["id"]}
                   />
                 )}
               </MDBox>

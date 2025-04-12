@@ -29,25 +29,6 @@ const PerformanceSummaryCard = ({
               <MDTypography variant="body2" color="text">
                 Score: {safeNumberFormat(performanceScore)}/100
               </MDTypography>
-              <MDBox
-                sx={{
-                  height: 8,
-                  width: "100%",
-                  borderRadius: 10,
-                  background: "#f0f0f0",
-                  mt: 0.5,
-                  overflow: "hidden",
-                }}
-              >
-                <MDBox
-                  sx={{
-                    height: "100%",
-                    width: `${performanceScore}%`,
-                    borderRadius: 10,
-                    background: `var(--${overallStatus.color})`,
-                  }}
-                />
-              </MDBox>
             </MDBox>
           </MDBox>
         </Grid>
@@ -55,17 +36,6 @@ const PerformanceSummaryCard = ({
           <MDBox>
             <MDTypography variant="subtitle2" color="text">
               Heures travaillées: <strong>{formatTime(stats?.dailyAvgWorkingHours)}/jour</strong>
-            </MDTypography>
-            <MDTypography variant="subtitle2" color="text">
-              Complexité moyenne des tâches:{" "}
-              <strong>
-                {stats?.taskComplexityScore !== null
-                  ? safeNumberFormat(stats?.taskComplexityScore) + "/5"
-                  : "N/A"}
-              </strong>
-            </MDTypography>
-            <MDTypography variant="subtitle2" color="text">
-              Temps moyen de retard: <strong>{formatTime(stats?.tempsMoyenRetard)}</strong>
             </MDTypography>
           </MDBox>
         </Grid>

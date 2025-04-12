@@ -1,19 +1,3 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.2.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
-// prop-types is a library for typechecking of props
 import PropTypes from "prop-types";
 
 // Material Dashboard 2 React components
@@ -33,9 +17,16 @@ function DataTableBodyCell({ noBorder, align, children }) {
     >
       <MDBox
         display="inline-block"
-        width="max-content"
+        // width="max-content"
+        minWidth="50px"
+        maxWidth="200px"
         color="text"
-        sx={{ verticalAlign: "middle" }}
+        sx={{
+          verticalAlign: "middle",
+          whiteSpace: "normal",
+          wordWrap: "break-word",
+          overflow: "hidden",
+        }}
       >
         {children}
       </MDBox>
@@ -46,7 +37,7 @@ function DataTableBodyCell({ noBorder, align, children }) {
 // Setting default values for the props of DataTableBodyCell
 DataTableBodyCell.defaultProps = {
   noBorder: false,
-  align: "left",
+  align: "right",
 };
 
 // Typechecking props for the DataTableBodyCell

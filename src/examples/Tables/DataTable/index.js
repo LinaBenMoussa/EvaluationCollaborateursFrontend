@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useMemo, useEffect, useState, useRef } from "react";
 import PropTypes from "prop-types";
 import { useTable, useGlobalFilter, useAsyncDebounce, useSortBy, usePagination } from "react-table";
@@ -45,6 +46,7 @@ function DataTable({
   enablePagination,
   pageSize: initialPageSize,
   pageSizeOptions,
+  initialHiddenColumns,
   enableExport,
   enableColumnVisibility,
   rowActions,
@@ -63,7 +65,7 @@ function DataTable({
     {
       columns,
       data,
-      initialState: { pageSize: defaultPageSize },
+      initialState: { pageSize: defaultPageSize, hiddenColumns: initialHiddenColumns || [] },
     },
     useGlobalFilter,
     useSortBy,
@@ -447,10 +449,10 @@ function DataTable({
                       key={idx}
                       {...column.getHeaderProps(isSorted && column.getSortByToggleProps())}
                       width={column.width ? column.width : "auto"}
-                      align={column.align ? column.align : "left"}
+                      align={column.align ? column.align : "center"}
                       sorted={setSortedValue(column)}
                       sx={{
-                        color: colorMode === "dark" ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.7)",
+                        color: "#000000",
                         fontSize: "0.75rem",
                         fontWeight: "700",
                         textTransform: "uppercase",
@@ -464,7 +466,9 @@ function DataTable({
                             : "rgba(255, 255, 255, 0.95)",
                         backdropFilter: "blur(4px)",
                         boxShadow: "0 1px 0 0 rgba(0, 0, 0, 0.1)",
-                        whiteSpace: "nowrap",
+                        whiteSpace: "normal",
+                        wordWrap: "break-word",
+                        maxWidth: "200px",
                         cursor: isSorted ? "pointer" : "default",
                         transition: "all 0.2s",
                         "&:hover": isSorted
@@ -488,27 +492,7 @@ function DataTable({
                     </DataTableHeadCell>
                   ))}
                   {rowActions && (
-                    <DataTableHeadCell
-                      width="100px"
-                      align="center"
-                      sx={{
-                        color: colorMode === "dark" ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.7)",
-                        fontSize: "0.75rem",
-                        fontWeight: "700",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.025rem",
-                        padding: "16px",
-                        position: "sticky",
-                        top: 0,
-                        backgroundColor:
-                          colorMode === "dark"
-                            ? "rgba(26, 32, 53, 0.95)"
-                            : "rgba(255, 255, 255, 0.95)",
-                        backdropFilter: "blur(4px)",
-                        boxShadow: "0 1px 0 0 rgba(0, 0, 0, 0.1)",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
+                    <DataTableHeadCell width="100px" align="center">
                       Actions
                     </DataTableHeadCell>
                   )}
@@ -546,13 +530,15 @@ function DataTable({
                         <DataTableBodyCell
                           key={idx}
                           noBorder={noEndBorder && displayRows.length - 1 === key}
-                          align={cell.column.align ? cell.column.align : "left"}
+                          align={cell.column.align ? cell.column.align : "right"}
                           {...cell.getCellProps()}
                           sx={{
                             color: colorMode === "dark" ? "rgba(255,255,255,0.7)" : "inherit",
                             padding: "16px",
                             fontSize: "0.875rem",
-                            whiteSpace: "nowrap",
+                            whiteSpace: "normal",
+                            wordWrap: "break-word",
+                            maxWidth: "200px",
                           }}
                         >
                           {cell.render("Cell")}
@@ -566,7 +552,9 @@ function DataTable({
                             color: colorMode === "dark" ? "rgba(255,255,255,0.7)" : "inherit",
                             padding: "16px",
                             fontSize: "0.875rem",
-                            whiteSpace: "nowrap",
+                            wwhiteSpace: "normal",
+                            wordWrap: "break-word",
+                            maxWidth: "200px",
                           }}
                         >
                           <MDBox display="flex" justifyContent="center" gap={1}>
@@ -724,11 +712,12 @@ DataTable.defaultProps = {
   pageSize: 10,
   pageSizeOptions: [5, 10, 25, 50],
   enableExport: false,
-  enableColumnVisibility: false,
+  enableColumnVisibility: true,
   rowActions: null,
   onRowClick: null,
   emptyMessage: "Aucune donnée disponible",
   refreshAction: null,
+  initialHiddenColumns: [],
 };
 
 // Typechecking props for the DataTable
@@ -754,6 +743,7 @@ DataTable.propTypes = {
   onRowClick: PropTypes.func,
   emptyMessage: PropTypes.string,
   refreshAction: PropTypes.func,
+  initialHiddenColumns: PropTypes.arrayOf(PropTypes.string),
 };
 
 export default DataTable;

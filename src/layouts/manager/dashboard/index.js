@@ -23,6 +23,7 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import { MetricsAvancees } from "./components/metricsAvancees";
 import { useGetReportMutation } from "store/api/reportApi";
 import ReportViewer from "./components/ReportViewer";
+import TopCollaborators from "./components/topCollaborateur";
 
 const Dashboard = () => {
   const [collaborateurId, setCollaborateurId] = useState(null);
@@ -138,7 +139,6 @@ const Dashboard = () => {
       setReportDialogOpen(true);
     } catch (error) {
       console.error("Erreur lors de la génération du rapport :", error);
-      // Tu peux afficher une notification ici par exemple
     }
   };
 
@@ -232,7 +232,14 @@ const Dashboard = () => {
             </Card>
           </Grid>
         </Grid>
-        <MetricsAvancees stats={stats} />
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={6}>
+            <TopCollaborators />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <MetricsAvancees stats={stats} />
+          </Grid>
+        </Grid>
 
         {/* Bouton pour générer le rapport */}
         <MDBox mt={3} display="flex" justifyContent="flex-end">

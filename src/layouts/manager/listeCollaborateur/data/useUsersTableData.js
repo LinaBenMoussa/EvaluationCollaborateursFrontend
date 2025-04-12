@@ -2,7 +2,6 @@
 /* eslint-disable react/function-component-definition */
 
 import { useMemo } from "react";
-import MDTypography from "components/MDTypography";
 import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
 
 export function useUsersTableData(managerId) {
@@ -12,9 +11,9 @@ export function useUsersTableData(managerId) {
   const columns = useMemo(
     () => [
       { Header: "id", accessor: "id", align: "left" },
-      { Header: "nom", accessor: "nom", align: "center" },
-      { Header: "prenom", accessor: "prenom", align: "center" },
-      { Header: "Nom d'utilisateur", accessor: "username", align: "center" },
+      { Header: "nom", accessor: "nom", align: "left" },
+      { Header: "prenom", accessor: "prenom", align: "left" },
+      { Header: "Nom d'utilisateur", accessor: "username", align: "left" },
     ],
     []
   );
