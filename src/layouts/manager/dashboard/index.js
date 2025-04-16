@@ -24,6 +24,7 @@ import { MetricsAvancees } from "./components/metricsAvancees";
 import { useGetReportMutation } from "store/api/reportApi";
 import ReportViewer from "./components/ReportViewer";
 import TopCollaborators from "./components/topCollaborateur";
+import Footer from "examples/Footer";
 
 const Dashboard = () => {
   const [collaborateurId, setCollaborateurId] = useState(null);
@@ -293,6 +294,7 @@ const Dashboard = () => {
         </MDBox>
       </MDBox>
       {renderContent()}
+      <Footer />
     </DashboardLayout>
   );
 };

@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 
 // react-router components
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 
 // @mui material components
 import { ThemeProvider } from "@mui/material/styles";
@@ -28,7 +28,6 @@ import brandWhite from "assets/images/logo_clinisys.png";
 import { useSelector } from "react-redux";
 import { selectCurrentRole, selectIsAuthenticated } from "./store/slices/authSlice";
 import AuthRequired from "store/slices/RequireAuth";
-import LogoutButton from "layouts/authentication/logout/logout";
 import AddFeedBack from "layouts/manager/feedback/addfeedback";
 import SaisiesTable from "layouts/manager/saisie temps";
 import AddUser from "layouts/admin/add-user";
@@ -99,7 +98,6 @@ export default function App() {
             routes={routes.filter((route) => !route.roles || route.roles.includes(userRole?.[0] ?? ""))}
             onMouseEnter={handleOnMouseEnter}
             onMouseLeave={handleOnMouseLeave}
-            footerComponent={<LogoutButton />}
           />
         </>
       )}

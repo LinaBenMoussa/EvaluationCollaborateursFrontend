@@ -31,6 +31,7 @@ import { useFiltreIssuesQuery } from "store/api/issueApi";
 import { STATUS_OPTIONS } from "./constants";
 import ExcelExportDialog from "./exportToExcelDialog";
 import DashboardNavbar from "../DashboardNavbar";
+import Footer from "examples/Footer";
 
 // Period options
 const PERIOD_OPTIONS = [
@@ -604,6 +605,7 @@ function IssuesList() {
           )}
         </MDBox>
       </FiltreAvancee>
+      <Footer />
     </DashboardLayout>
   );
 }

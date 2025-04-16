@@ -27,6 +27,7 @@ import { formatDate } from "functions/dateTime";
 import { getStartDate } from "functions/startDate";
 import SaisieExportToExcelDialog from "./exportToExcelDialog";
 import DashboardNavbar from "../DashboardNavbar";
+import Footer from "examples/Footer";
 
 function SaisiesTempsCollaborateur() {
   const theme = useTheme();
@@ -289,6 +290,7 @@ function SaisiesTempsCollaborateur() {
           </Grid>
         </MDBox>
       </FiltreAvancee>
+      <Footer />
     </DashboardLayout>
   );
 }

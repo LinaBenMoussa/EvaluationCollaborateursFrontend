@@ -13,6 +13,7 @@ import { useUsersTableData } from "./data/useUsersTableData";
 import SelectFieldRole from "../add-user/SelectFieldRole";
 import { Header } from "layouts/shared/Header";
 import { useTheme } from "@emotion/react";
+import Footer from "examples/Footer";
 
 function Tables() {
   const navigate = useNavigate();
@@ -94,6 +95,7 @@ function Tables() {
           </MDButton>
         </DialogActions>
       </Dialog>
+      <Footer />
     </DashboardLayout>
   );
 }

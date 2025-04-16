@@ -20,6 +20,7 @@ import AutocompleteField from "layouts/shared/autocompleteField";
 import { useAddUserMutation } from "store/api/userApi";
 import { useNavigate } from "react-router-dom";
 import { useGetByRoleQuery } from "store/api/userApi";
+import Footer from "examples/Footer";
 
 function AddUser() {
   const [username, setUser] = useState("");
@@ -211,6 +212,7 @@ function AddUser() {
           </Grid>
         </Grid>
       </MDBox>
+      <Footer />
     </DashboardLayout>
   );
 }

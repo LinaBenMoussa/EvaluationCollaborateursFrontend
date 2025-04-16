@@ -16,6 +16,7 @@ import AutocompleteField from "layouts/shared/autocompleteField";
 import { useEditUserMutation } from "store/api/userApi";
 import { useGetUserByIdQuery } from "store/api/userApi";
 import { useGetByRoleQuery } from "store/api/userApi";
+import Footer from "examples/Footer";
 
 function EditUser() {
   const { id } = useParams();
@@ -205,6 +206,7 @@ function EditUser() {
           </Grid>
         </Grid>
       </MDBox>
+      <Footer />
     </DashboardLayout>
   );
 }

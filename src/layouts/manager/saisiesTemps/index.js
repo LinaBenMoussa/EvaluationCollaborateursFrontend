@@ -35,6 +35,7 @@ import { convertDateFormat } from "functions/dateTime";
 import { formatDate } from "functions/dateTime";
 import { getStartDate } from "functions/startDate";
 import SaisieExportToExcelDialog from "./exportToExcelDialog";
+import Footer from "examples/Footer";
 
 function SaisiesTemps() {
   const theme = useTheme();
@@ -344,6 +345,7 @@ function SaisiesTemps() {
           </Grid>
         </MDBox>
       </FiltreAvancee>
+      <Footer />
     </DashboardLayout>
   );
 }

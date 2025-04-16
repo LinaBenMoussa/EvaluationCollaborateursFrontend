@@ -26,6 +26,7 @@ import { FiltreAvancee } from "layouts/shared/FiltreAvancee";
 import { useCongesTableData } from "./data/useCongesTableData";
 import CongeExcelExportDialog from "./exportToExcelDialog";
 import DashboardNavbar from "../DashboardNavbar";
+import Footer from "examples/Footer";
 
 // Period options
 const PERIOD_OPTIONS = [
@@ -537,6 +538,7 @@ function CongesListCollaborateur() {
           )}
         </MDBox>
       </FiltreAvancee>
+      <Footer />
     </DashboardLayout>
   );
 }

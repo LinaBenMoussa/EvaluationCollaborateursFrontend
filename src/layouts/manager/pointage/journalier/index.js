@@ -38,6 +38,7 @@ import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
 import { Header } from "layouts/shared/Header";
 import FiltreRapide from "layouts/shared/FiltreRapide";
 import { FiltreAvancee } from "layouts/shared/FiltreAvancee";
+import Footer from "examples/Footer";
 
 // Status filter options with icons
 const statusOptions = [
@@ -396,6 +397,7 @@ function Pointage() {
           />
         </MDBox>
       </FiltreAvancee>
+      <Footer />
     </DashboardLayout>
   );
 }

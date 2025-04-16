@@ -7,6 +7,7 @@ import Chip from "@mui/material/Chip";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import Tooltip from "@mui/material/Tooltip";
+import { keyframes } from "@emotion/react";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
@@ -15,6 +16,24 @@ import MDAvatar from "components/MDAvatar";
 import { useGetBadgeByCollaborateurQuery } from "store/api/badgeApi";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "store/slices/authSlice";
+
+// Ajout d'animations avec emotion
+const float = keyframes`
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0px); }
+`;
+
+const pulse = keyframes`
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+`;
+
+const shine = keyframes`
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+`;
 
 function Badge() {
   const collaborateurId = useSelector(selectCurrentUser);
@@ -45,6 +64,18 @@ function Badge() {
     return "primary"; // Couleur par défaut
   };
 
+  // Obtenir un dégradé de couleur pour le badge
+  const getBadgeGradient = (badgeName) => {
+    const nameToLower = badgeName.toLowerCase();
+
+    if (nameToLower.includes("heure")) return "linear-gradient(135deg, #C9B719FF, #C9B719FF)";
+    if (nameToLower.includes("régulier")) return "linear-gradient(135deg, #646567FF, #646567FF)";
+    if (nameToLower.includes("assidu")) return "linear-gradient(135deg, #9C7C1CC5, #9C7C1CC5)";
+    if (nameToLower.includes("objectif")) return "linear-gradient(135deg, #32DD37FF, #32DD37FF)";
+    if (nameToLower.includes("employé")) return "linear-gradient(135deg, #B33AC8FF, #B33AC8FF)";
+    return "linear-gradient(135deg, #3f51b5, #1a237e)"; // Dégradé par défaut
+  };
+
   // Formater la date d'attribution
   const formatDate = (dateString) => {
     const options = { day: "numeric", month: "long", year: "numeric" };
@@ -55,13 +86,13 @@ function Badge() {
     <Card
       sx={{
         height: "100%",
-        boxShadow: "0 10px 20px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.06)",
-        borderRadius: "16px",
+        boxShadow: "0 15px 30px rgba(0,0,0,0.15), 0 5px 15px rgba(0,0,0,0.08)",
+        borderRadius: "20px",
         overflow: "hidden",
-        transition: "transform 0.3s ease, box-shadow 0.3s ease",
+        // transition: "transform 0.4s ease, box-shadow 0.4s ease",
         "&:hover": {
-          boxShadow: "0 12px 24px rgba(0,0,0,0.15), 0 6px 12px rgba(0,0,0,0.08)",
-          transform: "translateY(-5px)",
+          boxShadow: "0 20px 40px rgba(0,0,0,0.2), 0 10px 20px rgba(0,0,0,0.12)",
+          // transform: "translateY(-8px)",
         },
       }}
     >
@@ -74,52 +105,75 @@ function Badge() {
         alignItems="center"
         sx={{
           borderBottom: "1px solid rgba(0,0,0,0.05)",
-          background: "linear-gradient(135deg, #8E44AD 0%, #9B59B6 100%)",
+          background: "linear-gradient(135deg, #6a3093 0%, #a044ff 100%)",
           color: "#fff",
           position: "relative",
           overflow: "hidden",
           "&::after": {
             content: '""',
             position: "absolute",
-            top: "50%",
-            right: "-50px",
-            width: "150px",
-            height: "150px",
-            borderRadius: "50%",
-            background: "rgba(255,255,255,0.1)",
+            top: "-50%",
+            left: "-60%",
+            width: "200%",
+            height: "200%",
+            background:
+              "radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%)",
             zIndex: 0,
+          },
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: "-100%",
+            width: "50%",
+            height: "100%",
+            background:
+              "linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent)",
+            animation: `${shine} 6s infinite linear`,
+            zIndex: 1,
           },
         }}
       >
-        <MDBox display="flex" alignItems="center">
+        <MDBox display="flex" alignItems="center" sx={{ zIndex: 2 }}>
           <WorkspacePremiumIcon
             sx={{
-              fontSize: "1.75rem",
+              fontSize: "2rem",
               mr: 1.5,
               color: "rgba(255,255,255,0.9)",
+              filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
             }}
           />
-          <MDTypography variant="h6" fontWeight="bold" color="white">
+          <MDTypography
+            variant="h5"
+            fontWeight="bold"
+            color="white"
+            sx={{
+              textShadow: "0 2px 4px rgba(0,0,0,0.2)",
+              letterSpacing: "0.5px",
+            }}
+          >
             Badges & Récompenses
           </MDTypography>
         </MDBox>
         <Chip
           icon={<EmojiEventsIcon />}
           label="Accomplissements"
-          size="small"
+          size="medium"
           sx={{
-            backgroundColor: "rgba(255,255,255,0.2)",
+            backgroundColor: "rgba(255,255,255,0.15)",
             color: "#fff",
-            borderRadius: "8px",
-            fontWeight: "medium",
+            borderRadius: "12px",
+            fontWeight: "bold",
             "& .MuiChip-icon": {
               color: "#fff",
             },
             backdropFilter: "blur(10px)",
-            zIndex: 1,
-            transition: "all 0.2s ease",
+            zIndex: 2,
+            transition: "all 0.3s ease",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
             "&:hover": {
-              backgroundColor: "rgba(255,255,255,0.3)",
+              backgroundColor: "rgba(255,255,255,0.25)",
+              transform: "translateY(-2px)",
             },
           }}
         />
@@ -182,11 +236,12 @@ function Badge() {
             const { collaborateur, badge, nbrBadge, dateAttribution } = badgeItem;
             const badgeColor = getBadgeColor(badge.name);
             const badgeIcon = getBadgeIcon(badge.name);
+            const badgeGradient = getBadgeGradient(badge.name);
 
             return (
               <MDBox
                 key={badgeItem.id}
-                py={2}
+                py={3}
                 sx={{
                   transition: "all 0.3s ease",
                   "&:hover": {
@@ -203,18 +258,22 @@ function Badge() {
                       sx={{
                         display: "flex",
                         alignItems: "center",
-                        backgroundColor: `${badgeColor}.light`,
-                        borderRadius: "12px",
-                        padding: 2,
+                        background: badgeGradient,
+                        borderRadius: "16px",
+                        padding: 2.5,
                         position: "relative",
                         overflow: "hidden",
-                        boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                         "&::after": {
                           content: '""',
                           position: "absolute",
                           top: 0,
+                          left: 0,
                           right: 0,
-                          background: `radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%)`,
+                          height: "50%",
+                          background:
+                            "linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%)",
+                          borderRadius: "16px 16px 0 0",
                         },
                       }}
                     >
@@ -223,26 +282,35 @@ function Badge() {
                         alignItems="center"
                         justifyContent="center"
                         sx={{
-                          width: "48px",
-                          height: "48px",
-                          fontSize: "2rem",
-                          mr: 2,
-                          backgroundColor: "rgba(255,255,255,0.7)",
+                          width: "60px",
+                          height: "60px",
+                          fontSize: "2.2rem",
+                          mr: 2.5,
+                          backgroundColor: "rgba(255,255,255,0.9)",
                           borderRadius: "50%",
-                          boxShadow: "0 3px 6px rgba(0,0,0,0.1)",
+                          boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                          animation: `${float} 4s ease-in-out infinite, ${pulse} 2s ease-in-out infinite`,
+                          position: "relative",
+                          zIndex: 2,
+                          border: "3px solid rgba(255,255,255,0.4)",
                         }}
                       >
                         {badgeIcon}
                       </MDBox>
 
-                      <MDBox flexGrow={1}>
+                      <MDBox flexGrow={1} sx={{ zIndex: 2 }}>
                         <MDBox
                           display="flex"
                           justifyContent="space-between"
                           alignItems="center"
                           mb={0.5}
                         >
-                          <MDTypography variant="button" fontWeight="bold" color={badgeColor}>
+                          <MDTypography
+                            variant="h6"
+                            fontWeight="bold"
+                            color="white"
+                            sx={{ textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}
+                          >
                             {badge.name}
                           </MDTypography>
                           <Tooltip
@@ -253,19 +321,28 @@ function Badge() {
                               label={`${nbrBadge}${nbrBadge > 1 ? " badges" : " badge"}`}
                               size="small"
                               sx={{
-                                backgroundColor: "rgba(255,255,255,0.7)",
-                                color: `${badgeColor}.main`,
+                                backgroundColor: "rgba(255,255,255,0.9)",
+                                color: `${badgeColor}.dark`,
                                 fontWeight: "bold",
-                                borderRadius: "8px",
+                                borderRadius: "10px",
                                 ml: 1,
+                                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                                border: "1px solid rgba(255,255,255,0.6)",
+                                "& .MuiChip-label": {
+                                  px: 1.5,
+                                },
                               }}
                             />
                           </Tooltip>
                         </MDBox>
                         <MDTypography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ lineHeight: 1.3 }}
+                          variant="body2"
+                          sx={{
+                            lineHeight: 1.4,
+                            color: "rgba(255,255,255,0.9)",
+                            fontWeight: "regular",
+                            textShadow: "0 1px 1px rgba(0,0,0,0.1)",
+                          }}
                         >
                           {badge.description}
                         </MDTypography>
@@ -274,7 +351,7 @@ function Badge() {
                   </Grid>
                 </Grid>
                 {index < badges.length - 1 && (
-                  <MDBox my={1.5}>
+                  <MDBox my={2}>
                     <hr style={{ opacity: 0.07 }} />
                   </MDBox>
                 )}

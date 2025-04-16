@@ -10,6 +10,13 @@ export const NotificationApi = api.injectEndpoints({
       }),
     }),
 
+    getNotificationByManager: builder.query({
+      query: (id) => ({
+        url: `/notification/manager/${id}`,
+        method: "GET",
+      }),
+    }),
+
     deleteNotificationByCollaborateur: builder.mutation({
       query: (id) => ({
         url: `/notification/${id}`,
@@ -24,6 +31,20 @@ export const NotificationApi = api.injectEndpoints({
         body: notificationIds,
       }),
     }),
+    filtreNotifications: builder.query({
+      query: ({ managerId, startDate, endDate, collaborateurId, offset, limit }) => ({
+        url: `/notification/filtre`,
+        method: "GET",
+        params: {
+          managerId,
+          startDate,
+          endDate,
+          collaborateurId,
+          offset,
+          limit,
+        },
+      }),
+    }),
   }),
 });
 
@@ -31,4 +52,6 @@ export const {
   useGetNotificationByCollaborateurQuery,
   useDeleteNotificationByCollaborateurMutation,
   useMarkNotificationsAsReadMutation,
+  useGetNotificationByManagerQuery,
+  useFiltreNotificationsQuery,
 } = NotificationApi;

@@ -27,6 +27,7 @@ import { formatDate } from "functions/dateTime";
 import { getStartDate } from "functions/startDate";
 import PointageExportDialog from "./exportToExcelDialog";
 import DashboardNavbar from "../DashboardNavbar";
+import Footer from "examples/Footer";
 
 function Historique() {
   const theme = useTheme();
@@ -298,6 +299,7 @@ function Historique() {
           </Grid>
         </MDBox>
       </FiltreAvancee>
+      <Footer />
     </DashboardLayout>
   );
 }

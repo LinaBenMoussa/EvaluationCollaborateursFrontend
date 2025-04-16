@@ -210,6 +210,7 @@ function FeedbackListManager() {
           </Grid>
         </Grid>
       </MDBox>
+      <Footer />
     </DashboardLayout>
   );
 }

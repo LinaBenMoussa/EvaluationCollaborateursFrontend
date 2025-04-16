@@ -1,9 +1,5 @@
 import { useState, useEffect } from "react";
-
-// react-router components
 import { useLocation, Link } from "react-router-dom";
-
-// prop-types is a library for typechecking of props.
 import PropTypes from "prop-types";
 
 // @material-ui core components
@@ -11,11 +7,16 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import Icon from "@mui/material/Icon";
+import Avatar from "@mui/material/Avatar";
+import Divider from "@mui/material/Divider";
+import PersonIcon from "@mui/icons-material/Person";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDInput from "components/MDInput";
+import MDTypography from "components/MDTypography";
 
 // Material Dashboard 2 React example components
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -33,12 +34,23 @@ import {
 // Material Dashboard 2 React context
 import { useMaterialUIController, setMiniSidenav } from "context";
 
+// Redux
+import { useSelector } from "react-redux";
+import { selectCurrentNom, selectCurrentPrenom } from "store/slices/authSlice";
+import LogoutButton from "layouts/authentication/logout/logout";
+import { Typography } from "@mui/material";
+
 function DashboardNavbar({ absolute, light, isMini }) {
   const [navbarType, setNavbarType] = useState();
   const [controller, dispatch] = useMaterialUIController();
   const { miniSidenav, transparentNavbar, fixedNavbar, openConfigurator, darkMode } = controller;
   const [openMenu, setOpenMenu] = useState(false);
+  const [openProfileMenu, setOpenProfileMenu] = useState(false);
   const route = useLocation().pathname.split("/").slice(1);
+
+  // Redux state pour les informations utilisateur
+  const userLastName = useSelector(selectCurrentNom);
+  const userFirstName = useSelector(selectCurrentPrenom);
 
   useEffect(() => {
     // Setting the navbar type
@@ -52,6 +64,10 @@ function DashboardNavbar({ absolute, light, isMini }) {
   const handleMiniSidenav = () => setMiniSidenav(dispatch, !miniSidenav);
   const handleOpenMenu = (event) => setOpenMenu(event.currentTarget);
   const handleCloseMenu = () => setOpenMenu(false);
+
+  // Fonctions pour gérer le menu du profil
+  const handleOpenProfileMenu = (event) => setOpenProfileMenu(event.currentTarget);
+  const handleCloseProfileMenu = () => setOpenProfileMenu(false);
 
   // Render the notifications menu
   const renderMenu = () => (
@@ -69,6 +85,37 @@ function DashboardNavbar({ absolute, light, isMini }) {
       <NotificationItem icon={<Icon>email</Icon>} title="Check new messages" />
       <NotificationItem icon={<Icon>podcasts</Icon>} title="Manage Podcast sessions" />
       <NotificationItem icon={<Icon>shopping_cart</Icon>} title="Payment successfully completed" />
+    </Menu>
+  );
+
+  // Render the profile menu
+  const renderProfileMenu = () => (
+    <Menu
+      anchorEl={openProfileMenu}
+      anchorOrigin={{
+        vertical: "bottom",
+        horizontal: "right",
+      }}
+      transformOrigin={{
+        vertical: "top",
+        horizontal: "right",
+      }}
+      open={Boolean(openProfileMenu)}
+      onClose={handleCloseProfileMenu}
+      sx={{ mt: 2 }}
+    >
+      <MDBox display="flex" alignItems="center" flexDirection="column">
+        <Avatar sx={{ mb: 1, bgcolor: darkMode ? "primary.main" : "secondary.main" }}>
+          <PersonIcon />
+        </Avatar>
+        <Typography variant="subtitle1" fontWeight="bold">
+          {userFirstName} {userLastName}
+        </Typography>
+      </MDBox>
+      <Divider sx={{ my: 1 }} />
+      <MDBox ml={1} mt={1}>
+        <LogoutButton />
+      </MDBox>
     </Menu>
   );
 
@@ -93,25 +140,27 @@ function DashboardNavbar({ absolute, light, isMini }) {
     >
       <Toolbar sx={(theme) => navbarContainer(theme)}>
         <MDBox color="inherit" mb={{ xs: 1, md: 0 }} sx={(theme) => navbarRow(theme, { isMini })}>
-          {/* <Breadcrumbs icon="home" title={route[route.length - 1]} route={route} light={light} /> */}
+          {!isMini && (
+            <IconButton
+              size="small"
+              disableRipple
+              color="inherit"
+              onClick={handleMiniSidenav}
+              sx={{
+                ...navbarIconButton,
+                mr: 1,
+              }}
+            >
+              <Icon sx={iconsStyle} fontSize="medium">
+                {miniSidenav ? "menu_open" : "menu"}
+              </Icon>
+            </IconButton>
+          )}
         </MDBox>
         {isMini ? null : (
           <MDBox sx={(theme) => navbarRow(theme, { isMini })}>
-            <MDBox pr={1}>
-              <MDInput label="Search here" />
-            </MDBox>
             <MDBox color={light ? "white" : "inherit"}>
-              <Link to="/authentication/sign-in/basic">
-                <IconButton sx={navbarIconButton} size="small" disableRipple>
-                  <Icon sx={iconsStyle}>account_circle</Icon>
-                </IconButton>
-              </Link>
-              <IconButton size="small" disableRipple color="inherit" onClick={handleMiniSidenav}>
-                <Icon sx={iconsStyle} fontSize="medium">
-                  {miniSidenav ? "menu_open" : "menu"}
-                </Icon>
-              </IconButton>
-              <IconButton
+              {/* <IconButton
                 size="small"
                 disableRipple
                 color="inherit"
@@ -122,13 +171,19 @@ function DashboardNavbar({ absolute, light, isMini }) {
                 onClick={handleOpenMenu}
               >
                 <Icon sx={iconsStyle}>notifications</Icon>
+              </IconButton> */}
+              <IconButton
+                sx={navbarIconButton}
+                size="small"
+                disableRipple
+                onClick={handleOpenProfileMenu}
+                aria-controls="profile-menu"
+                aria-haspopup="true"
+              >
+                <Icon sx={iconsStyle}>account_circle</Icon>
               </IconButton>
+              {renderProfileMenu()}
               {renderMenu()}
-              <Link to="/parametre">
-                <IconButton sx={navbarIconButton} size="small" disableRipple>
-                  <SettingsIcon sx={iconsStyle} />
-                </IconButton>
-              </Link>
             </MDBox>
           </MDBox>
         )}

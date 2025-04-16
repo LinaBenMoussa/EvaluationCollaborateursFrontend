@@ -11,6 +11,7 @@ import { useGetParametreQuery } from "store/api/parametreApi";
 import MDButton from "components/MDButton";
 import { useSetParametreMutation } from "store/api/parametreApi";
 import { toast } from "react-toastify";
+import Footer from "examples/Footer";
 
 function Parametre() {
   const { data, isLoading } = useGetParametreQuery();
@@ -81,6 +82,7 @@ function Parametre() {
           </Grid>
         </Grid>
       </MDBox>
+      <Footer />
     </DashboardLayout>
   );
 }

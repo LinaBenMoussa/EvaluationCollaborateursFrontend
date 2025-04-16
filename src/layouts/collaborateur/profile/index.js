@@ -11,6 +11,7 @@ import Badge from "./components/badge";
 import { useSelector } from "react-redux";
 import { selectCurrentNom } from "store/slices/authSlice";
 import DashboardNavbar from "../DashboardNavbar";
+import Footer from "examples/Footer";
 
 function Overview() {
   return (
@@ -26,6 +27,7 @@ function Overview() {
           </Grid>
         </MDBox>
       </Header>
+      <Footer />
     </DashboardLayout>
   );
 }

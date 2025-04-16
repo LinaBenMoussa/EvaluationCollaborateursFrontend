@@ -33,23 +33,28 @@ import MDButton from "components/MDButton";
 // Material Dashboard 2 React example components
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import Footer from "examples/Footer";
+import DashboardNavbar from "examples/Navbars/DashboardNavbar";
+import AutocompleteField from "layouts/shared/autocompleteField";
 
 // API et Redux
 import {
   useDeleteNotificationByCollaborateurMutation,
   useFiltreNotificationsQuery,
 } from "store/api/notificationApi";
+import { useGetCollaborateursByManagerQuery } from "store/api/userApi";
 
 // Import des styles
 import createNotificationStyles from "./styles";
-import DashboardNavbar from "../DashboardNavbar";
 
 function Notifications() {
   const theme = useTheme();
-  const collaborateurId = useSelector(selectCurrentUser);
+  const managerId = useSelector(selectCurrentUser);
   const styles = createNotificationStyles(theme);
   const { blueColors } = styles;
 
+  // States
+  const [collaborateurId, setCollaborateurId] = useState(null);
+  const [selectedCollaborateur, setSelectedCollaborateur] = useState(null);
   const [selectedDate1, setSelectedDate1] = useState("");
   const [selectedDate2, setSelectedDate2] = useState("");
   const [page, setPage] = useState(1);
@@ -62,9 +67,10 @@ function Notifications() {
     isFetching,
     refetch,
   } = useFiltreNotificationsQuery({
-    collaborateurId,
+    managerId,
     startDate: selectedDate1,
     endDate: selectedDate2,
+    ...(collaborateurId !== null && { collaborateurId }),
     offset: (page - 1) * itemsPerPage,
     limit: itemsPerPage,
   });
@@ -76,7 +82,7 @@ function Notifications() {
   // Effects
   useEffect(() => {
     setPage(1);
-  }, [selectedDate1, selectedDate2]);
+  }, [collaborateurId, selectedDate1, selectedDate2]);
 
   // Handlers
   const handlePageChange = (event, value) => {
@@ -93,6 +99,8 @@ function Notifications() {
   };
 
   const handleClearFilters = () => {
+    setSelectedCollaborateur(null);
+    setCollaborateurId(null);
     setSelectedDate1("");
     setSelectedDate2("");
   };
@@ -118,9 +126,20 @@ function Notifications() {
           <Box sx={styles.filterSection}>
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12}></Grid>
+              <Grid item xs={12} md={4}>
+                <AutocompleteField
+                  useFetchHook={() => useGetCollaborateursByManagerQuery(managerId)}
+                  fullWidth
+                  setSelectedItem={setSelectedCollaborateur}
+                  setIdItem={setCollaborateurId}
+                  selectedItem={selectedCollaborateur}
+                  label="Choisir un collaborateur"
+                  sx={styles.autocompleteField}
+                />
+              </Grid>
               <Grid item xs={12} md={6}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={5}>
+                  <Grid item xs={12} sm={6}>
                     <TextField
                       type="date"
                       label="Date de début"
@@ -140,7 +159,7 @@ function Notifications() {
                       }}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={5}>
+                  <Grid item xs={12} sm={6}>
                     <TextField
                       type="date"
                       label="Date de fin"
@@ -160,17 +179,17 @@ function Notifications() {
                       }}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={2}>
-                    <MDButton
-                      variant="outlined"
-                      color="erreur"
-                      onClick={handleClearFilters}
-                      sx={styles.resetButton}
-                    >
-                      <GrPowerReset color="#FF0000" />
-                    </MDButton>
-                  </Grid>
                 </Grid>
+              </Grid>
+              <Grid item xs={12} md={2} sx={{ display: "flex", justifyContent: "flex-end" }}>
+                <MDButton
+                  variant="outlined"
+                  color="erreur"
+                  onClick={handleClearFilters}
+                  sx={styles.resetButton}
+                >
+                  <GrPowerReset color="#FF0000" />
+                </MDButton>
               </Grid>
             </Grid>
           </Box>
@@ -244,6 +263,9 @@ function Notifications() {
                         </Box>
 
                         <Box sx={{ flex: 1 }}>
+                          <MDTypography variant="body2" sx={styles.collaborateurName}>
+                            {notification.collaborateur.prenom} {notification.collaborateur.nom}
+                          </MDTypography>
                           <MDTypography variant="body2" sx={styles.notificationContent}>
                             {notification.contenu}
                           </MDTypography>

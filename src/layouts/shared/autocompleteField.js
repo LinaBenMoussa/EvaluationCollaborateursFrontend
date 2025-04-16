@@ -3,14 +3,14 @@ import { Height } from "@mui/icons-material";
 import { Autocomplete, Box, TextField } from "@mui/material";
 
 export default function AutocompleteField({
-  useFetchHook, // Le hook à utiliser pour récupérer les données
+  useFetchHook,
   fullwidth,
   setSelectedItem,
   setIdItem,
   selectedItem,
   label,
 }) {
-  const { data: options = [], isLoading, isFetching } = useFetchHook(); // Exécute le hook passé en prop
+  const { data: options = [], isLoading, isFetching } = useFetchHook();
 
   return (
     <Autocomplete

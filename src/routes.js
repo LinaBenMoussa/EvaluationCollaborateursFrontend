@@ -8,6 +8,8 @@ import HistoryIcon from "@mui/icons-material/History";
 import Dashboard from "layouts/manager/dashboard";
 import Tables from "layouts/admin/tables";
 import Notifications from "layouts/collaborateur/notifications";
+import NotificationsManager from "layouts/manager/notifications";
+
 import FeedbackListManager from "layouts/manager/feedback/listFeedbackManager";
 import Pointage from "layouts/manager/pointage/journalier";
 import Historique from "layouts/manager/pointage/historique";
@@ -57,6 +59,15 @@ const routes = [
     route: "/notification",
     component: <Notifications />,
     roles: ["ROLE_COLLABORATEUR"],
+  },
+  {
+    type: "collapse",
+    name: "Notifications",
+    key: "notification",
+    icon: <NotificationsNone fontSize="small" />,
+    route: "/notification",
+    component: <NotificationsManager />,
+    roles: ["ROLE_MANAGER"],
   },
   {
     type: "collapse",

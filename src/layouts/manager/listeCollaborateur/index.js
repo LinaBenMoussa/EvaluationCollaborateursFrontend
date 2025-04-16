@@ -11,6 +11,7 @@ import { selectCurrentUser } from "store/slices/authSlice";
 import { useUsersTableData } from "./data/useUsersTableData";
 import { CircularProgress, useTheme } from "@mui/material";
 import { Header } from "layouts/shared/Header";
+import Footer from "examples/Footer";
 
 function CollaborateursList() {
   const theme = useTheme();
@@ -59,6 +60,7 @@ function CollaborateursList() {
           </Grid>
         </Grid>
       </MDBox>
+      <Footer />
     </DashboardLayout>
   );
 }

@@ -83,6 +83,7 @@ const EmployeeCard = ({ card }) => {
     >
       <Box
         sx={{
+          ml: 2,
           backgroundColor: statusConfig.bgColor,
           padding: 2,
           borderRadius: "8px 8px 0 0",
@@ -107,6 +108,7 @@ const EmployeeCard = ({ card }) => {
           </Typography>
         </Box>
         <Chip
+          ml={2}
           label={statusConfig.icon + " " + (card.status || "N/A")}
           color={statusConfig.color}
           size="small"
